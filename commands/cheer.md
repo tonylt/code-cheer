@@ -1,3 +1,4 @@
+# 切换 code-cheer 应援角色（nova / luna / mochi / iris）
 ARGUMENT="$ARGUMENTS"
 
 If ARGUMENT is empty, use AskUserQuestion with these 4 options:
@@ -8,9 +9,8 @@ If ARGUMENT is empty, use AskUserQuestion with these 4 options:
 
 If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi / iris"
 
-Once a character is chosen (NAME = lowercase chosen name), run both Bash commands:
-  echo '{"character": "NAME"}' > $HOME/.claude/code-cheer/config.json
-  echo '{"message":"","last_updated":"","last_rate_tier":"normal","last_slot":null}' > $HOME/.claude/code-cheer/state.json
+Once a character is chosen (NAME = lowercase chosen name), run a single Bash command:
+  python3 -c "import os; open(os.path.expanduser('~/.claude/code-cheer/config.json'),'w').write('{\"character\": \"NAME\"}'); open(os.path.expanduser('~/.claude/code-cheer/state.json'),'w').write('{\"message\":\"\",\"last_updated\":\"\",\"last_rate_tier\":\"normal\",\"last_slot\":null}')"
 
 Then reply:
 - nova:  已切换到 Nova！(*>ω<) 准备好了吗！冲冲冲！！

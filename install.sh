@@ -30,14 +30,18 @@ shutil.copy2(path, path + ".bak")
 sl = data.get("statusLine", {})
 if isinstance(sl, dict) and script in sl.get("command", ""):
     del data["statusLine"]
-# Remove our PostToolUse hook entry
+# Remove our Stop hook entry
 hooks = data.get("hooks", {})
-ptu = hooks.get("PostToolUse", [])
-new_ptu = [h for h in ptu if not (isinstance(h, dict) and script in h.get("command", ""))]
-if new_ptu != ptu:
-    hooks["PostToolUse"] = new_ptu
-    if not new_ptu:
-        del hooks["PostToolUse"]
+stop = hooks.get("Stop", [])
+def has_script(h):
+    if not isinstance(h, dict): return False
+    if script in h.get("command", ""): return True
+    return any(script in hook.get("command", "") for hook in h.get("hooks", []))
+new_stop = [h for h in stop if not has_script(h)]
+if new_stop != stop:
+    hooks["Stop"] = new_stop
+    if not new_stop:
+        del hooks["Stop"]
 if not hooks:
     data.pop("hooks", None)
 tmp = path + ".tmp"
@@ -116,14 +120,18 @@ else:
     data["statusLine"] = {"type": "command", "command": status_cmd}
     print(f"✓ Added statusLine")
 
-# hooks.PostToolUse
+# hooks.Stop
 hooks = data.setdefault("hooks", {})
-ptu   = hooks.setdefault("PostToolUse", [])
-if not any(isinstance(h, dict) and update_cmd in h.get("command", "") for h in ptu):
-    ptu.append({"command": update_cmd})
-    print(f"✓ Added PostToolUse hook")
+stop  = hooks.setdefault("Stop", [])
+def has_update_cmd(h):
+    if not isinstance(h, dict): return False
+    if update_cmd in h.get("command", ""): return True
+    return any(update_cmd in hook.get("command", "") for hook in h.get("hooks", []))
+if not any(has_update_cmd(h) for h in stop):
+    stop.append({"hooks": [{"type": "command", "command": update_cmd}]})
+    print(f"✓ Added Stop hook")
 else:
-    print(f"  PostToolUse hook already present, skipping")
+    print(f"  Stop hook already present, skipping")
 
 tmp = settings_path + ".tmp"
 with open(tmp, "w") as f:
