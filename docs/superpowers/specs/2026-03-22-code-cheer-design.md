@@ -249,10 +249,14 @@ def main():
     cc_data   = read_stdin_json() # Claude Code 传入 JSON（model, rate_limits）
     character = load_character(config["character"])
 
-    message, tier = resolve_message(character, state, stats, cc_data)
+    message, tier = resolve_message(character, state, stats, cc_data,
+                                    force_post_tool=update_only)
 
     if message != state["message"] or tier != state["last_rate_tier"]:
-        save_state(message, tier)
+        # save_state() 写入所有四个字段：
+        #   message, last_updated（当前时间戳）, last_rate_tier, last_slot（当前时段）
+        # --update 模式（post_tool 触发）同样更新 last_slot 为当前值
+        save_state(message, tier, slot=get_time_slot())
 
     if update_only:
         return  # hook 模式只更新缓存
@@ -263,30 +267,37 @@ def main():
 **`resolve_message()` 优先级：**
 
 ```python
-def resolve_message(character, state, stats, cc_data):
+def resolve_message(character, state, stats, cc_data, force_post_tool=False):
     # 安全读取，字段缺失时使用 fallback 值
     rate_limits = cc_data.get("rate_limits", {})
     used_pct = rate_limits.get("used_percentage", 0)  # 缺失时默认 0（不触发告警）
     tier = get_tier(used_pct)  # normal / warning / critical
 
-    # 1. 用量跨级 → 立即触发告警语
+    # 1. 用量跨级处理
     if tier != state["last_rate_tier"]:
-        return pick(character["usage"][tier]), tier
+        if tier != "normal":
+            # 跨入告警 tier → 立即显示告警词
+            return pick(character["usage"][tier]), tier
+        # else: 从 warning/critical 降回 normal → 跳过告警，走正常优先级
 
     # 告警持续：tier 未变且处于 warning/critical，继续显示缓存告警词
-    if tier != "normal":
+    if tier != "normal" and tier == state["last_rate_tier"]:
         return state["message"], tier
 
-    # 2. 缓存未过期（5分钟内）→ 返回缓存
+    # 2. post_tool 强制触发（--update 模式）
+    if force_post_tool:
+        return pick_different(character["post_tool"], state["message"]), tier
+
+    # 3. 缓存未过期（5分钟内）→ 返回缓存
     if not cache_expired(state["last_updated"], minutes=5):
         return state["message"], tier
 
-    # 3. 时段切换 → 时段词（对比 state["last_slot"]，不从时间戳反推）
+    # 4. 时段切换 → 时段词（对比 state["last_slot"]，不从时间戳反推）
     slot = get_time_slot()  # 无参数，返回当前时段
     if slot != state.get("last_slot"):
         return pick(character["time"][slot]), tier
 
-    # 4. 兜底随机（不与上条重复）
+    # 5. 兜底随机（不与上条重复）
     return pick_different(character["random"], state["message"]), tier
 ```
 
@@ -296,7 +307,7 @@ def resolve_message(character, state, stats, cc_data):
 - `evening`：18:00–22:59
 - `midnight`：23:00–05:59
 
-**`--update` 模式（PostToolUse hook）：** 调用 `resolve_message()` 但强制走优先级 2（`post_tool` 词库），忽略缓存时间，直接更新 `state.json`。
+**`--update` 模式（PostToolUse hook）：** 向 `resolve_message()` 传入 `force_post_tool=True`，跳过缓存和时段判断，直接从 `post_tool` 词库选词（不与上条重复）并更新 `state.json`。
 
 **数据 fallback 规则：**
 
@@ -343,8 +354,8 @@ def resolve_message(character, state, stats, cc_data):
 ```json
 "statusLine": {
   "type": "command",
-  "command": "/Users/yourname/.claude/code-cheer/statusline.py"
+  "command": "python3 /Users/yourname/.claude/code-cheer/statusline.py"
 }
 ```
 
-`install.sh` 写入时使用 Python 解析 `$HOME` 为绝对路径后填入，不使用 `~`。
+`install.sh` 写入时使用 Python 解析 `$HOME` 为绝对路径后填入 `python3 <绝对路径>`，不使用 `~`，与 install.sh 流程注释中的写法保持一致。
