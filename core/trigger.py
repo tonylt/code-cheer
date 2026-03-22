@@ -57,7 +57,7 @@ def resolve_message(
 ) -> tuple:
     """Select the appropriate message and return (message, tier)."""
     rate_limits = cc_data.get("rate_limits", {})
-    used_pct = rate_limits.get("used_percentage", 0)
+    used_pct = rate_limits.get("five_hour", {}).get("used_percentage", 0)
     tier = get_tier(used_pct)
 
     triggers = character["triggers"]

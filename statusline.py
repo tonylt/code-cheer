@@ -84,6 +84,13 @@ def main():
     stats = load_stats()
     cc_data = read_stdin_json()
 
+    # Supplement missing token data from cc_data when stats-cache has no entry for today
+    if stats.get("today_tokens") in (None, "N/A"):
+        ctx = cc_data.get("context_window", {})
+        total = ctx.get("total_input_tokens", 0) + ctx.get("total_output_tokens", 0)
+        if total > 0:
+            stats["today_tokens"] = total
+
     try:
         character = load_character(config.get("character", "nova"))
     except FileNotFoundError:
