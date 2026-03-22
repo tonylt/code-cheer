@@ -21,10 +21,11 @@ if [[ "${1:-}" == "--uninstall" ]]; then
 
   if [[ -f "$SETTINGS" ]]; then
     python3 - "$SETTINGS" "$SCRIPT_PATH" <<'PYEOF'
-import json, sys
+import json, sys, shutil, os
 path, script = sys.argv[1], sys.argv[2]
 with open(path) as f:
     data = json.load(f)
+shutil.copy2(path, path + ".bak")
 # Remove statusLine only if it points to our script
 sl = data.get("statusLine", {})
 if isinstance(sl, dict) and script in sl.get("command", ""):
@@ -32,15 +33,17 @@ if isinstance(sl, dict) and script in sl.get("command", ""):
 # Remove our PostToolUse hook entry
 hooks = data.get("hooks", {})
 ptu = hooks.get("PostToolUse", [])
-new_ptu = [h for h in ptu if script not in h.get("command", "")]
+new_ptu = [h for h in ptu if not (isinstance(h, dict) and script in h.get("command", ""))]
 if new_ptu != ptu:
     hooks["PostToolUse"] = new_ptu
     if not new_ptu:
         del hooks["PostToolUse"]
 if not hooks:
     data.pop("hooks", None)
-with open(path, "w") as f:
+tmp = path + ".tmp"
+with open(tmp, "w") as f:
     json.dump(data, f, indent=2)
+os.replace(tmp, path)
 PYEOF
     ok "settings.json cleaned"
   fi
@@ -83,7 +86,7 @@ else
   info "Config already exists, skipping"
 fi
 
-# 5. Write empty state
+# 5. Write empty state (always reset — clears stale message/tier on upgrade)
 echo '{"message":"","last_updated":"","last_rate_tier":"normal","last_slot":null}' \
   > "$INSTALL_DIR/state.json"
 ok "Initialized state"
@@ -116,14 +119,16 @@ else:
 # hooks.PostToolUse
 hooks = data.setdefault("hooks", {})
 ptu   = hooks.setdefault("PostToolUse", [])
-if not any(update_cmd in h.get("command", "") for h in ptu):
+if not any(isinstance(h, dict) and update_cmd in h.get("command", "") for h in ptu):
     ptu.append({"command": update_cmd})
     print(f"✓ Added PostToolUse hook")
 else:
     print(f"  PostToolUse hook already present, skipping")
 
-with open(settings_path, "w") as f:
+tmp = settings_path + ".tmp"
+with open(tmp, "w") as f:
     json.dump(data, f, indent=2)
+os.replace(tmp, settings_path)
 PYEOF
 
 # 7. Copy cheer command
