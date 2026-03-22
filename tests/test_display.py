@@ -26,19 +26,19 @@ def test_format_tokens_zero():
 # --- format_resets ---
 def test_format_resets_hours_and_minutes():
     from datetime import datetime, timezone, timedelta
-    future = (datetime.now(timezone.utc) + timedelta(hours=3, minutes=20)).isoformat()
+    future = (datetime.now(timezone.utc) + timedelta(hours=3, minutes=20, seconds=30)).isoformat()
     result = format_resets(future)
     assert result == "3h20m"
 
 def test_format_resets_minutes_only():
     from datetime import datetime, timezone, timedelta
-    future = (datetime.now(timezone.utc) + timedelta(minutes=45)).isoformat()
+    future = (datetime.now(timezone.utc) + timedelta(minutes=45, seconds=30)).isoformat()
     result = format_resets(future)
     assert result == "45m"
 
 def test_format_resets_zero_pads_minutes():
     from datetime import datetime, timezone, timedelta
-    future = (datetime.now(timezone.utc) + timedelta(hours=1, minutes=5)).isoformat()
+    future = (datetime.now(timezone.utc) + timedelta(hours=1, minutes=5, seconds=30)).isoformat()
     result = format_resets(future)
     assert result == "1h05m"  # zero-padded minutes
 
