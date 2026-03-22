@@ -123,6 +123,7 @@ def test_main_prints_two_lines(tmp_path, monkeypatch, capsys):
     lines = captured.out.strip().split("\n")
     assert len(lines) == 2
     assert "Nova" in lines[0]
+    assert "tokens" in lines[1]
 
 def test_main_update_mode_no_output(tmp_path, monkeypatch, capsys):
     import io

@@ -87,14 +87,19 @@ def main():
     try:
         character = load_character(config.get("character", "nova"))
     except FileNotFoundError:
-        character = load_character("nova")
+        try:
+            character = load_character("nova")
+        except FileNotFoundError:
+            print("(*>ω<) Nova: 加油！今天也要好好编程！\nunknown | N/A tokens")
+            return
 
+    slot = get_time_slot()
     message, tier = resolve_message(
         character, state, stats, cc_data, force_post_tool=update_only
     )
 
     if message != state.get("message") or tier != state.get("last_rate_tier"):
-        save_state(message, tier, slot=get_time_slot())
+        save_state(message, tier, slot=slot)
 
     if update_only:
         return
