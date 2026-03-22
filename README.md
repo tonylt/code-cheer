@@ -22,7 +22,7 @@ The statusline updates after each Claude response with a character message + ses
 ## Install / 安装
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/code-cheer
+git clone https://github.com/alexfly123lee-creator/Claude-Code-Cheer.git
 cd code-cheer
 ./install.sh
 ```
