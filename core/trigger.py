@@ -46,3 +46,45 @@ def cache_expired(last_updated: str, minutes: int = 5) -> bool:
         return delta > minutes * 60
     except (ValueError, TypeError):
         return True
+
+
+def resolve_message(
+    character: dict,
+    state: dict,
+    stats: dict,
+    cc_data: dict,
+    force_post_tool: bool = False
+) -> tuple:
+    """Select the appropriate message and return (message, tier)."""
+    rate_limits = cc_data.get("rate_limits", {})
+    used_pct = rate_limits.get("used_percentage", 0)
+    tier = get_tier(used_pct)
+
+    triggers = character["triggers"]
+    last_tier = state.get("last_rate_tier", "normal")
+
+    # Priority 1: usage tier change
+    if tier != last_tier:
+        if tier != "normal":
+            return pick(triggers["usage"][tier]), tier
+        # Dropped back to normal — fall through to normal priorities
+
+    # Alert persistence: same non-normal tier → keep current alert message
+    if tier != "normal" and tier == last_tier:
+        return state.get("message", ""), tier
+
+    # Priority 2: post_tool forced (--update mode)
+    if force_post_tool:
+        return pick_different(triggers["post_tool"], state.get("message", "")), tier
+
+    # Priority 3: cache still fresh
+    if not cache_expired(state.get("last_updated", ""), minutes=5):
+        return state.get("message", ""), tier
+
+    # Priority 4: time slot changed
+    slot = get_time_slot()
+    if slot != state.get("last_slot"):
+        return pick(triggers["time"][slot]), tier
+
+    # Priority 5: random fallback (avoid repeating last)
+    return pick_different(triggers["random"], state.get("message", "")), tier
