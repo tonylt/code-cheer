@@ -180,3 +180,181 @@ def test_save_state_git_fields_none_omitted(tmp_path, monkeypatch):
     assert "last_git_events" not in s
     assert "last_repo" not in s
     assert "commits_today" not in s
+
+
+# --- Phase 4 新测试: render 只读、session_start、--debug-events ---
+
+def _setup_main_env(tmp_path, monkeypatch, argv=None, stdin_data='{}'):
+    """共用 helper：设置 main() 所需的所有 monkeypatch。"""
+    import io
+    import core.character as char_mod
+
+    config_path = tmp_path / "config.json"
+    state_path = tmp_path / "state.json"
+    vocab_path = tmp_path / "vocab"
+    vocab_path.mkdir(exist_ok=True)
+
+    write_json(str(config_path), {"character": "nova"})
+    write_json(str(vocab_path / "nova.json"), SAMPLE_CHAR)
+
+    monkeypatch.setattr(char_mod, 'VOCAB_DIR', str(vocab_path))
+    monkeypatch.setattr(sl, 'CONFIG_PATH', str(config_path))
+    monkeypatch.setattr(sl, 'STATE_PATH', str(state_path))
+    monkeypatch.setattr(sl, 'STATS_PATH', str(tmp_path / "no.json"))
+    monkeypatch.setattr(sl, 'BASE_DIR', str(tmp_path))
+    monkeypatch.setattr(sys, 'argv', argv or ['statusline.py'])
+    monkeypatch.setattr(sys, 'stdin', io.StringIO(stdin_data))
+
+    # load_git_context 默认 mock（避免真实 subprocess）
+    monkeypatch.setattr('statusline.load_git_context', lambda cwd: None)
+
+    return state_path
+
+
+def test_render_mode_does_not_write_state(tmp_path, monkeypatch):
+    """STA-02: render 路径（无 --update）不调用 save_state，state.json 内容保持原样。"""
+    state_path = _setup_main_env(tmp_path, monkeypatch, argv=['statusline.py'])
+    initial_state = {
+        "message": "old_msg",
+        "last_updated": "old",
+        "last_rate_tier": "normal",
+        "last_slot": None,
+    }
+    write_json(str(state_path), initial_state)
+
+    sl.main()
+
+    with open(str(state_path)) as f:
+        saved = json.load(f)
+    assert saved["message"] == "old_msg", "render 模式不应修改 state.json 中的 message"
+
+
+def test_save_state_session_start(tmp_path, monkeypatch):
+    """D-03: save_state() 支持 session_start 参数并持久化到 state.json。"""
+    monkeypatch.setattr(sl, 'STATE_PATH', str(tmp_path / "state.json"))
+    monkeypatch.setattr(sl, 'BASE_DIR', str(tmp_path))
+    sl.save_state("msg", "normal", "morning", session_start="2026-04-02T10:00:00")
+    with open(str(tmp_path / "state.json")) as f:
+        s = json.load(f)
+    assert s["session_start"] == "2026-04-02T10:00:00"
+
+
+def test_update_writes_session_start(tmp_path, monkeypatch):
+    """D-02: --update 模式在 state.json 无 session_start 时写入今天的 ISO 时间戳。"""
+    from datetime import datetime
+    state_path = _setup_main_env(
+        tmp_path, monkeypatch,
+        argv=['statusline.py', '--update'],
+        stdin_data='{}',
+    )
+    # state.json 无 session_start 字段
+    write_json(str(state_path), {
+        "message": "", "last_updated": "", "last_rate_tier": "normal", "last_slot": None,
+    })
+    monkeypatch.setattr(
+        'statusline.load_git_context',
+        lambda cwd: {"commits_today": 0, "diff_lines": 0, "repo_path": "/tmp/repo", "first_commit_time": None},
+    )
+
+    sl.main()
+
+    with open(str(state_path)) as f:
+        saved = json.load(f)
+    assert "session_start" in saved
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    assert today_str in saved["session_start"], f"session_start 应包含今天日期 {today_str}"
+
+
+def test_update_preserves_session_start_same_day(tmp_path, monkeypatch):
+    """D-02: 同天 session_start 不被覆盖。"""
+    from datetime import datetime
+    state_path = _setup_main_env(
+        tmp_path, monkeypatch,
+        argv=['statusline.py', '--update'],
+        stdin_data='{}',
+    )
+    today_8am = datetime.now().replace(hour=8, minute=0, second=0, microsecond=0).isoformat()
+    write_json(str(state_path), {
+        "message": "", "last_updated": "", "last_rate_tier": "normal", "last_slot": None,
+        "session_start": today_8am,
+    })
+    monkeypatch.setattr(
+        'statusline.load_git_context',
+        lambda cwd: {"commits_today": 0, "diff_lines": 0, "repo_path": "/tmp/repo", "first_commit_time": None},
+    )
+
+    sl.main()
+
+    with open(str(state_path)) as f:
+        saved = json.load(f)
+    assert saved["session_start"] == today_8am, "同天 session_start 不应被覆盖"
+
+
+def test_update_resets_session_start_cross_day(tmp_path, monkeypatch):
+    """D-02: 跨天时 session_start 被重置为今天的值。"""
+    from datetime import datetime, timedelta
+    state_path = _setup_main_env(
+        tmp_path, monkeypatch,
+        argv=['statusline.py', '--update'],
+        stdin_data='{}',
+    )
+    yesterday = (datetime.now() - timedelta(days=1)).isoformat()
+    write_json(str(state_path), {
+        "message": "", "last_updated": "", "last_rate_tier": "normal", "last_slot": None,
+        "session_start": yesterday,
+    })
+    monkeypatch.setattr(
+        'statusline.load_git_context',
+        lambda cwd: {"commits_today": 0, "diff_lines": 0, "repo_path": "/tmp/repo", "first_commit_time": None},
+    )
+
+    sl.main()
+
+    with open(str(state_path)) as f:
+        saved = json.load(f)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    assert today_str in saved["session_start"], "跨天后 session_start 应被重置为今天"
+
+
+def test_debug_events_stderr_output(tmp_path, monkeypatch, capsys):
+    """CFG-02: --debug-events 向 stderr 输出 GIT_CONTEXT / EVENTS_WOULD_FIRE / STATE_SNAPSHOT 三行。"""
+    state_path = _setup_main_env(
+        tmp_path, monkeypatch,
+        argv=['statusline.py', '--debug-events'],
+        stdin_data='{}',
+    )
+    write_json(str(state_path), {
+        "message": "", "last_updated": "", "last_rate_tier": "normal", "last_slot": None,
+    })
+    monkeypatch.setattr(
+        'statusline.load_git_context',
+        lambda cwd: {"commits_today": 3, "diff_lines": 50, "repo_path": "/tmp/repo", "first_commit_time": None},
+    )
+
+    sl.main()
+
+    captured = capsys.readouterr()
+    assert "GIT_CONTEXT:" in captured.err
+    assert "EVENTS_WOULD_FIRE:" in captured.err
+    assert "STATE_SNAPSHOT:" in captured.err
+
+
+def test_debug_events_no_stdout(tmp_path, monkeypatch, capsys):
+    """CFG-02: --debug-events 不向 stdout 输出任何内容。"""
+    state_path = _setup_main_env(
+        tmp_path, monkeypatch,
+        argv=['statusline.py', '--debug-events'],
+        stdin_data='{}',
+    )
+    write_json(str(state_path), {
+        "message": "", "last_updated": "", "last_rate_tier": "normal", "last_slot": None,
+    })
+    monkeypatch.setattr(
+        'statusline.load_git_context',
+        lambda cwd: {"commits_today": 3, "diff_lines": 50, "repo_path": "/tmp/repo", "first_commit_time": None},
+    )
+
+    sl.main()
+
+    captured = capsys.readouterr()
+    assert captured.out == "", "--debug-events 不应向 stdout 输出任何内容"
