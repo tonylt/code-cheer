@@ -72,6 +72,7 @@ def save_state(
     last_git_events: list | None = None,
     last_repo: str | None = None,
     commits_today: int | None = None,
+    session_start: str | None = None,
 ) -> None:
     os.makedirs(BASE_DIR, exist_ok=True)
     state = {
@@ -86,14 +87,51 @@ def save_state(
         state["last_repo"] = last_repo
     if commits_today is not None:
         state["commits_today"] = commits_today
+    if session_start is not None:
+        state["session_start"] = session_start
     tmp_path = STATE_PATH + ".tmp"
     with open(tmp_path, "w") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
     os.replace(tmp_path, STATE_PATH)
 
 
+def _should_reset_session_start(existing: str | None) -> bool:
+    """判断是否需要重置 session_start：缺失、无效、或日期非今天时返回 True。"""
+    if not existing:
+        return True
+    try:
+        dt = datetime.fromisoformat(existing)
+        return dt.date() != datetime.now().date()
+    except (ValueError, TypeError):
+        return True
+
+
+def _event_reason(event: str, git_context: dict, config: dict) -> str:
+    """返回事件触发原因的可读描述（用于 --debug-events 输出）。"""
+    thresholds = config.get("event_thresholds", {})
+    if event == "first_commit_today":
+        return "first commit of the day"
+    elif event.startswith("milestone_"):
+        count = event.split("_")[1]
+        return f"commits_today {git_context.get('commits_today', 0)} reached milestone {count}"
+    elif event == "late_night_commit":
+        hour = thresholds.get("late_night_hour_start", 22)
+        return f"current hour >= threshold {hour}"
+    elif event == "big_diff":
+        threshold = thresholds.get("big_diff", 200)
+        return f"diff_lines {git_context.get('diff_lines', 0)} >= threshold {threshold}"
+    elif event == "big_session":
+        threshold = thresholds.get("big_session_minutes", 120)
+        return f"session_minutes >= threshold {threshold}"
+    elif event == "long_day":
+        threshold = thresholds.get("long_day_commits", 15)
+        return f"commits_today {git_context.get('commits_today', 0)} >= threshold {threshold}"
+    return event
+
+
 def main():
-    update_only = "--update" in sys.argv
+    update_only = "--update" in sys.argv or "--debug-events" in sys.argv
+    debug_mode = "--debug-events" in sys.argv
 
     config = load_config()
     state = load_state()
@@ -109,9 +147,17 @@ def main():
 
     git_context = None
     triggered_events = None
+    session_start_val = None
     if update_only:
         git_context = load_git_context(os.getcwd())
         triggered_events = detect_git_events(git_context, state, config)
+
+        # Determine session_start: preserve same-day, reset cross-day or missing
+        existing_session_start = state.get("session_start")
+        if _should_reset_session_start(existing_session_start):
+            session_start_val = datetime.now().isoformat()
+        else:
+            session_start_val = existing_session_start
 
     try:
         character = load_character(config.get("character", "nova"))
@@ -156,6 +202,7 @@ def main():
                 last_git_events=new_last_git_events,
                 last_repo=new_last_repo,
                 commits_today=new_commits_today,
+                session_start=session_start_val,
             )
         else:
             save_state(
@@ -163,9 +210,38 @@ def main():
                 last_git_events=new_last_git_events,
                 last_repo=new_last_repo,
                 commits_today=new_commits_today,
+                session_start=session_start_val,
             )
-    elif message != state.get("message") or tier != state.get("last_rate_tier"):
-        save_state(message, tier, slot=slot)
+    elif update_only:
+        # update mode but no git context (non-git dir) — still save message + session_start
+        save_state(message, tier, slot=slot, session_start=session_start_val)
+
+    # --debug-events: output diagnostic info to stderr, no stdout
+    if debug_mode:
+        safe_session_start = session_start_val or datetime.now().isoformat()
+        try:
+            session_start_dt = datetime.fromisoformat(safe_session_start)
+            session_minutes = int((datetime.now() - session_start_dt).total_seconds() / 60)
+        except (ValueError, TypeError):
+            session_minutes = 0
+        git_ctx_display = {
+            "commits_today": git_context.get("commits_today", 0) if git_context else 0,
+            "diff_lines": git_context.get("diff_lines", 0) if git_context else 0,
+            "session_minutes": session_minutes,
+        }
+        events_display = {}
+        for e in (triggered_events or []):
+            events_display[e] = _event_reason(e, git_context or {}, config)
+        state_snapshot = {
+            "last_git_events": new_last_git_events or [],
+            "commits_today": new_commits_today or 0,
+            "session_start": safe_session_start,
+            "last_repo": new_last_repo,
+        }
+        ts = datetime.now().isoformat(timespec="seconds")
+        print(f"[{ts}] GIT_CONTEXT: {json.dumps(git_ctx_display)}", file=sys.stderr)
+        print(f"EVENTS_WOULD_FIRE: {json.dumps(events_display)}", file=sys.stderr)
+        print(f"STATE_SNAPSHOT: {json.dumps(state_snapshot, ensure_ascii=False)}", file=sys.stderr)
 
     if update_only:
         return
