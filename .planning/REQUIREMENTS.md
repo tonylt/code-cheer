@@ -9,21 +9,21 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 
 ### Git 事件感知 (GIT)
 
-- [ ] **GIT-01**: 用户当天首次 git 提交后，状态栏在下一次 Claude 响应时显示 `first_commit_today` 角色消息
-- [ ] **GIT-02**: 用户当天提交数达到 5 次时显示 `milestone_5` 消息；10 次显示 `milestone_10`；20 次显示 `milestone_20`；每个阶段当天最多触发一次
-- [ ] **GIT-03**: 用户在本地时间 22 点（可配置）后有 git 提交时，显示 `late_night_commit` 角色消息
-- [ ] **GIT-04**: 当次响应时 HEAD 的 diff 行数 ≥ 200（可配置）时，显示 `big_diff` 角色消息
-- [ ] **GIT-05**: 当天会话时长（从 `session_start` 起）≥ 120 分钟（可配置）时，显示 `big_session` 角色消息
-- [ ] **GIT-06**: 当天 git 提交总数 ≥ 15（可配置）时，显示 `long_day` 角色消息
+- [x] **GIT-01**: 用户当天首次 git 提交后，状态栏在下一次 Claude 响应时显示 `first_commit_today` 角色消息
+- [x] **GIT-02**: 用户当天提交数达到 5 次时显示 `milestone_5` 消息；10 次显示 `milestone_10`；20 次显示 `milestone_20`；每个阶段当天最多触发一次
+- [x] **GIT-03**: 用户在本地时间 22 点（可配置）后有 git 提交时，显示 `late_night_commit` 角色消息
+- [x] **GIT-04**: 当次响应时 HEAD 的 diff 行数 ≥ 200（可配置）时，显示 `big_diff` 角色消息
+- [x] **GIT-05**: 当天会话时长（从 `session_start` 起）≥ 120 分钟（可配置）时，显示 `big_session` 角色消息
+- [x] **GIT-06**: 当天 git 提交总数 ≥ 15（可配置）时，显示 `long_day` 角色消息
 
 ### 配置与可观测性 (CFG)
 
-- [ ] **CFG-01**: 用户通过 `config.json` 的 `event_thresholds` 字段自定义触发阈值（big_diff / milestone_counts / big_session_minutes / long_day_commits / late_night_hour_start），字段缺失时回落默认值
+- [x] **CFG-01**: 用户通过 `config.json` 的 `event_thresholds` 字段自定义触发阈值（big_diff / milestone_counts / big_session_minutes / long_day_commits / late_night_hour_start），字段缺失时回落默认值
 - [ ] **CFG-02**: `statusline.py --debug-events` 输出当前 git context、会触发的事件及原因、state.json 快照到 stderr
 
 ### 稳定性与隔离 (STA)
 
-- [ ] **STA-01**: 切换 git repo 时，当天 git 事件状态自动重置（通过 `last_repo` 字段检测路径变化）
+- [x] **STA-01**: 切换 git repo 时，当天 git 事件状态自动重置（通过 `last_repo` 字段检测路径变化）
 - [ ] **STA-02**: render 模式（statusline 轮询路径）不触发 git subprocess，不覆盖 `last_git_events`/`commits_today` 等 git 相关字段
 - [ ] **STA-03**: 任意 git subprocess 失败（超时 / 无 repo / git 未安装）时，静默 fallback 到 0，状态栏正常显示，不抛出异常
 
@@ -61,14 +61,14 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 |-------------|-------|--------|
 | TST-01 | Phase 1 | Complete |
 | STA-03 | Phase 2 | Pending |
-| GIT-01 | Phase 3 | Pending |
-| GIT-02 | Phase 3 | Pending |
-| GIT-03 | Phase 3 | Pending |
-| GIT-04 | Phase 3 | Pending |
-| GIT-05 | Phase 3 | Pending |
-| GIT-06 | Phase 3 | Pending |
-| CFG-01 | Phase 3 | Pending |
-| STA-01 | Phase 3 | Pending |
+| GIT-01 | Phase 3 | Complete |
+| GIT-02 | Phase 3 | Complete |
+| GIT-03 | Phase 3 | Complete |
+| GIT-04 | Phase 3 | Complete |
+| GIT-05 | Phase 3 | Complete |
+| GIT-06 | Phase 3 | Complete |
+| CFG-01 | Phase 3 | Complete |
+| STA-01 | Phase 3 | Complete |
 | STA-02 | Phase 4 | Pending |
 | CFG-02 | Phase 4 | Pending |
 | TST-02 | Phase 5 | Pending |

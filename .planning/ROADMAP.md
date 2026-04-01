@@ -48,9 +48,9 @@ Plans:
 **Goal**: trigger.py 能根据 git context 数据检测 6 种事件，并配合配置阈值和 per-repo 隔离正确触发角色消息
 **Depends on**: Phase 2
 **Requirements**: GIT-01, GIT-02, GIT-03, GIT-04, GIT-05, GIT-06, CFG-01, STA-01
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 03-01-PLAN.md — TDD: detect_git_events() 纯函数实现 + 全量单元测试
+- [x] 03-01-PLAN.md — TDD: detect_git_events() 纯函数实现 + 全量单元测试
 - [ ] 03-02-PLAN.md — 集成: resolve_message() 增加 triggered_events 参数 + statusline.py 状态持久化
 **Success Criteria** (what must be TRUE):
   1. 当天首次 git 提交后，下一次 Claude 响应时 state.json 包含 `first_commit_today` 事件，角色消息对应该事件
@@ -89,7 +89,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/1 | Planned    |  |
-| 3. 事件检测与触发 | 0/2 | Planned | - |
+| 3. 事件检测与触发 | 1/2 | In Progress|  |
 | 4. statusline.py 集成 | 0/? | Not started | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
 
