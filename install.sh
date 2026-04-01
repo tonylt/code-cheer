@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="$HOME/.claude/code-cheer"
+INSTALL_DIR="$HOME/.claude/cheermate"
 SETTINGS="$HOME/.claude/settings.json"
 COMMANDS_DIR="$HOME/.claude/commands"
 SCRIPT_PATH="$INSTALL_DIR/statusline.py"
@@ -17,7 +17,7 @@ die()   { echo "✗ $*" >&2; exit 1; }
 
 # ── uninstall ─────────────────────────────────────────────────────────────────
 if [[ "${1:-}" == "--uninstall" ]]; then
-  echo "Uninstalling Code Cheer…"
+  echo "Uninstalling CheerMate…"
 
   if [[ -f "$SETTINGS" ]]; then
     python3 - "$SETTINGS" "$SCRIPT_PATH" <<'PYEOF'
@@ -65,7 +65,7 @@ PYEOF
 fi
 
 # ── install ───────────────────────────────────────────────────────────────────
-echo "Installing Code Cheer…"
+echo "Installing CheerMate…"
 echo ""
 
 # 1. Check Python 3
