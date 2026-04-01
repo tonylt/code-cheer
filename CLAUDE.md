@@ -4,9 +4,9 @@ This file provides guidance to Claude Code when working in this repository.
 
 ## Project
 
-**code-cheer** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
+**CheerMate** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
 
-Installs to `~/.claude/code-cheer/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
+Installs to `~/.claude/cheermate/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
 
 ## Commands
 
@@ -45,7 +45,7 @@ vocab/
   iris.json
 commands/
   cheer.md              /cheer slash command (Claude Code custom command)
-install.sh              copies files to ~/.claude/code-cheer/, patches settings.json
+install.sh              copies files to ~/.claude/cheermate/, patches settings.json
 tests/                  pytest unit tests for each core module
 ```
 
@@ -64,11 +64,11 @@ install.sh registers two entries in `~/.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "python3 ~/.claude/code-cheer/statusline.py"
+    "command": "python3 ~/.claude/cheermate/statusline.py"
   },
   "hooks": {
     "Stop": [{
-      "hooks": [{"type": "command", "command": "python3 ~/.claude/code-cheer/statusline.py --update"}]
+      "hooks": [{"type": "command", "command": "python3 ~/.claude/cheermate/statusline.py --update"}]
     }]
   }
 }
@@ -80,8 +80,8 @@ install.sh registers two entries in `~/.claude/settings.json`:
 ## State files (runtime, not in repo)
 
 ```
-~/.claude/code-cheer/config.json   # {"character": "nova"}
-~/.claude/code-cheer/state.json    # last message, tier, slot, timestamp
+~/.claude/cheermate/config.json   # {"character": "nova"}
+~/.claude/cheermate/state.json    # last message, tier, slot, timestamp
 ~/.claude/stats-cache.json         # token usage by day (written by Claude Code)
 ```
 
