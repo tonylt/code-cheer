@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: 测试基础设施** — 安装 pytest，修复 make_cc() helper，确保测试套件 68/68 通过
+- [x] **Phase 1: 测试基础设施** — 安装 pytest，修复 make_cc() helper，确保测试套件 68/68 通过 (completed 2026-04-01)
 - [ ] **Phase 2: Git Context 读取** — 新建 core/git_context.py，3 个并行 subprocess 读取提交数 / diff / repo 路径，带 fallback
 - [ ] **Phase 3: 事件检测与触发** — trigger.py 实现 detect_git_events()，6 种事件，config.json 阈值，per-repo 隔离
 - [ ] **Phase 4: statusline.py 集成** — session_start 记录，render 模式约束，last_repo 切换重置，--debug-events 输出
@@ -23,9 +23,9 @@
 **Goal**: 测试套件可以正常运行，为 v2 所有新代码提供可靠的测试基础
 **Depends on**: Nothing (first phase)
 **Requirements**: TST-01
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 01-01-PLAN.md — 安装 pytest + 修复 make_cc() helper 使 68/68 测试通过
+- [x] 01-01-PLAN.md — 安装 pytest + 修复 make_cc() helper 使 68/68 测试通过
 **Success Criteria** (what must be TRUE):
   1. `python3 -m pytest tests/` 运行通过，没有 ImportError 或 fixture 错误
   2. `make_cc()` helper 生成与真实 stats-cache.json 结构一致的测试对象，现有测试不再因结构不匹配而失败
@@ -82,7 +82,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 测试基础设施 | 0/1 | Planned | - |
+| 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/? | Not started | - |
 | 3. 事件检测与触发 | 0/? | Not started | - |
 | 4. statusline.py 集成 | 0/? | Not started | - |

@@ -29,7 +29,7 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 
 ### 测试基础设施 (TST)
 
-- [ ] **TST-01**: pytest 已安装；`make_cc()` helper 修复为正确的 stats-cache 结构；`test_display.py` 断言更新匹配当前输出格式
+- [x] **TST-01**: pytest 已安装；`make_cc()` helper 修复为正确的 stats-cache 结构；`test_display.py` 断言更新匹配当前输出格式
 - [ ] **TST-02**: 所有 v2 新增代码路径有对应 pytest 测试覆盖（git context、事件检测、去重逻辑、fallback、display 更新、config 阈值读取、per-repo 隔离）
 
 ## Future Requirements
@@ -59,7 +59,7 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TST-01 | Phase 1 | Pending |
+| TST-01 | Phase 1 | Complete |
 | STA-03 | Phase 2 | Pending |
 | GIT-01 | Phase 3 | Pending |
 | GIT-02 | Phase 3 | Pending |
