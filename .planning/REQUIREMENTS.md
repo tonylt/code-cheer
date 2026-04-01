@@ -60,24 +60,24 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TST-01 | Phase 1 | Pending |
-| TST-02 | — | TBD by roadmap |
-| GIT-01 | — | TBD by roadmap |
-| GIT-02 | — | TBD by roadmap |
-| GIT-03 | — | TBD by roadmap |
-| GIT-04 | — | TBD by roadmap |
-| GIT-05 | — | TBD by roadmap |
-| GIT-06 | — | TBD by roadmap |
-| CFG-01 | — | TBD by roadmap |
-| CFG-02 | — | TBD by roadmap |
-| STA-01 | — | TBD by roadmap |
-| STA-02 | — | TBD by roadmap |
-| STA-03 | — | TBD by roadmap |
+| STA-03 | Phase 2 | Pending |
+| GIT-01 | Phase 3 | Pending |
+| GIT-02 | Phase 3 | Pending |
+| GIT-03 | Phase 3 | Pending |
+| GIT-04 | Phase 3 | Pending |
+| GIT-05 | Phase 3 | Pending |
+| GIT-06 | Phase 3 | Pending |
+| CFG-01 | Phase 3 | Pending |
+| STA-01 | Phase 3 | Pending |
+| STA-02 | Phase 4 | Pending |
+| CFG-02 | Phase 4 | Pending |
+| TST-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 13 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13 (roadmap complete)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 after initial definition*
+*Last updated: 2026-04-01 — traceability updated after roadmap creation*
