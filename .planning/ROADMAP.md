@@ -48,13 +48,16 @@ Plans:
 **Goal**: trigger.py 能根据 git context 数据检测 6 种事件，并配合配置阈值和 per-repo 隔离正确触发角色消息
 **Depends on**: Phase 2
 **Requirements**: GIT-01, GIT-02, GIT-03, GIT-04, GIT-05, GIT-06, CFG-01, STA-01
+**Plans:** 2 plans
+Plans:
+- [ ] 03-01-PLAN.md — TDD: detect_git_events() 纯函数实现 + 全量单元测试
+- [ ] 03-02-PLAN.md — 集成: resolve_message() 增加 triggered_events 参数 + statusline.py 状态持久化
 **Success Criteria** (what must be TRUE):
   1. 当天首次 git 提交后，下一次 Claude 响应时 state.json 包含 `first_commit_today` 事件，角色消息对应该事件
   2. 提交数达到 5 / 10 / 20 时分别触发对应 milestone 消息；同一阶段当天只触发一次（last_git_events 数组去重）
   3. 22 点（可配置）后有提交时触发 `late_night_commit`；diff ≥ 200 行触发 `big_diff`；提交数 ≥ 15 触发 `long_day`；会话时长 ≥ 120 分钟触发 `big_session`
   4. `config.json` 缺少 `event_thresholds` 字段或部分字段缺失时，静默回落到默认值，功能正常
   5. 切换 git repo 时（last_repo 路径不同），当天 git 事件状态自动重置，不携带上一个 repo 的 last_git_events
-**Plans**: TBD
 
 ### Phase 4: statusline.py 集成
 **Goal**: statusline.py 入口正确区分 render 模式和 update 模式，集成 session_start 记录、repo 切换重置和 debug 输出
@@ -86,7 +89,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/1 | Planned    |  |
-| 3. 事件检测与触发 | 0/? | Not started | - |
+| 3. 事件检测与触发 | 0/2 | Planned | - |
 | 4. statusline.py 集成 | 0/? | Not started | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
 
@@ -115,4 +118,4 @@ All 13 v2.0 requirements mapped. No orphans.
 ---
 
 *Created: 2026-04-01*
-*Last updated: 2026-04-01 — Phase 2 planned (1 plan, 1 wave)*
+*Last updated: 2026-04-02 — Phase 3 planned (2 plans, 2 waves)*
