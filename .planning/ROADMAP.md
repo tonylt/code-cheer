@@ -35,7 +35,7 @@ Plans:
 **Goal**: code-pal 能够从当前 repo 读取 git 状态，失败时静默降级，不影响状态栏正常显示
 **Depends on**: Phase 1
 **Requirements**: STA-03
-**Plans:** 1 plan
+**Plans:** 0/1 plans executed
 Plans:
 - [ ] 02-01-PLAN.md — TDD: 新建 core/git_context.py + tests/test_git_context.py，4 个并行 subprocess 读取 git 状态，静默 fallback
 **Success Criteria** (what must be TRUE):
@@ -85,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
-| 2. Git Context 读取 | 0/1 | Planned | - |
+| 2. Git Context 读取 | 0/1 | Planned    |  |
 | 3. 事件检测与触发 | 0/? | Not started | - |
 | 4. statusline.py 集成 | 0/? | Not started | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
