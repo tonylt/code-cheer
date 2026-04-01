@@ -10,7 +10,7 @@
 ## Phases
 
 - [x] **Phase 1: 测试基础设施** — 安装 pytest，修复 make_cc() helper，确保测试套件 68/68 通过 (completed 2026-04-01)
-- [ ] **Phase 2: Git Context 读取** — 新建 core/git_context.py，3 个并行 subprocess 读取提交数 / diff / repo 路径，带 fallback
+- [ ] **Phase 2: Git Context 读取** — 新建 core/git_context.py，4 个并行 subprocess 读取提交数 / diff / repo 路径 / 首次提交时间，带 fallback
 - [ ] **Phase 3: 事件检测与触发** — trigger.py 实现 detect_git_events()，6 种事件，config.json 阈值，per-repo 隔离
 - [ ] **Phase 4: statusline.py 集成** — session_start 记录，render 模式约束，last_repo 切换重置，--debug-events 输出
 - [ ] **Phase 5: Vocab + 完整测试** — 4 个角色 vocab 添加 git_events 段，所有新代码路径有 pytest 覆盖
@@ -35,12 +35,14 @@ Plans:
 **Goal**: code-pal 能够从当前 repo 读取 git 状态，失败时静默降级，不影响状态栏正常显示
 **Depends on**: Phase 1
 **Requirements**: STA-03
+**Plans:** 1 plan
+Plans:
+- [ ] 02-01-PLAN.md — TDD: 新建 core/git_context.py + tests/test_git_context.py，4 个并行 subprocess 读取 git 状态，静默 fallback
 **Success Criteria** (what must be TRUE):
   1. `core/git_context.py` 可读取：当天提交数、HEAD diff 行数、当前 repo 路径（git rev-parse --show-toplevel）
-  2. 3 个 subprocess 并行执行，总耗时由最慢一个决定，实测 < 500ms
+  2. 4 个 subprocess 并行执行，总耗时由最慢一个决定，实测 < 500ms
   3. 任意 subprocess 失败（无 git repo / git 未安装 / 超时 5s）时，对应字段返回 0 或 None，不抛出异常，状态栏正常显示
   4. 在非 git 目录调用时，返回全部为 0 的安全默认结构
-**Plans**: TBD
 
 ### Phase 3: 事件检测与触发
 **Goal**: trigger.py 能根据 git context 数据检测 6 种事件，并配合配置阈值和 per-repo 隔离正确触发角色消息
@@ -83,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
-| 2. Git Context 读取 | 0/? | Not started | - |
+| 2. Git Context 读取 | 0/1 | Planned | - |
 | 3. 事件检测与触发 | 0/? | Not started | - |
 | 4. statusline.py 集成 | 0/? | Not started | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
@@ -113,4 +115,4 @@ All 13 v2.0 requirements mapped. No orphans.
 ---
 
 *Created: 2026-04-01*
-*Last updated: 2026-04-01 — Phase 1 planned (1 plan, 1 wave)*
+*Last updated: 2026-04-01 — Phase 2 planned (1 plan, 1 wave)*
