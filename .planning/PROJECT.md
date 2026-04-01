@@ -26,6 +26,7 @@ code-pal 是 Claude Code 的状态栏伴侣。4 个动漫风格角色（Nova/Lun
 
 <!-- 已实现的 v1 功能 -->
 
+- ✓ 测试基础设施（pytest 9.0.2，make_cc() 修复）— 61/61 tests passing — Validated in Phase 01: test-infrastructure
 - ✓ 4 个角色（Nova/Luna/Mochi/Iris）各有独立 vocab JSON — v1
 - ✓ 状态栏展示角色消息 + token 用量（5h 占比、7d 占比、ctx 占比）— v1
 - ✓ 4 种消息触发类型：random、time slot、usage tier、post_tool — v1
@@ -102,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 after milestone v2.0 start*
+*Last updated: 2026-04-01 after Phase 01 (test-infrastructure) complete*
