@@ -35,22 +35,21 @@ code-pal 是 Claude Code 的状态栏伴侣。4 个动漫风格角色（Nova/Lun
 - ✓ install.sh 安装到 ~/.claude/code-pal/，非破坏性 patch settings.json — v1
 - ✓ /cheer 斜线命令触发角色回应 — v1
 - ✓ 原子写入 state.json（os.replace() temp file 模式）— v1
+- ✓ GIT-01: first_commit_today 事件检测与消息路由 — Validated in Phase 03: event-detection
+- ✓ GIT-02: milestone_5/10/20 独立去重，优先级倒序 — Validated in Phase 03: event-detection
+- ✓ GIT-03: late_night_commit（hour >= 22，需有提交）— Validated in Phase 03: event-detection
+- ✓ GIT-04: big_diff（diff_lines >= threshold，默认 200）— Validated in Phase 03: event-detection
+- ✓ GIT-05: big_session（elapsed >= threshold，默认 120min）— Validated in Phase 03: event-detection
+- ✓ GIT-06: long_day（commits_today >= threshold，默认 15）— Validated in Phase 03: event-detection
+- ✓ GIT-07: per-repo 隔离（repo 切换时 effective_last_events 逻辑重置）— Validated in Phase 03: event-detection
+- ✓ GIT-08: event_thresholds 可配置（5 个阈值，逐字段 .get(key, default)）— Validated in Phase 03: event-detection
+- ✓ TEST-02: 110 测试覆盖全部新代码路径（detect_git_events 30 + resolve integration 4 + save_state git 2）— Validated in Phase 03: event-detection
 
 ### Active
 
 <!-- v2.0 当前范围 -->
 
-- [ ] GIT-01: 用户的首次每日提交后，角色显示 first_commit_today 消息
-- [ ] GIT-02: 用户提交达到 5/10/20 里程碑后，角色显示对应 milestone 消息（每个阶段最多一次/天）
-- [ ] GIT-03: 用户在 22 点后提交时（late_night_commit），角色显示深夜鼓励消息
-- [ ] GIT-04: 用户 diff 行数 ≥ 200 时，角色显示 big_diff 消息
-- [ ] GIT-05: 会话时长 ≥ 120 分钟时，角色显示 big_session 消息
-- [ ] GIT-06: 当天提交数 ≥ 15 时，角色显示 long_day 消息
-- [ ] GIT-07: 切换 repo 时，当天 git 事件状态重置（last_repo 隔离）
-- [ ] GIT-08: 用户可通过 config.json event_thresholds 字段自定义触发阈值
 - [ ] GIT-09: `statusline.py --debug-events` 输出当前 git context、触发事件和 state 内容
-- [ ] TEST-01: 安装 pytest，修复 make_cc() helper 结构，修复 test_display.py 断言
-- [ ] TEST-02: 28 个新代码路径全部有对应测试
 
 ### Out of Scope
 
@@ -104,4 +103,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 after Phase 02 (git-context) complete*
+*Last updated: 2026-04-02 after Phase 03 (event-detection) complete*
