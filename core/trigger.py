@@ -123,7 +123,8 @@ def resolve_message(
     state: dict,
     stats: dict,
     cc_data: dict,
-    force_post_tool: bool = False
+    force_post_tool: bool = False,
+    triggered_events: list | None = None
 ) -> tuple:
     """Select the appropriate message and return (message, tier)."""
     rate_limits = cc_data.get("rate_limits", {})
@@ -145,6 +146,11 @@ def resolve_message(
 
     # Priority 2: post_tool forced (--update mode)
     if force_post_tool:
+        if triggered_events:
+            event_key = triggered_events[0]
+            git_events_vocab = triggers.get("git_events", {})
+            options = git_events_vocab.get(event_key, triggers["post_tool"])
+            return pick_different(options, state.get("message", "")), tier
         return pick_different(triggers["post_tool"], state.get("message", "")), tier
 
     # Priority 3: cache still fresh

@@ -153,3 +153,30 @@ def test_main_update_mode_no_output(tmp_path, monkeypatch, capsys):
         saved = _json.load(f)
     assert saved["message"] in ["p1", "p2"]  # post_tool vocab
     assert "last_updated" in saved
+
+
+# --- save_state with git fields ---
+
+def test_save_state_git_fields(tmp_path, monkeypatch):
+    monkeypatch.setattr(sl, 'STATE_PATH', str(tmp_path / "state.json"))
+    monkeypatch.setattr(sl, 'BASE_DIR', str(tmp_path))
+    sl.save_state("hello", "normal", "afternoon",
+                  last_git_events=["milestone_5", "first_commit_today"],
+                  last_repo="/path/to/repo",
+                  commits_today=5)
+    with open(str(tmp_path / "state.json")) as f:
+        s = json.load(f)
+    assert s["last_git_events"] == ["milestone_5", "first_commit_today"]
+    assert s["last_repo"] == "/path/to/repo"
+    assert s["commits_today"] == 5
+
+
+def test_save_state_git_fields_none_omitted(tmp_path, monkeypatch):
+    monkeypatch.setattr(sl, 'STATE_PATH', str(tmp_path / "state.json"))
+    monkeypatch.setattr(sl, 'BASE_DIR', str(tmp_path))
+    sl.save_state("hello", "normal", "afternoon")
+    with open(str(tmp_path / "state.json")) as f:
+        s = json.load(f)
+    assert "last_git_events" not in s
+    assert "last_repo" not in s
+    assert "commits_today" not in s
