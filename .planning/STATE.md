@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03-event-detection-01-PLAN.md
-last_updated: "2026-04-01T16:37:38.261Z"
-last_activity: 2026-04-01
+status: verifying
+stopped_at: Completed 03-event-detection-02-PLAN.md
+last_updated: "2026-04-02T00:00:00.000Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # State: code-pal
@@ -24,11 +24,11 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 ## Current Position
 
-Phase: 03 (event-detection) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-04-01
-Stopped at: Completed 03-event-detection-01-PLAN.md
+Phase: 03 (event-detection) — COMPLETE
+Plan: 2 of 2 (all plans done)
+Status: Phase complete — ready for verification
+Last activity: 2026-04-02
+Stopped at: Completed 03-event-detection-02-PLAN.md
 
 ```
 Progress: Phase 1 of 5
@@ -70,6 +70,9 @@ Progress: Phase 1 of 5
 - test_display.py 过时断言需修复（Rule 1 bug fix）：测试期望旧 v1 中文标签，实际代码输出 "5h N%" 格式
 - detect_git_events() is a pure function receiving all state/config as parameters, consistent with trigger.py's no-I/O pattern
 - Per-repo isolation handled inside detect_git_events() via effective_last_events logical reset; statusline.py handles actual state write
+- resolve_message() falls back to post_tool vocab when git_events section missing — forward-compatible with Phase 5 (which adds vocab)
+- git state always persisted in --update mode regardless of message change to prevent event accumulation loss
+- save_state() upgraded to use atomic write (os.replace) — consistent with PROJECT.md design decision
 
 ---
-*Last updated: 2026-04-01 — Phase 03 plan 01 complete, detect_git_events() implemented, 104/104 tests passing*
+*Last updated: 2026-04-02 — Phase 03 plan 02 complete, git events wired end-to-end, 110/110 tests passing*

@@ -11,7 +11,7 @@
 
 - [x] **Phase 1: 测试基础设施** — 安装 pytest，修复 make_cc() helper，确保测试套件 68/68 通过 (completed 2026-04-01)
 - [ ] **Phase 2: Git Context 读取** — 新建 core/git_context.py，4 个并行 subprocess 读取提交数 / diff / repo 路径 / 首次提交时间，带 fallback
-- [ ] **Phase 3: 事件检测与触发** — trigger.py 实现 detect_git_events()，6 种事件，config.json 阈值，per-repo 隔离
+- [x] **Phase 3: 事件检测与触发** — trigger.py 实现 detect_git_events()，6 种事件，config.json 阈值，per-repo 隔离 (completed 2026-04-01)
 - [ ] **Phase 4: statusline.py 集成** — session_start 记录，render 模式约束，last_repo 切换重置，--debug-events 输出
 - [ ] **Phase 5: Vocab + 完整测试** — 4 个角色 vocab 添加 git_events 段，所有新代码路径有 pytest 覆盖
 
@@ -48,10 +48,10 @@ Plans:
 **Goal**: trigger.py 能根据 git context 数据检测 6 种事件，并配合配置阈值和 per-repo 隔离正确触发角色消息
 **Depends on**: Phase 2
 **Requirements**: GIT-01, GIT-02, GIT-03, GIT-04, GIT-05, GIT-06, CFG-01, STA-01
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 03-01-PLAN.md — TDD: detect_git_events() 纯函数实现 + 全量单元测试
-- [ ] 03-02-PLAN.md — 集成: resolve_message() 增加 triggered_events 参数 + statusline.py 状态持久化
+- [x] 03-02-PLAN.md — 集成: resolve_message() 增加 triggered_events 参数 + statusline.py 状态持久化
 **Success Criteria** (what must be TRUE):
   1. 当天首次 git 提交后，下一次 Claude 响应时 state.json 包含 `first_commit_today` 事件，角色消息对应该事件
   2. 提交数达到 5 / 10 / 20 时分别触发对应 milestone 消息；同一阶段当天只触发一次（last_git_events 数组去重）
@@ -89,7 +89,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/1 | Planned    |  |
-| 3. 事件检测与触发 | 1/2 | In Progress|  |
+| 3. 事件检测与触发 | 2/2 | Complete   | 2026-04-01 |
 | 4. statusline.py 集成 | 0/? | Not started | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
 
