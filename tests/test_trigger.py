@@ -194,3 +194,280 @@ def test_resolve_handles_missing_rate_limits():
     state = make_state()
     msg, tier = resolve_message(CHAR, state, {}, {})
     assert tier == "normal"
+
+
+# =============================================================================
+# detect_git_events() tests
+# =============================================================================
+
+from core.trigger import detect_git_events
+
+
+def make_git_ctx(commits=0, diff=0, repo="/repo/a"):
+    return {"commits_today": commits, "diff_lines": diff,
+            "first_commit_time": None, "repo_path": repo}
+
+
+def make_det_state(last_events=None, last_repo="/repo/a", session_start=None):
+    s = {"last_git_events": last_events or [], "last_repo": last_repo}
+    if session_start:
+        s["session_start"] = session_start
+    return s
+
+
+# --- GIT-01: first_commit_today ---
+
+def test_detect_first_commit_today():
+    events = detect_git_events(make_git_ctx(commits=1), make_det_state(), {})
+    assert "first_commit_today" in events
+
+
+def test_detect_first_commit_today_dedup():
+    events = detect_git_events(
+        make_git_ctx(commits=3),
+        make_det_state(last_events=["first_commit_today"]),
+        {}
+    )
+    assert "first_commit_today" not in events
+
+
+def test_detect_first_commit_today_no_commits():
+    events = detect_git_events(make_git_ctx(commits=0), make_det_state(), {})
+    assert "first_commit_today" not in events
+
+
+# --- GIT-02: milestones ---
+
+def test_detect_milestone_5():
+    events = detect_git_events(make_git_ctx(commits=5), make_det_state(), {})
+    assert "milestone_5" in events
+
+
+def test_detect_milestone_10():
+    events = detect_git_events(make_git_ctx(commits=10), make_det_state(), {})
+    assert "milestone_10" in events
+
+
+def test_detect_milestone_20():
+    events = detect_git_events(make_git_ctx(commits=20), make_det_state(), {})
+    assert "milestone_20" in events
+
+
+def test_detect_milestone_independent_dedup():
+    events = detect_git_events(
+        make_git_ctx(commits=10),
+        make_det_state(last_events=["milestone_5"]),
+        {}
+    )
+    assert "milestone_5" not in events
+    assert "milestone_10" in events
+
+
+def test_detect_milestone_priority_order():
+    events = detect_git_events(make_git_ctx(commits=20), make_det_state(), {})
+    assert events.index("milestone_20") < events.index("milestone_10") < events.index("milestone_5")
+
+
+# --- GIT-03: late_night_commit ---
+
+@patch('core.trigger.datetime')
+def test_detect_late_night_commit(mock_dt):
+    mock_dt.now.return_value = datetime(2026, 3, 22, 22, 0)
+    mock_dt.fromisoformat = datetime.fromisoformat
+    events = detect_git_events(make_git_ctx(commits=1), make_det_state(), {})
+    assert "late_night_commit" in events
+
+
+@patch('core.trigger.datetime')
+def test_detect_late_night_not_triggered_before_hour(mock_dt):
+    mock_dt.now.return_value = datetime(2026, 3, 22, 21, 0)
+    mock_dt.fromisoformat = datetime.fromisoformat
+    events = detect_git_events(make_git_ctx(commits=1), make_det_state(), {})
+    assert "late_night_commit" not in events
+
+
+@patch('core.trigger.datetime')
+def test_detect_late_night_no_commits(mock_dt):
+    mock_dt.now.return_value = datetime(2026, 3, 22, 23, 0)
+    mock_dt.fromisoformat = datetime.fromisoformat
+    events = detect_git_events(make_git_ctx(commits=0), make_det_state(), {})
+    assert "late_night_commit" not in events
+
+
+@patch('core.trigger.datetime')
+def test_detect_late_night_dedup(mock_dt):
+    mock_dt.now.return_value = datetime(2026, 3, 22, 22, 0)
+    mock_dt.fromisoformat = datetime.fromisoformat
+    events = detect_git_events(
+        make_git_ctx(commits=1),
+        make_det_state(last_events=["late_night_commit"]),
+        {}
+    )
+    assert "late_night_commit" not in events
+
+
+# --- GIT-04: big_diff ---
+
+def test_detect_big_diff_exact_boundary():
+    events = detect_git_events(make_git_ctx(diff=200), make_det_state(), {})
+    assert "big_diff" in events
+
+
+def test_detect_big_diff_below():
+    events = detect_git_events(make_git_ctx(diff=199), make_det_state(), {})
+    assert "big_diff" not in events
+
+
+def test_detect_big_diff_custom_threshold():
+    events = detect_git_events(
+        make_git_ctx(diff=100),
+        make_det_state(),
+        {"event_thresholds": {"big_diff": 50}}
+    )
+    assert "big_diff" in events
+
+
+# --- GIT-05: big_session ---
+
+@patch('core.trigger.datetime')
+def test_detect_big_session(mock_dt):
+    now = datetime(2026, 3, 22, 14, 0, 0)
+    mock_dt.now.return_value = now
+    mock_dt.fromisoformat = datetime.fromisoformat
+    start = (now - timedelta(minutes=120)).isoformat()
+    events = detect_git_events(
+        make_git_ctx(),
+        make_det_state(session_start=start),
+        {}
+    )
+    assert "big_session" in events
+
+
+@patch('core.trigger.datetime')
+def test_detect_big_session_below(mock_dt):
+    now = datetime(2026, 3, 22, 14, 0, 0)
+    mock_dt.now.return_value = now
+    mock_dt.fromisoformat = datetime.fromisoformat
+    start = (now - timedelta(minutes=119)).isoformat()
+    events = detect_git_events(
+        make_git_ctx(),
+        make_det_state(session_start=start),
+        {}
+    )
+    assert "big_session" not in events
+
+
+def test_detect_big_session_no_start():
+    events = detect_git_events(make_git_ctx(), make_det_state(), {})
+    assert "big_session" not in events
+
+
+def test_detect_big_session_invalid_start():
+    state = make_det_state()
+    state["session_start"] = "not-a-date"
+    events = detect_git_events(make_git_ctx(), state, {})
+    assert "big_session" not in events
+
+
+# --- GIT-06: long_day ---
+
+def test_detect_long_day():
+    events = detect_git_events(make_git_ctx(commits=15), make_det_state(), {})
+    assert "long_day" in events
+
+
+def test_detect_long_day_below():
+    events = detect_git_events(make_git_ctx(commits=14), make_det_state(), {})
+    assert "long_day" not in events
+
+
+# --- CFG-01: config fallback ---
+
+def test_detect_empty_config_uses_defaults():
+    events = detect_git_events(make_git_ctx(commits=5, diff=200), make_det_state(), {})
+    assert "milestone_5" in events
+    assert "big_diff" in events
+
+
+def test_detect_partial_config_merges():
+    events = detect_git_events(
+        make_git_ctx(commits=5, diff=150),
+        make_det_state(),
+        {"event_thresholds": {"big_diff": 100}}
+    )
+    assert "big_diff" in events       # custom threshold 100 < 150
+    assert "milestone_5" in events    # default [5,10,20] still applies
+
+
+def test_detect_custom_milestone_counts():
+    events = detect_git_events(
+        make_git_ctx(commits=3),
+        make_det_state(),
+        {"event_thresholds": {"milestone_counts": [3, 7]}}
+    )
+    assert "milestone_3" in events
+
+
+# --- STA-01: per-repo isolation ---
+
+def test_detect_repo_switch_resets_events():
+    events = detect_git_events(
+        make_git_ctx(commits=3, repo="/repo/b"),
+        make_det_state(last_events=["milestone_5", "first_commit_today"], last_repo="/repo/a"),
+        {}
+    )
+    # After repo switch, last_git_events is effectively [], so first_commit_today can retrigger
+    assert "first_commit_today" in events
+
+
+def test_detect_repo_none_no_reset():
+    events = detect_git_events(
+        make_git_ctx(commits=3, repo=None),
+        make_det_state(last_events=["first_commit_today"], last_repo="/repo/a"),
+        {}
+    )
+    # repo_path is None -> no reset -> dedup still in effect
+    assert "first_commit_today" not in events
+
+
+def test_detect_same_repo_no_reset():
+    events = detect_git_events(
+        make_git_ctx(commits=3, repo="/repo/a"),
+        make_det_state(last_events=["first_commit_today"], last_repo="/repo/a"),
+        {}
+    )
+    assert "first_commit_today" not in events
+
+
+# --- Edge cases ---
+
+def test_detect_corrupted_last_events_string():
+    state = make_det_state()
+    state["last_git_events"] = "not_a_list"
+    # Should treat as [], events returned normally
+    events = detect_git_events(make_git_ctx(commits=1), state, {})
+    assert "first_commit_today" in events
+
+
+def test_detect_no_events_returns_empty():
+    events = detect_git_events(make_git_ctx(commits=0, diff=0), make_det_state(), {})
+    assert events == []
+
+
+# --- Priority order ---
+
+@patch('core.trigger.datetime')
+def test_detect_priority_order_full(mock_dt):
+    now = datetime(2026, 3, 22, 23, 0, 0)
+    mock_dt.now.return_value = now
+    mock_dt.fromisoformat = datetime.fromisoformat
+    start = (now - timedelta(hours=3)).isoformat()
+    events = detect_git_events(
+        make_git_ctx(commits=20, diff=200, repo="/repo/a"),
+        make_det_state(session_start=start),
+        {}
+    )
+    # milestone_20 should be first, first_commit_today should be last
+    assert len(events) > 0
+    assert events[0] == "milestone_20"
+    assert events[-1] == "first_commit_today"
