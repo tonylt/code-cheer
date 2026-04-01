@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: verifying
-stopped_at: Phase 4 context gathered
-last_updated: "2026-04-01T17:12:24.742Z"
+stopped_at: Completed 04-statusline-py-01-PLAN.md
+last_updated: "2026-04-01T22:57:45.324Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # State: code-pal
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 03 — event-detection
+**Current focus:** Phase 04 — statusline-py
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
+Phase: 04 (statusline-py) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-01
-Stopped at: Phase 4 context gathered
+Stopped at: Completed 04-statusline-py-01-PLAN.md
 
 ```
 Progress: Phase 1 of 5
@@ -73,6 +73,9 @@ Progress: Phase 1 of 5
 - resolve_message() falls back to post_tool vocab when git_events section missing — forward-compatible with Phase 5 (which adds vocab)
 - git state always persisted in --update mode regardless of message change to prevent event accumulation loss
 - save_state() upgraded to use atomic write (os.replace) — consistent with PROJECT.md design decision
+- render mode pure read-only: removed elif save_state() from render path (D-01, Phase 4)
+- --debug-events sets update_only=True semantically, debug_mode flag prevents stdout output (D-04, Phase 4)
+- session_start preserved same-day, reset cross-day via _should_reset_session_start() (D-02, Phase 4)
 
 ---
-*Last updated: 2026-04-02 — Phase 03 plan 02 complete, git events wired end-to-end, 110/110 tests passing*
+*Last updated: 2026-04-02 — Phase 04 plan 01 complete, render/update separation + session_start + --debug-events, 117/117 tests passing*

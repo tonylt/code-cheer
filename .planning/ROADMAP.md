@@ -12,7 +12,7 @@
 - [x] **Phase 1: 测试基础设施** — 安装 pytest，修复 make_cc() helper，确保测试套件 68/68 通过 (completed 2026-04-01)
 - [ ] **Phase 2: Git Context 读取** — 新建 core/git_context.py，4 个并行 subprocess 读取提交数 / diff / repo 路径 / 首次提交时间，带 fallback
 - [x] **Phase 3: 事件检测与触发** — trigger.py 实现 detect_git_events()，6 种事件，config.json 阈值，per-repo 隔离 (completed 2026-04-01)
-- [ ] **Phase 4: statusline.py 集成** — session_start 记录，render 模式约束，last_repo 切换重置，--debug-events 输出
+- [x] **Phase 4: statusline.py 集成** — session_start 记录，render 模式约束，last_repo 切换重置，--debug-events 输出 (completed 2026-04-01)
 - [ ] **Phase 5: Vocab + 完整测试** — 4 个角色 vocab 添加 git_events 段，所有新代码路径有 pytest 覆盖
 
 ---
@@ -67,9 +67,9 @@ Plans:
   1. render 模式（无 `--update`）不执行任何 git subprocess，不覆盖 state.json 中 `last_git_events` / `commits_today` 等 git 字段
   2. `--update` 模式在首次运行时将 `session_start` 写入 state.json，后续调用不覆盖，直到进程重启
   3. `statusline.py --debug-events` 向 stderr 输出：当前 git context 数值、检测到的事件及触发原因、state.json 快照；stderr 内容不污染状态栏渲染
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 04-01-PLAN.md — TDD: render 纯只读 + session_start 记录 + --debug-events stderr 输出
+- [x] 04-01-PLAN.md — TDD: render 纯只读 + session_start 记录 + --debug-events stderr 输出
 **UI hint**: yes
 
 ### Phase 5: Vocab + 完整测试
@@ -92,7 +92,7 @@ Plans:
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/1 | Planned    |  |
 | 3. 事件检测与触发 | 2/2 | Complete   | 2026-04-01 |
-| 4. statusline.py 集成 | 0/1 | Planned | - |
+| 4. statusline.py 集成 | 1/1 | Complete   | 2026-04-01 |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
 
 ---

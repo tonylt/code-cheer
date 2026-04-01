@@ -19,12 +19,12 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 ### 配置与可观测性 (CFG)
 
 - [x] **CFG-01**: 用户通过 `config.json` 的 `event_thresholds` 字段自定义触发阈值（big_diff / milestone_counts / big_session_minutes / long_day_commits / late_night_hour_start），字段缺失时回落默认值
-- [ ] **CFG-02**: `statusline.py --debug-events` 输出当前 git context、会触发的事件及原因、state.json 快照到 stderr
+- [x] **CFG-02**: `statusline.py --debug-events` 输出当前 git context、会触发的事件及原因、state.json 快照到 stderr
 
 ### 稳定性与隔离 (STA)
 
 - [x] **STA-01**: 切换 git repo 时，当天 git 事件状态自动重置（通过 `last_repo` 字段检测路径变化）
-- [ ] **STA-02**: render 模式（statusline 轮询路径）不触发 git subprocess，不覆盖 `last_git_events`/`commits_today` 等 git 相关字段
+- [x] **STA-02**: render 模式（statusline 轮询路径）不触发 git subprocess，不覆盖 `last_git_events`/`commits_today` 等 git 相关字段
 - [ ] **STA-03**: 任意 git subprocess 失败（超时 / 无 repo / git 未安装）时，静默 fallback 到 0，状态栏正常显示，不抛出异常
 
 ### 测试基础设施 (TST)
@@ -69,8 +69,8 @@ Requirements for milestone v2.0 — Git 事件驱动角色反应.
 | GIT-06 | Phase 3 | Complete |
 | CFG-01 | Phase 3 | Complete |
 | STA-01 | Phase 3 | Complete |
-| STA-02 | Phase 4 | Pending |
-| CFG-02 | Phase 4 | Pending |
+| STA-02 | Phase 4 | Complete |
+| CFG-02 | Phase 4 | Complete |
 | TST-02 | Phase 5 | Pending |
 
 **Coverage:**
