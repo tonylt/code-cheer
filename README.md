@@ -1,4 +1,4 @@
-# CheerMate
+# code-pal
 
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
@@ -23,7 +23,7 @@ The statusline updates after each Claude response with a character message + ses
 
 ```bash
 git clone https://github.com/alexfly123lee-creator/Claude-Code-Cheer.git
-cd CheerMate
+cd code-pal
 ./install.sh
 ```
 
@@ -68,7 +68,7 @@ Claude response ends (Stop hook)
 statusline.py --update
   → reads token stats from stats-cache.json
   → selects message by: usage tier > time slot > random
-  → writes to ~/.claude/cheermate/state.json
+  → writes to ~/.claude/code-pal/state.json
         ↓
 Statusline polls statusline.py
   → reads state.json → renders to status bar
@@ -91,10 +91,10 @@ Statusline polls statusline.py
 Edit any character's JSON file to add your own lines:
 
 ```bash
-~/.claude/cheermate/vocab/nova.json
-~/.claude/cheermate/vocab/luna.json
-~/.claude/cheermate/vocab/mochi.json
-~/.claude/cheermate/vocab/iris.json
+~/.claude/code-pal/vocab/nova.json
+~/.claude/code-pal/vocab/luna.json
+~/.claude/code-pal/vocab/mochi.json
+~/.claude/code-pal/vocab/iris.json
 ```
 
 Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/evening/midnight), `usage` (warning/critical), and `random`.
@@ -118,7 +118,7 @@ Removes all files and cleans up `~/.claude/settings.json`.
 ## File structure / 文件结构
 
 ```
-cheermate/
+code-pal/
 ├── install.sh          # installer / 安装脚本
 ├── statusline.py       # main entry point / 状态栏入口
 ├── core/

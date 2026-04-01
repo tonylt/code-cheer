@@ -11,7 +11,7 @@ from core.character import load_character
 from core.trigger import resolve_message, get_time_slot
 from core.display import render
 
-BASE_DIR = os.path.join(os.path.expanduser("~"), ".claude", "cheermate")
+BASE_DIR = os.path.join(os.path.expanduser("~"), ".claude", "code-pal")
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 STATE_PATH = os.path.join(BASE_DIR, "state.json")
 STATS_PATH = os.path.join(os.path.expanduser("~"), ".claude", "stats-cache.json")
