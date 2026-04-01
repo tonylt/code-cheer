@@ -67,7 +67,9 @@ Plans:
   1. render 模式（无 `--update`）不执行任何 git subprocess，不覆盖 state.json 中 `last_git_events` / `commits_today` 等 git 字段
   2. `--update` 模式在首次运行时将 `session_start` 写入 state.json，后续调用不覆盖，直到进程重启
   3. `statusline.py --debug-events` 向 stderr 输出：当前 git context 数值、检测到的事件及触发原因、state.json 快照；stderr 内容不污染状态栏渲染
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 04-01-PLAN.md — TDD: render 纯只读 + session_start 记录 + --debug-events stderr 输出
 **UI hint**: yes
 
 ### Phase 5: Vocab + 完整测试
@@ -90,7 +92,7 @@ Plans:
 | 1. 测试基础设施 | 1/1 | Complete   | 2026-04-01 |
 | 2. Git Context 读取 | 0/1 | Planned    |  |
 | 3. 事件检测与触发 | 2/2 | Complete   | 2026-04-01 |
-| 4. statusline.py 集成 | 0/? | Not started | - |
+| 4. statusline.py 集成 | 0/1 | Planned | - |
 | 5. Vocab + 完整测试 | 0/? | Not started | - |
 
 ---
@@ -118,4 +120,4 @@ All 13 v2.0 requirements mapped. No orphans.
 ---
 
 *Created: 2026-04-01*
-*Last updated: 2026-04-02 — Phase 3 planned (2 plans, 2 waves)*
+*Last updated: 2026-04-02 — Phase 4 planned (1 plan, 1 wave)*
