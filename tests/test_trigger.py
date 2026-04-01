@@ -107,10 +107,10 @@ def make_state(message="r1", tier="normal", slot="afternoon", updated=None):
     return {"message": message, "last_updated": ts, "last_rate_tier": tier, "last_slot": slot}
 
 def make_cc(pct=0, resets_at=None, model="claude-sonnet-4-6"):
-    d = {"model": model, "rate_limits": {"used_percentage": pct}}
+    five_hour = {"used_percentage": pct}
     if resets_at:
-        d["rate_limits"]["resets_at"] = resets_at
-    return d
+        five_hour["resets_at"] = resets_at
+    return {"model": model, "rate_limits": {"five_hour": five_hour}}
 
 # --- Priority 1: usage tier escalation ---
 def test_resolve_escalates_to_warning():

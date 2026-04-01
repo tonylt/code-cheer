@@ -74,10 +74,10 @@ def test_render_line2_contains_model():
     assert "sonnet-4-6" in output.split("\n")[1]
 
 def test_render_line2_contains_pct():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 32}}
+    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"five_hour": {"used_percentage": 32}}}
     stats = {"today_tokens": 100}
     output = render(CHAR, "msg", cc, stats)
-    assert "用量 32%" in output.split("\n")[1]
+    assert "5h 32.0%" in output.split("\n")[1]
 
 def test_render_no_resets_when_missing():
     cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 10}}
