@@ -44,12 +44,12 @@ code-pal 是 Claude Code 的状态栏伴侣。4 个动漫风格角色（Nova/Lun
 - ✓ GIT-07: per-repo 隔离（repo 切换时 effective_last_events 逻辑重置）— Validated in Phase 03: event-detection
 - ✓ GIT-08: event_thresholds 可配置（5 个阈值，逐字段 .get(key, default)）— Validated in Phase 03: event-detection
 - ✓ TEST-02: 110 测试覆盖全部新代码路径（detect_git_events 30 + resolve integration 4 + save_state git 2）— Validated in Phase 03: event-detection
+- ✓ STA-02: render 模式纯只读，session_start 首次写入后同天保留跨天重置 — Validated in Phase 04: statusline-py
+- ✓ CFG-02: `statusline.py --debug-events` 向 stderr 输出 GIT_CONTEXT / EVENTS_WOULD_FIRE / STATE_SNAPSHOT — Validated in Phase 04: statusline-py
 
 ### Active
 
 <!-- v2.0 当前范围 -->
-
-- [ ] GIT-09: `statusline.py --debug-events` 输出当前 git context、触发事件和 state 内容
 
 ### Out of Scope
 
@@ -83,7 +83,7 @@ code-pal 是 Claude Code 的状态栏伴侣。4 个动漫风格角色（Nova/Lun
 | last_repo 字段实现 per-repo 隔离 | 全局 state.json 在切换 repo 时静默返回错误 git context | ✓ Good |
 | render 模式只更新 message/tier/slot | 防止 render 和 Stop hook 竞争写入 git 字段 | ✓ Good |
 | concurrent.futures 并行 subprocess | 3 个串行 subprocess ~320ms；并行后由最慢一个决定 ~80ms | ✓ Good |
-| session_start 记录到 state.json | 计算 session_minutes 无需额外 subprocess | — Pending |
+| session_start 记录到 state.json | 计算 session_minutes 无需额外 subprocess | ✓ Validated in Phase 04 |
 
 ## Evolution
 
