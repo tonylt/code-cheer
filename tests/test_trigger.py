@@ -471,3 +471,47 @@ def test_detect_priority_order_full(mock_dt):
     assert len(events) > 0
     assert events[0] == "milestone_20"
     assert events[-1] == "first_commit_today"
+
+
+# =============================================================================
+# resolve_message() with triggered_events integration tests
+# =============================================================================
+
+# --- resolve_message with triggered_events ---
+
+def test_resolve_git_event_uses_post_tool_fallback():
+    """When git_events vocab missing, falls back to post_tool."""
+    state = make_state(message="r1")
+    msg, tier = resolve_message(CHAR, state, {}, make_cc(),
+                                force_post_tool=True,
+                                triggered_events=["milestone_5"])
+    assert msg in ["p1", "p2", "p3"]  # falls back to post_tool (no git_events in CHAR)
+
+
+def test_resolve_git_event_uses_git_vocab_when_present():
+    """When git_events vocab exists, picks from it."""
+    char = dict(CHAR)
+    char["triggers"] = dict(CHAR["triggers"])
+    char["triggers"]["git_events"] = {"milestone_5": ["git_m5_a", "git_m5_b"]}
+    state = make_state(message="r1")
+    msg, tier = resolve_message(char, state, {}, make_cc(),
+                                force_post_tool=True,
+                                triggered_events=["milestone_5"])
+    assert msg in ["git_m5_a", "git_m5_b"]
+
+
+def test_resolve_no_triggered_events_uses_post_tool():
+    """When triggered_events is empty list, normal post_tool behavior."""
+    state = make_state(message="r1")
+    msg, tier = resolve_message(CHAR, state, {}, make_cc(),
+                                force_post_tool=True,
+                                triggered_events=[])
+    assert msg in ["p1", "p2", "p3"]
+
+
+def test_resolve_triggered_events_none_backward_compat():
+    """When triggered_events=None (default), identical to current behavior."""
+    state = make_state(message="r1")
+    msg, tier = resolve_message(CHAR, state, {}, make_cc(),
+                                force_post_tool=True)
+    assert msg in ["p1", "p2", "p3"]

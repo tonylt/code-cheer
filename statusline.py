@@ -8,7 +8,8 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.character import load_character
-from core.trigger import resolve_message, get_time_slot
+from core.git_context import load_git_context
+from core.trigger import resolve_message, get_time_slot, detect_git_events
 from core.display import render
 
 BASE_DIR = os.path.join(os.path.expanduser("~"), ".claude", "code-pal")
@@ -64,7 +65,14 @@ def read_stdin_json() -> dict:
     return {}
 
 
-def save_state(message: str, tier: str, slot: str) -> None:
+def save_state(
+    message: str,
+    tier: str,
+    slot: str,
+    last_git_events: list | None = None,
+    last_repo: str | None = None,
+    commits_today: int | None = None,
+) -> None:
     os.makedirs(BASE_DIR, exist_ok=True)
     state = {
         "message": message,
@@ -72,8 +80,16 @@ def save_state(message: str, tier: str, slot: str) -> None:
         "last_rate_tier": tier,
         "last_slot": slot,
     }
-    with open(STATE_PATH, "w") as f:
+    if last_git_events is not None:
+        state["last_git_events"] = last_git_events
+    if last_repo is not None:
+        state["last_repo"] = last_repo
+    if commits_today is not None:
+        state["commits_today"] = commits_today
+    tmp_path = STATE_PATH + ".tmp"
+    with open(tmp_path, "w") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_path, STATE_PATH)
 
 
 def main():
@@ -91,6 +107,12 @@ def main():
         if total > 0:
             stats["today_tokens"] = total
 
+    git_context = None
+    triggered_events = None
+    if update_only:
+        git_context = load_git_context(os.getcwd())
+        triggered_events = detect_git_events(git_context, state, config)
+
     try:
         character = load_character(config.get("character", "nova"))
     except FileNotFoundError:
@@ -102,10 +124,47 @@ def main():
 
     slot = get_time_slot()
     message, tier = resolve_message(
-        character, state, stats, cc_data, force_post_tool=update_only
+        character, state, stats, cc_data,
+        force_post_tool=update_only,
+        triggered_events=triggered_events,
     )
 
-    if message != state.get("message") or tier != state.get("last_rate_tier"):
+    # Compute git state for persistence (update mode only)
+    new_last_git_events = None
+    new_last_repo = None
+    new_commits_today = None
+    if update_only and git_context is not None:
+        current_repo = git_context.get("repo_path")
+        # Recompute effective_last_events (symmetric with detect_git_events logic)
+        if current_repo is not None and current_repo != state.get("last_repo"):
+            base_events: list = []
+        else:
+            raw = state.get("last_git_events", [])
+            base_events = raw if isinstance(raw, list) else []
+        # Append newly triggered events to base (avoid duplicates)
+        new_last_git_events = list(base_events) + [
+            e for e in (triggered_events or []) if e not in base_events
+        ]
+        new_last_repo = current_repo if current_repo is not None else state.get("last_repo")
+        new_commits_today = git_context.get("commits_today", 0)
+
+    if update_only and new_last_git_events is not None:
+        # Always persist git state in update mode (git events accumulate)
+        if message != state.get("message") or tier != state.get("last_rate_tier"):
+            save_state(
+                message, tier, slot=slot,
+                last_git_events=new_last_git_events,
+                last_repo=new_last_repo,
+                commits_today=new_commits_today,
+            )
+        else:
+            save_state(
+                state.get("message", ""), state.get("last_rate_tier", "normal"), slot=slot,
+                last_git_events=new_last_git_events,
+                last_repo=new_last_repo,
+                commits_today=new_commits_today,
+            )
+    elif message != state.get("message") or tier != state.get("last_rate_tier"):
         save_state(message, tier, slot=slot)
 
     if update_only:
