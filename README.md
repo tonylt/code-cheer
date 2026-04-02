@@ -22,7 +22,7 @@ The statusline updates after each Claude response with a character message + ses
 ## Install / 安装
 
 ```bash
-git clone https://github.com/alexfly123lee-creator/Claude-Code-Cheer.git
+git clone https://github.com/tonylt/code-pal.git
 cd code-pal
 ./install.sh
 ```
@@ -146,3 +146,15 @@ Pull requests welcome! Some ideas:
 - Bug fixes / Bug 修复
 
 Run tests before submitting: `python3 -m pytest tests/`
+
+---
+
+## License / 许可证
+
+[MIT](./LICENSE)
+
+---
+
+## Inspired by / 致谢
+
+Forked from and inspired by [Claude-Code-Cheer](https://github.com/alexfly123lee-creator/Claude-Code-Cheer) by [@alexfly123lee-creator](https://github.com/alexfly123lee-creator). Thanks for the original idea and foundation.
