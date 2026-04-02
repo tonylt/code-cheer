@@ -15,6 +15,12 @@ def format_tokens(token_count) -> str:
     return str(n)
 
 
+def _ctx_bar(pct: int, width: int = 10) -> str:
+    """Build a block-character progress bar for the given percentage."""
+    filled = max(0, min(width, round(pct / 100 * width)))
+    return "█" * filled + "░" * (width - filled)
+
+
 def format_resets(resets_at):
     """Format Unix timestamp or ISO string into relative '3h20m' or '45m'. Returns None if past or invalid."""
     if not resets_at:
@@ -42,7 +48,7 @@ def format_resets(resets_at):
 
 
 def render(character: dict, message: str, cc_data: dict, stats: dict) -> str:
-    """Format the 2-line statusline output."""
+    """Format the 2-line statusline output (both lines left-aligned)."""
     ascii_face = character["meta"]["ascii"]
     name = character["meta"]["name"]
     color = character["meta"].get("color", "")
@@ -56,28 +62,19 @@ def render(character: dict, message: str, cc_data: dict, stats: dict) -> str:
         model = str(model_raw)
     model = model.replace("claude-", "")
 
+    cwd_name = stats.get("cwd_name", "")
     tokens = format_tokens(stats.get("today_tokens"))
-
-    rate_limits = cc_data.get("rate_limits", {})
-    five_hour = rate_limits.get("five_hour", {})
-    seven_day = rate_limits.get("seven_day", {})
-    five_pct = five_hour.get("used_percentage")
-    seven_pct = seven_day.get("used_percentage")
-    five_resets = format_resets(five_hour.get("resets_at"))
 
     ctx = cc_data.get("context_window", {})
     ctx_pct = ctx.get("used_percentage")
 
-    parts = [model, f"{tokens} tokens"]
-    if five_pct is not None:
-        five_str = f"5h {five_pct:.1f}%"
-        if five_resets:
-            five_str += f" ↺{five_resets}"
-        parts.append(five_str)
-    if seven_pct is not None:
-        parts.append(f"7d {seven_pct:.1f}%")
+    parts = [model]
+    if cwd_name:
+        parts.append(cwd_name)
+    parts.append(f"{tokens} tokens")
     if ctx_pct is not None:
-        parts.append(f"ctx {ctx_pct}%")
+        bar = _ctx_bar(int(ctx_pct))
+        parts.append(f"[{bar}] {ctx_pct}%")
 
     line2 = " | ".join(parts)
     return f"{line1}\n{line2}"

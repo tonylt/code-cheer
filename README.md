@@ -6,7 +6,7 @@
 
 - Git-aware reactions — first commit of the day, commit milestones (5/10/20), late-night commits, big diffs, and more trigger character-specific lines
 - 4 anime characters — Nova, Luna, Mochi, Iris, each with a distinct personality. Switch anytime with `/cheer`
-- Live token stats — 5-hour ratio, 7-day ratio, and context usage at a glance
+- Live stats — model, project folder, token count, and a context window progress bar at a glance
 
 ---
 
@@ -14,10 +14,10 @@
 
 ```
 (=^･ω･^=) Mochi: 跑完这个就去休息… 才不是
-claude-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
 ```
 
-The statusline updates after each Claude response with a character message + session stats.
+The statusline updates after each Claude response: character message on line 1, model + project + tokens + context bar on line 2.
 
 ---
 
