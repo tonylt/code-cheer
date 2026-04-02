@@ -4,6 +4,10 @@
 
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
+- Git-aware reactions — first commit of the day, commit milestones (5/10/20), late-night commits, big diffs, and more trigger character-specific lines
+- 4 anime characters — Nova, Luna, Mochi, Iris, each with a distinct personality. Switch anytime with `/cheer`
+- Live token stats — 5-hour ratio, 7-day ratio, and context usage at a glance
+
 ---
 
 ## What it looks like
@@ -17,6 +21,14 @@ The statusline updates after each Claude response with a character message + ses
 
 ---
 
+## Prerequisites
+
+- **Python 3.8+** (pre-installed on macOS/Linux)
+- **git**
+- **Claude Code v2.1.80+**
+
+---
+
 ## Install
 
 ```bash
@@ -26,10 +38,6 @@ cd code-pal
 ```
 
 Restart Claude Code. The statusline activates immediately.
-
-> **Requirements**
-> - Python 3 (pre-installed on macOS/Linux)
-> - Claude Code v2.1.80+
 
 ---
 
@@ -129,6 +137,16 @@ code-pal/
 
 ---
 
+## Tests
+
+```bash
+python3 -m pytest tests/
+```
+
+All tests should pass with no errors.
+
+---
+
 ## Contributing
 
 Pull requests welcome! Some ideas:
@@ -137,7 +155,27 @@ Pull requests welcome! Some ideas:
 - Language packs
 - Bug fixes
 
-Run tests before submitting: `python3 -m pytest tests/`
+See [Tests](#tests) above before submitting.
+
+---
+
+## Troubleshooting
+
+**Statusline not showing?**
+Check that install.sh completed without errors. Restart Claude Code. Verify the entry exists:
+`cat ~/.claude/settings.json | grep statusLine`
+
+**`python3` command not found?**
+macOS/Linux should have Python 3 pre-installed. Verify with `python3 --version`. If missing, install via your package manager (e.g., `brew install python3` on macOS, `sudo apt install python3` on Ubuntu).
+
+**install.sh errors?**
+Make sure the script is executable: `chmod +x install.sh`. Run from the repo root directory. Check that `~/.claude/` directory exists (created by Claude Code on first run).
+
+**Stop hook not triggering?**
+Verify the hook is registered: `cat ~/.claude/settings.json | grep -A5 Stop`. If missing, re-run `./install.sh`. Restart Claude Code after install.
+
+**Claude Code version mismatch?**
+code-pal requires Claude Code v2.1.80 or later. Check your version and update if needed.
 
 ---
 
