@@ -111,7 +111,7 @@ Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/ev
 ./install.sh --uninstall
 ```
 
-Removes all files and cleans up `~/.claude/settings.json`.
+Removes all files and cleans up `~/.claude/settings.json`. If you had a previous statusLine configured, it will be restored automatically.
 
 ---
 
@@ -176,6 +176,9 @@ Verify the hook is registered: `cat ~/.claude/settings.json | grep -A5 Stop`. If
 
 **Claude Code version mismatch?**
 code-pal requires Claude Code v2.1.80 or later. Check your version and update if needed.
+
+**Another tool already uses statusLine?**
+code-pal requires exclusive access to the statusLine setting. On install, it backs up any existing statusLine config to `~/.claude/code-pal/statusline-backup.json`. Uninstalling restores your previous config. If you want to switch between tools, uninstall one before installing the other.
 
 ---
 
