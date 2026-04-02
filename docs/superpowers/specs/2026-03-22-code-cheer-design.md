@@ -49,28 +49,34 @@ code-cheer/
 
 ## 状态栏输出格式
 
-两行固定格式：
+两行固定格式（均左对齐）：
 
 ```
 {ascii} {name}: {message}
-{model} | {tokens} tokens | 用量 {pct}% | resets in {resets}
+{model} | {cwd_name} | {tokens} tokens | [{ctx_bar}] {ctx_pct}%
 ```
+
+- `{cwd_name}`：当前工作目录名（`os.path.basename(os.getcwd())`），让用户一眼看出在哪个项目工作
+- `{ctx_bar}`：10 格 block 进度条（`█` 填充，`░` 空余），反映上下文窗口占用比例
+- 没有 `context_window` 数据时，进度条和百分比字段省略
 
 **各角色示例：**
 
 ```
 (*>ω<) Nova: 命令跑完啦！下一个目标，冲！！
-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+sonnet-4-6 | myproject | 47k tokens | [████░░░░░░] 40%
 
 (´• ω •`) Luna: 跑完了呢，辛苦啦～
-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+sonnet-4-6 | myproject | 47k tokens | [████░░░░░░] 40%
 
 (=^･ω･^=) Mochi: 跑完了嘛… Mochi 看着呢，继续啦
-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+sonnet-4-6 | myproject | 47k tokens | [████░░░░░░] 40%
 
 (￣ω￣) Iris: 执行完毕。下一项。
-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+sonnet-4-6 | myproject | 47k tokens | [████░░░░░░] 40%
 ```
+
+> **版本说明：** 初始版本格式为 `{model} | {tokens} tokens | 用量 {pct}% | resets in {resets}`（见 2026-03-22 原版）。v3 重构移除了 5h/7d rate limit 显示，新增 cwd 项目名和 ctx 进度条，并将两行统一左对齐（放弃终端宽度自适应的左右分栏，以兼容窄窗口）。详见 `docs/designs/statusline-layout-v3.md`。
 
 ---
 
