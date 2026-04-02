@@ -42,10 +42,20 @@ path, script = sys.argv[1], sys.argv[2]
 with open(path) as f:
     data = json.load(f)
 shutil.copy2(path, path + ".bak")
-# Remove statusLine only if it points to our script
-sl = data.get("statusLine", {})
-if isinstance(sl, dict) and script in sl.get("command", ""):
-    del data["statusLine"]
+# Restore previous statusLine from backup, or remove if we owned it
+backup_file = os.path.expanduser("~/.claude/code-pal/statusline-backup.json")
+if os.path.exists(backup_file):
+    with open(backup_file, "r") as bf:
+        backup = json.load(bf)
+    if "statusLine" in backup:
+        data["statusLine"] = backup["statusLine"]
+        print("restored previous statusLine from backup", file=sys.stderr)
+    os.remove(backup_file)
+else:
+    # No backup, remove statusLine only if it points to our script
+    sl = data.get("statusLine", {})
+    if isinstance(sl, dict) and script in sl.get("command", ""):
+        del data["statusLine"]
 # Remove our Stop hook entry
 hooks = data.get("hooks", {})
 stop = hooks.get("Stop", [])
@@ -130,12 +140,18 @@ if os.path.exists(settings_path):
 else:
     data = {}
 
-# statusLine
-if "statusLine" in data:
-    print(f"⚠ statusLine already configured — skipping (won't overwrite)")
-else:
-    data["statusLine"] = {"type": "command", "command": status_cmd}
-    print(f"✓ Added statusLine")
+# statusLine - backup existing and set code-pal
+backup_file = os.path.expanduser("~/.claude/code-pal/statusline-backup.json")
+if "statusLine" in data and data["statusLine"]:
+    # 备份现有配置
+    with open(backup_file, "w") as bf:
+        json.dump({"statusLine": data["statusLine"]}, bf, indent=2)
+    print(f"⚠ Existing statusLine backed up to: {backup_file}")
+    print(f"  code-pal requires exclusive statusLine access to function")
+    print(f"  Previous config will be restored on uninstall")
+
+data["statusLine"] = {"type": "command", "command": status_cmd}
+print(f"✓ Set code-pal statusLine")
 
 # hooks.Stop
 hooks = data.setdefault("hooks", {})
