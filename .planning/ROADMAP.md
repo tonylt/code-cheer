@@ -81,9 +81,9 @@ Plans:
   2. 无 `git_events` 段的旧 vocab 文件加载时静默跳过，不抛出 KeyError
   3. `python3 -m pytest tests/` 覆盖：git context 读取（正常 + fallback）、6 种事件检测、去重逻辑、config 阈值读取、per-repo 隔离、render 模式约束、display 更新；全部通过
   4. 所有新增测试文件放置在 `tests/` 目录，符合现有命名规范
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 05-01-PLAN.md — character.py get_git_event_message() + trigger.py 顶层路径修复 + 测试扩展
+- [x] 05-01-PLAN.md — character.py get_git_event_message() + trigger.py 顶层路径修复 + 测试扩展
 - [ ] 05-02-PLAN.md — 4 个角色 vocab JSON 添加 git_events 段（96 条消息）
 
 ---
@@ -96,7 +96,7 @@ Plans:
 | 2. Git Context 读取 | 0/1 | Planned    |  |
 | 3. 事件检测与触发 | 2/2 | Complete   | 2026-04-01 |
 | 4. statusline.py 集成 | 1/1 | Complete   | 2026-04-01 |
-| 5. Vocab + 完整测试 | 0/2 | Planned | - |
+| 5. Vocab + 完整测试 | 1/2 | In Progress|  |
 
 ---
 

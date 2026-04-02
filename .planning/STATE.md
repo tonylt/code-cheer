@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: Phase 5 context gathered
-last_updated: "2026-04-01T23:48:43.168Z"
-last_activity: 2026-04-01
+last_updated: "2026-04-02T00:33:40.675Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # State: code-pal
@@ -20,15 +20,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 04 — statusline-py
+**Current focus:** Phase 05 — vocab
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-01
-Stopped at: Phase 5 context gathered
+Phase: 05 (vocab) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-02
+Stopped at: Phase 5 Plan 01 complete
 
 ```
 Progress: Phase 1 of 5
@@ -76,6 +76,9 @@ Progress: Phase 1 of 5
 - render mode pure read-only: removed elif save_state() from render path (D-01, Phase 4)
 - --debug-events sets update_only=True semantically, debug_mode flag prevents stdout output (D-04, Phase 4)
 - session_start preserved same-day, reset cross-day via _should_reset_session_start() (D-02, Phase 4)
+- get_git_event_message() is module-level function in character.py importing pick from trigger.py (Phase 05-01)
+- triggered_events reads from character.get('git_events', {}) top-level (not triggers sub-key, per D-01) (Phase 05-01)
+- make_cc() regression fixed: test_trigger.py was using flat rate_limits structure, fixed to five_hour nesting (Phase 05-01)
 
 ---
-*Last updated: 2026-04-02 — Phase 04 plan 01 complete, render/update separation + session_start + --debug-events, 117/117 tests passing*
+*Last updated: 2026-04-02 — Phase 05 plan 01 complete, get_git_event_message() + triggered_events param + git_events top-level read path, 69/69 tests passing*
