@@ -1,0 +1,152 @@
+[English](./README.md)
+
+# code-pal
+
+**Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
+
+---
+
+## 效果预览
+
+```
+(=^･ω･^=) Mochi: 跑完这个就去休息… 才不是
+claude-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
+```
+
+每次 Claude 回复结束后，状态栏自动刷新：角色台词 + 当前会话 token 用量。
+
+---
+
+## 安装
+
+```bash
+git clone https://github.com/tonylt/code-pal.git
+cd code-pal
+./install.sh
+```
+
+重启 Claude Code，状态栏立即生效。
+
+> **环境要求**
+> - Python 3（macOS/Linux 已内置）
+> - Claude Code v2.1.80+
+
+---
+
+## 切换角色
+
+```
+/cheer          # 交互选择
+/cheer nova     # 直接指定
+/cheer luna
+/cheer mochi
+/cheer iris
+```
+
+---
+
+## 角色一览
+
+| 角色 | 表情符 | 风格 |
+|------|--------|------|
+| **Nova 星野** | `(*>ω<)` | 元气满满，运动系啦啦队 |
+| **Luna 月野** | `(´• ω •\`)` | 温柔治愈，陪伴系 |
+| **Mochi 年糕** | `(=^･ω･^=)` | 软萌奶凶，傲娇猫系 |
+| **Iris 晴** | `(￣ω￣)` | 女王御姐，冷静挑衅 |
+
+---
+
+## 工作原理
+
+```
+Claude response ends (Stop hook)
+        ↓
+statusline.py --update
+  → reads token stats from stats-cache.json
+  → selects message by: usage tier > time slot > random
+  → writes to ~/.claude/code-pal/state.json
+        ↓
+Statusline polls statusline.py
+  → reads state.json → renders to status bar
+```
+
+**台词选择优先级：**
+
+| 优先级 | 触发条件 | 结果 |
+|--------|----------|------|
+| 1 | token 用量等级变化（正常 → 警告 → 紧急） | 告警台词 |
+| 2 | 同一非正常等级 | 保持当前告警 |
+| 3 | 每次 Claude 回复后 | 轮换 `post_tool` 台词 |
+| 4 | 时间段变化（早晨/下午/傍晚/深夜） | 时段专属台词 |
+| 5 | 兜底 | 随机，不重复 |
+
+---
+
+## 自定义台词
+
+编辑角色的 JSON 文件即可添加自己的台词：
+
+```bash
+~/.claude/code-pal/vocab/nova.json
+~/.claude/code-pal/vocab/luna.json
+~/.claude/code-pal/vocab/mochi.json
+~/.claude/code-pal/vocab/iris.json
+```
+
+每个文件包含以下触发类别：`post_tool`（工具后）、`time`（时段：morning/afternoon/evening/midnight）、`usage`（用量告警：warning/critical）、`random`（随机兜底）。
+
+---
+
+## 卸载
+
+```bash
+./install.sh --uninstall
+```
+
+删除所有文件并清理 `~/.claude/settings.json`。
+
+---
+
+## 文件结构
+
+```
+code-pal/
+├── install.sh          # 安装脚本
+├── statusline.py       # 状态栏入口
+├── core/
+│   ├── character.py    # 加载角色配置
+│   ├── trigger.py      # 台词选择逻辑
+│   └── display.py      # 渲染输出
+├── vocab/
+│   ├── nova.json
+│   ├── luna.json
+│   ├── mochi.json
+│   └── iris.json
+├── commands/
+│   └── cheer.md        # /cheer 斜杠命令
+└── tests/              # 单元测试
+```
+
+---
+
+## 贡献
+
+欢迎提 Pull Request！一些想法：
+- 新角色
+- 新台词
+- 多语言台词包
+- Bug 修复
+
+提交前请先运行测试：`python3 -m pytest tests/`
+
+---
+
+## 许可证
+
+[MIT](./LICENSE)
+
+---
+
+## 致谢
+
+本项目 fork 自并受启发于 [@alexfly123lee-creator](https://github.com/alexfly123lee-creator) 的 [Claude-Code-Cheer](https://github.com/alexfly123lee-creator/Claude-Code-Cheer)。感谢原创灵感与基础实现。
