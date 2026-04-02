@@ -136,6 +136,7 @@ def main():
     config = load_config()
     state = load_state()
     stats = load_stats()
+    stats["cwd_name"] = os.path.basename(os.getcwd())
     cc_data = read_stdin_json()
 
     # Supplement missing token data from cc_data when stats-cache has no entry for today
