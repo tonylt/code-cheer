@@ -46,6 +46,7 @@ code-pal 是 Claude Code 的状态栏伴侣。4 个动漫风格角色（Nova/Lun
 - ✓ TEST-02: 110 测试覆盖全部新代码路径（detect_git_events 30 + resolve integration 4 + save_state git 2）— Validated in Phase 03: event-detection
 - ✓ STA-02: render 模式纯只读，session_start 首次写入后同天保留跨天重置 — Validated in Phase 04: statusline-py
 - ✓ CFG-02: `statusline.py --debug-events` 向 stderr 输出 GIT_CONTEXT / EVENTS_WOULD_FIRE / STATE_SNAPSHOT — Validated in Phase 04: statusline-py
+- ✓ TST-02: get_git_event_message() 覆盖 + trigger.py 顶层 git_events 读取路径 + 4 角色 vocab 各含 96 条事件消息 — Validated in Phase 05: vocab
 
 ### Active
 
@@ -103,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 03 (event-detection) complete*
+*Last updated: 2026-04-02 after Phase 05 (vocab) complete — v2.0 milestone all phases done*
