@@ -489,10 +489,9 @@ def test_resolve_git_event_uses_post_tool_fallback():
 
 
 def test_resolve_git_event_uses_git_vocab_when_present():
-    """When git_events vocab exists, picks from it."""
+    """When triggered_events passed and character has top-level git_events, use git vocab."""
     char = dict(CHAR)
-    char["triggers"] = dict(CHAR["triggers"])
-    char["triggers"]["git_events"] = {"milestone_5": ["git_m5_a", "git_m5_b"]}
+    char["git_events"] = {"milestone_5": ["git_m5_a", "git_m5_b"]}
     state = make_state(message="r1")
     msg, tier = resolve_message(char, state, {}, make_cc(),
                                 force_post_tool=True,
@@ -515,3 +514,23 @@ def test_resolve_triggered_events_none_backward_compat():
     msg, tier = resolve_message(CHAR, state, {}, make_cc(),
                                 force_post_tool=True)
     assert msg in ["p1", "p2", "p3"]
+
+
+def test_resolve_git_event_warning_tier_ignores_events():
+    """warning tier should return usage message, not git event message."""
+    state = make_state(tier="normal")
+    msg, tier = resolve_message(CHAR, state, {}, make_cc(pct=85),
+                                force_post_tool=True,
+                                triggered_events=["first_commit_today"])
+    assert msg == "w1"
+    assert tier == "warning"
+
+
+def test_resolve_git_event_critical_tier_ignores_events():
+    """critical tier should return usage message, not git event message."""
+    state = make_state(tier="normal")
+    msg, tier = resolve_message(CHAR, state, {}, make_cc(pct=97),
+                                force_post_tool=True,
+                                triggered_events=["first_commit_today"])
+    assert msg == "c1"
+    assert tier == "critical"

@@ -148,7 +148,7 @@ def resolve_message(
     if force_post_tool:
         if triggered_events:
             event_key = triggered_events[0]
-            git_events_vocab = triggers.get("git_events", {})
+            git_events_vocab = character.get("git_events", {})
             options = git_events_vocab.get(event_key, triggers["post_tool"])
             return pick_different(options, state.get("message", "")), tier
         return pick_different(triggers["post_tool"], state.get("message", "")), tier
