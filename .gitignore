@@ -213,4 +213,4 @@ __marimo__/
 .playwright-mcp/
 
 # GSD local config
-.planning/config.json
+.planning/
