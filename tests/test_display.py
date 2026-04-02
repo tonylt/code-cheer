@@ -55,38 +55,63 @@ def test_format_resets_invalid_returns_none():
 CHAR = {"meta": {"name": "Nova", "ascii": "(*>ω<)", "style": "test"}}
 
 def test_render_two_lines():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 32}}
-    stats = {"today_tokens": 47768}
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {"cwd_name": "myproject"}
     output = render(CHAR, "冲冲冲！！", cc, stats)
     lines = output.split("\n")
     assert len(lines) == 2
 
-def test_render_line1_format():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 32}}
-    stats = {"today_tokens": 100}
+def test_render_line1_starts_with_character():
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {"cwd_name": "myproject"}
     output = render(CHAR, "冲冲冲！！", cc, stats)
     assert output.startswith("(*>ω<) Nova: 冲冲冲！！")
 
 def test_render_line2_contains_model():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 32}}
-    stats = {"today_tokens": 100}
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {"cwd_name": "myproject"}
     output = render(CHAR, "msg", cc, stats)
     assert "sonnet-4-6" in output.split("\n")[1]
 
-def test_render_line2_contains_pct():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"five_hour": {"used_percentage": 32}}}
-    stats = {"today_tokens": 100}
+def test_render_line2_contains_cwd():
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {"cwd_name": "code-pal"}
     output = render(CHAR, "msg", cc, stats)
-    assert "5h 32.0%" in output.split("\n")[1]
+    assert "code-pal" in output.split("\n")[1]
 
-def test_render_no_resets_when_missing():
-    cc = {"model": "claude-sonnet-4-6", "rate_limits": {"used_percentage": 10}}
-    stats = {"today_tokens": 100}
+def test_render_cwd_absent_when_empty():
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {}
     output = render(CHAR, "msg", cc, stats)
-    assert "resets" not in output
+    assert "code-pal" not in output.split("\n")[1]
+
+def test_render_ctx_bar_shown():
+    cc = {"model": "claude-sonnet-4-6", "context_window": {"used_percentage": 48}}
+    stats = {}
+    output = render(CHAR, "msg", cc, stats)
+    assert "█" in output or "░" in output
+    assert "48%" in output
+
+def test_render_ctx_bar_full():
+    cc = {"model": "claude-sonnet-4-6", "context_window": {"used_percentage": 100}}
+    stats = {}
+    output = render(CHAR, "msg", cc, stats)
+    assert "██████████" in output
+
+def test_render_ctx_bar_empty():
+    cc = {"model": "claude-sonnet-4-6", "context_window": {"used_percentage": 0}}
+    stats = {}
+    output = render(CHAR, "msg", cc, stats)
+    assert "░░░░░░░░░░" in output
+
+def test_render_no_ctx_bar_when_missing():
+    cc = {"model": "claude-sonnet-4-6"}
+    stats = {}
+    output = render(CHAR, "msg", cc, stats)
+    assert "█" not in output
 
 def test_render_strips_claude_prefix():
-    cc = {"model": "claude-opus-4-6", "rate_limits": {}}
+    cc = {"model": "claude-opus-4-6"}
     stats = {}
     output = render(CHAR, "msg", cc, stats)
     assert "opus-4-6" in output
