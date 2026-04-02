@@ -54,40 +54,27 @@ def test_format_resets_invalid_returns_none():
 # --- render ---
 CHAR = {"meta": {"name": "Nova", "ascii": "(*>ω<)", "style": "test"}}
 
-def test_render_two_lines():
+def test_render_single_line():
     cc = {"model": "claude-sonnet-4-6"}
-    stats = {"cwd_name": "myproject"}
+    stats = {"today_tokens": 47768}
     output = render(CHAR, "冲冲冲！！", cc, stats)
-    lines = output.split("\n")
-    assert len(lines) == 2
+    assert "\n" not in output
 
-def test_render_line1_starts_with_character():
+def test_render_starts_with_character():
     cc = {"model": "claude-sonnet-4-6"}
-    stats = {"cwd_name": "myproject"}
+    stats = {"today_tokens": 100}
     output = render(CHAR, "冲冲冲！！", cc, stats)
     assert output.startswith("(*>ω<) Nova: 冲冲冲！！")
 
-def test_render_line2_contains_model():
+def test_render_contains_model():
     cc = {"model": "claude-sonnet-4-6"}
-    stats = {"cwd_name": "myproject"}
+    stats = {"today_tokens": 100}
     output = render(CHAR, "msg", cc, stats)
-    assert "sonnet-4-6" in output.split("\n")[1]
-
-def test_render_line2_contains_cwd():
-    cc = {"model": "claude-sonnet-4-6"}
-    stats = {"cwd_name": "code-pal"}
-    output = render(CHAR, "msg", cc, stats)
-    assert "code-pal" in output.split("\n")[1]
-
-def test_render_cwd_absent_when_empty():
-    cc = {"model": "claude-sonnet-4-6"}
-    stats = {}
-    output = render(CHAR, "msg", cc, stats)
-    assert "code-pal" not in output.split("\n")[1]
+    assert "sonnet-4-6" in output
 
 def test_render_ctx_bar_shown():
     cc = {"model": "claude-sonnet-4-6", "context_window": {"used_percentage": 48}}
-    stats = {}
+    stats = {"today_tokens": 100}
     output = render(CHAR, "msg", cc, stats)
     assert "█" in output or "░" in output
     assert "48%" in output
@@ -122,3 +109,12 @@ def test_render_fallback_when_no_model():
     stats = {}
     output = render(CHAR, "msg", cc, stats)
     assert "unknown" in output
+
+def test_render_char_left_stats_right():
+    """Character message appears before stats content."""
+    cc = {"model": "claude-sonnet-4-6", "context_window": {"used_percentage": 50}}
+    stats = {"today_tokens": 1000}
+    output = render(CHAR, "msg", cc, stats)
+    char_pos = output.index("(*>ω<)")
+    model_pos = output.index("sonnet-4-6")
+    assert char_pos < model_pos

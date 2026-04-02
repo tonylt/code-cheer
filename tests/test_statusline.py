@@ -99,7 +99,7 @@ def test_save_state_writes_all_fields(tmp_path, monkeypatch):
     assert "last_updated" in s
 
 # --- main() render mode ---
-def test_main_prints_two_lines(tmp_path, monkeypatch, capsys):
+def test_main_prints_single_line(tmp_path, monkeypatch, capsys):
     import io
     config_path = tmp_path / "config.json"
     state_path = tmp_path / "state.json"
@@ -120,10 +120,10 @@ def test_main_prints_two_lines(tmp_path, monkeypatch, capsys):
 
     sl.main()
     captured = capsys.readouterr()
-    lines = captured.out.strip().split("\n")
-    assert len(lines) == 2
-    assert "Nova" in lines[0]
-    assert "sonnet-4-6" in lines[1]
+    output = captured.out.strip()
+    assert "\n" not in output
+    assert "Nova" in output
+    assert "tokens" in output
 
 def test_main_update_mode_no_output(tmp_path, monkeypatch, capsys):
     import io

@@ -1,4 +1,7 @@
 # core/display.py
+import re
+import shutil
+import unicodedata
 from datetime import datetime, timezone
 
 
@@ -13,6 +16,12 @@ def format_tokens(token_count) -> str:
     if n >= 1000:
         return f"{n // 1000}k"
     return str(n)
+
+
+def _visual_width(s: str) -> int:
+    """Visual column width of a string: strips ANSI codes, counts CJK chars as 2."""
+    clean = re.sub(r"\033\[[0-9;]*m", "", s)
+    return sum(2 if unicodedata.east_asian_width(c) in ("W", "F") else 1 for c in clean)
 
 
 def _ctx_bar(pct: int, width: int = 10) -> str:
@@ -48,12 +57,12 @@ def format_resets(resets_at):
 
 
 def render(character: dict, message: str, cc_data: dict, stats: dict) -> str:
-    """Format the 2-line statusline output (both lines left-aligned)."""
+    """Format the statusline: character message LEFT, stats RIGHT, single line."""
     ascii_face = character["meta"]["ascii"]
     name = character["meta"]["name"]
     color = character["meta"].get("color", "")
-    raw_line1 = f"{ascii_face} {name}: {message}"
-    line1 = f"\033[{color}m{raw_line1}\033[0m" if color else raw_line1
+    raw_left = f"{ascii_face} {name}: {message}"
+    left = f"\033[{color}m{raw_left}\033[0m" if color else raw_left
 
     model_raw = cc_data.get("model", "unknown")
     if isinstance(model_raw, dict):
@@ -68,13 +77,13 @@ def render(character: dict, message: str, cc_data: dict, stats: dict) -> str:
     ctx = cc_data.get("context_window", {})
     ctx_pct = ctx.get("used_percentage")
 
-    parts = [model]
-    if cwd_name:
-        parts.append(cwd_name)
-    parts.append(f"{tokens} tokens")
+    right_parts = [model, f"{tokens} tokens"]
     if ctx_pct is not None:
         bar = _ctx_bar(int(ctx_pct))
-        parts.append(f"[{bar}] {ctx_pct}%")
+        right_parts.append(f"[{bar}] {ctx_pct}%")
 
-    line2 = " | ".join(parts)
-    return f"{line1}\n{line2}"
+    right = " | ".join(right_parts)
+
+    term_width = shutil.get_terminal_size((120, 20)).columns
+    pad = max(1, term_width - _visual_width(raw_left) - len(right))
+    return f"{left}{' ' * pad}{right}"
