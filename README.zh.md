@@ -4,6 +4,10 @@
 
 **Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
 
+- Git 事件感知 — 首次提交、提交里程碑（5/10/20 次）、深夜提交、大 diff 等自动触发角色专属台词
+- 4 个动漫角色 — Nova、Luna、Mochi、Iris，各具独特性格，随时用 `/cheer` 切换
+- 实时 token 用量 — 一眼查看 5 小时占比、7 天占比和上下文使用情况
+
 ---
 
 ## 效果预览
@@ -17,6 +21,14 @@ claude-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
 
 ---
 
+## 环境要求
+
+- **Python 3.8+**（macOS/Linux 已内置）
+- **git**
+- **Claude Code v2.1.80+**
+
+---
+
 ## 安装
 
 ```bash
@@ -26,10 +38,6 @@ cd code-pal
 ```
 
 重启 Claude Code，状态栏立即生效。
-
-> **环境要求**
-> - Python 3（macOS/Linux 已内置）
-> - Claude Code v2.1.80+
 
 ---
 
@@ -129,6 +137,16 @@ code-pal/
 
 ---
 
+## 测试
+
+```bash
+python3 -m pytest tests/
+```
+
+所有测试应无错误通过。
+
+---
+
 ## 贡献
 
 欢迎提 Pull Request！一些想法：
@@ -137,7 +155,27 @@ code-pal/
 - 多语言台词包
 - Bug 修复
 
-提交前请先运行测试：`python3 -m pytest tests/`
+提交前请参阅上方[测试](#测试)章节。
+
+---
+
+## 常见问题
+
+**状态栏没有显示？**
+确认 install.sh 运行无报错，然后重启 Claude Code。验证配置是否写入：
+`cat ~/.claude/settings.json | grep statusLine`
+
+**找不到 `python3` 命令？**
+macOS/Linux 通常已内置 Python 3。运行 `python3 --version` 确认。如未安装，使用包管理器安装（macOS: `brew install python3`，Ubuntu: `sudo apt install python3`）。
+
+**install.sh 报错？**
+确保脚本有执行权限：`chmod +x install.sh`。在仓库根目录下运行。确认 `~/.claude/` 目录存在（Claude Code 首次运行时自动创建）。
+
+**Stop hook 未触发？**
+确认 hook 已注册：`cat ~/.claude/settings.json | grep -A5 Stop`。如缺失，重新运行 `./install.sh`，然后重启 Claude Code。
+
+**Claude Code 版本不符？**
+code-pal 需要 Claude Code v2.1.80 或更高版本。检查当前版本并按需更新。
 
 ---
 
