@@ -1,10 +1,11 @@
 ---
 phase: 1
 slug: test-infrastructure
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-01
+audited: 2026-04-02
 ---
 
 # Phase 1 — Validation Strategy
@@ -29,7 +30,7 @@ created: 2026-04-01
 
 - **After every task commit:** Run `python3 -m pytest tests/test_trigger.py -v`
 - **After every plan wave:** Run `python3 -m pytest tests/ -v`
-- **Before `/gsd:verify-work`:** Full suite must be green (68/68 pass)
+- **Before `/gsd:verify-work`:** Full suite must be green (122/122 pass)
 - **Max feedback latency:** 5 seconds
 
 ---
@@ -38,8 +39,8 @@ created: 2026-04-01
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 1-01-01 | 01 | 1 | TST-01 | infra | `pip3 install pytest --break-system-packages && python3 -m pytest --version` | ✅ | ⬜ pending |
-| 1-01-02 | 01 | 1 | TST-01 | unit | `python3 -m pytest tests/test_trigger.py -v` | ✅ | ⬜ pending |
+| 1-01-01 | 01 | 1 | TST-01 | infra | `pip3 install pytest --break-system-packages && python3 -m pytest --version` | ✅ | ✅ green |
+| 1-01-02 | 01 | 1 | TST-01 | unit | `python3 -m pytest tests/test_trigger.py -v` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -67,3 +68,17 @@ created: 2026-04-01
 ## Wave 0 Requirements
 
 None — this phase fixes existing test infrastructure, not adding new tests.
+
+---
+
+## Validation Audit 2026-04-02
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+| Total tests passing | 122 |
+| Nyquist compliant | ✅ true |
+
+> Note: Test count grew from 61 (at phase execution) to 122 (at audit time) due to subsequent phases adding tests. All Phase 1 requirements (TST-01) remain fully covered.
