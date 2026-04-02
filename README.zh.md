@@ -23,7 +23,7 @@ claude-sonnet-4-6 | 47k tokens | 用量 32% | resets in 3h20m
 
 ## 环境要求
 
-- **Python 3.8+**（macOS/Linux 已内置）
+- **Python 3.10+**（macOS/Linux 已内置）
 - **git**
 - **Claude Code v2.1.80+**
 
@@ -165,8 +165,8 @@ python3 -m pytest tests/
 确认 install.sh 运行无报错，然后重启 Claude Code。验证配置是否写入：
 `cat ~/.claude/settings.json | grep statusLine`
 
-**找不到 `python3` 命令？**
-macOS/Linux 通常已内置 Python 3。运行 `python3 --version` 确认。如未安装，使用包管理器安装（macOS: `brew install python3`，Ubuntu: `sudo apt install python3`）。
+**找不到 `python3` 命令或版本不符？**
+code-pal 需要 Python 3.10+。运行 `python3 --version` 确认版本。如未安装或版本过低，使用包管理器安装（macOS: `brew install python3`，Ubuntu: `sudo apt install python3.10`）。
 
 **install.sh 报错？**
 确保脚本有执行权限：`chmod +x install.sh`。在仓库根目录下运行。确认 `~/.claude/` 目录存在（Claude Code 首次运行时自动创建）。

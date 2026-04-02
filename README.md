@@ -23,7 +23,7 @@ The statusline updates after each Claude response with a character message + ses
 
 ## Prerequisites
 
-- **Python 3.8+** (pre-installed on macOS/Linux)
+- **Python 3.10+** (pre-installed on macOS/Linux)
 - **git**
 - **Claude Code v2.1.80+**
 
@@ -165,8 +165,8 @@ See [Tests](#tests) above before submitting.
 Check that install.sh completed without errors. Restart Claude Code. Verify the entry exists:
 `cat ~/.claude/settings.json | grep statusLine`
 
-**`python3` command not found?**
-macOS/Linux should have Python 3 pre-installed. Verify with `python3 --version`. If missing, install via your package manager (e.g., `brew install python3` on macOS, `sudo apt install python3` on Ubuntu).
+**`python3` command not found or wrong version?**
+code-pal requires Python 3.10+. Verify with `python3 --version`. If missing or outdated, install via your package manager (e.g., `brew install python3` on macOS, `sudo apt install python3.10` on Ubuntu).
 
 **install.sh errors?**
 Make sure the script is executable: `chmod +x install.sh`. Run from the repo root directory. Check that `~/.claude/` directory exists (created by Claude Code on first run).

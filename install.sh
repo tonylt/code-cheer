@@ -68,9 +68,11 @@ fi
 echo "Installing code-pal…"
 echo ""
 
-# 1. Check Python 3
+# 1. Check Python 3.10+
 python3 --version > /dev/null 2>&1 || die "Python 3 is required but not found"
-ok "Python 3 found"
+python3 -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" \
+    || die "Python 3.10+ is required. Found: $(python3 --version 2>&1). Install from https://python.org"
+ok "Python 3.10+ found"
 
 # 2. Create install dir
 mkdir -p "$INSTALL_DIR"
