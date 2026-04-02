@@ -28,5 +28,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      - name: Smoke test install.sh
+        run: |
+          bash install.sh
+          test -f "$HOME/.claude/code-pal/statusline.py" || (echo "statusline.py missing" && exit 1)
+          test -f "$HOME/.claude/code-pal/config.json"   || (echo "config.json missing" && exit 1)
+          test -f "$HOME/.claude/settings.json"           || (echo "settings.json missing" && exit 1)
+          grep -q "statusLine" "$HOME/.claude/settings.json" || (echo "statusLine not wired" && exit 1)
+          bash install.sh --uninstall
+          test ! -d "$HOME/.claude/code-pal" || (echo "uninstall left files behind" && exit 1)
+
       - name: Run tests
         run: python3 -m pytest tests/

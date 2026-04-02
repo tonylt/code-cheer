@@ -6,8 +6,24 @@ INSTALL_DIR="$HOME/.claude/code-pal"
 SETTINGS="$HOME/.claude/settings.json"
 COMMANDS_DIR="$HOME/.claude/commands"
 SCRIPT_PATH="$INSTALL_DIR/statusline.py"
-UPDATE_CMD="python3 $SCRIPT_PATH --update"
-STATUS_CMD="python3 $SCRIPT_PATH"
+
+# Resolve a Python 3.10+ interpreter (python3 may point to an older version)
+_resolve_python() {
+  for _bin in python3 python3.13 python3.12 python3.11 python3.10; do
+    if command -v "$_bin" > /dev/null 2>&1; then
+      if "$_bin" -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" 2>/dev/null; then
+        echo "$_bin"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+PYTHON3_BIN=$(_resolve_python) \
+  || die "Python 3.10+ is required but not found. Install from https://python.org (macOS: brew install python3)"
+
+UPDATE_CMD="$PYTHON3_BIN $SCRIPT_PATH --update"
+STATUS_CMD="$PYTHON3_BIN $SCRIPT_PATH"
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 info()  { echo "  $*"; }
@@ -20,7 +36,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
   echo "Uninstalling code-pal…"
 
   if [[ -f "$SETTINGS" ]]; then
-    python3 - "$SETTINGS" "$SCRIPT_PATH" <<'PYEOF'
+    "$PYTHON3_BIN" - "$SETTINGS" "$SCRIPT_PATH" <<'PYEOF'
 import json, sys, shutil, os
 path, script = sys.argv[1], sys.argv[2]
 with open(path) as f:
@@ -68,9 +84,10 @@ fi
 echo "Installing code-pal…"
 echo ""
 
-# 1. Check Python 3
-python3 --version > /dev/null 2>&1 || die "Python 3 is required but not found"
-ok "Python 3 found"
+# 1. Check Python 3.10+ (already resolved above) and git
+ok "$($PYTHON3_BIN --version) found"
+command -v git > /dev/null 2>&1 || die "git is required but not found. Install git first."
+ok "git found"
 
 # 2. Create install dir
 mkdir -p "$INSTALL_DIR"
