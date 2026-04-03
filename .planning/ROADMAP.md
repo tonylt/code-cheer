@@ -105,7 +105,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
-| 10. Core 模块移植 | 4/4 | Complete   | 2026-04-03 |
+| 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
 | 11. 入口点 | 0/? | Not started | - |
 | 12. Jest 测试套件 | 0/? | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
