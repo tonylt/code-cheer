@@ -59,7 +59,7 @@ Plans:
   4. `trigger.ts` 消息选择在所有消息类型（random/time/usage/post_tool/git_events）和优先级分层上与 Python 版本行为一致，per-repo 隔离正确工作
 **Plans**: 4 plans
 Plans:
-- [ ] 10-01-PLAN.md — display.ts 移植（render + formatTokens + formatResets + _ctxBar）
+- [x] 10-01-PLAN.md — display.ts 移植（render + formatTokens + formatResets + _ctxBar）
 - [ ] 10-02-PLAN.md — character.ts 移植（loadCharacter + getGitEventMessage + Zod 验证）
 - [ ] 10-03-PLAN.md — gitContext.ts 移植（Promise.allSettled 并行 git 子进程）
 - [x] 10-04-PLAN.md — trigger.ts 移植（6 级优先级逻辑 + detectGitEvents + per-repo 隔离）
@@ -105,7 +105,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
-| 10. Core 模块移植 | 1/4 | In Progress|  |
+| 10. Core 模块移植 | 2/4 | In Progress|  |
 | 11. 入口点 | 0/? | Not started | - |
 | 12. Jest 测试套件 | 0/? | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
