@@ -192,6 +192,19 @@ describe('unpatchSettings', () => {
     expect(data.statusLine).toBeUndefined()
   })
 
+  it('removes statusLine containing statusline.py (Python legacy)', () => {
+    const existing = {
+      statusLine: { type: 'command', command: 'python3 /Users/tony/.claude/code-pal/statusline.py' },
+      hooks: { PostToolUse: [{ type: 'command', command: 'prettier --write' }] },
+    }
+    const settingsPath = writeSettings(tmpDir, existing)
+    unpatchSettings({ settingsPath, installDir })
+
+    const data = readSettings(settingsPath)
+    expect(data.statusLine).toBeUndefined()
+    expect((data.hooks as Record<string, unknown>)?.PostToolUse).toBeDefined()
+  })
+
   it('restores statusLine from backup file', () => {
     const thirdParty = { type: 'command', command: 'my-custom-statusline --render' }
     const backupPath = path.join(installDir, 'statusline-backup.json')

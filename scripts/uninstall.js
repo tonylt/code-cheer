@@ -38,7 +38,7 @@ function unpatchSettings(opts) {
     ok('Restored previous statusLine from backup')
   } else {
     const sl = data.statusLine || {}
-    if (sl.command && sl.command.includes('statusline.js')) {
+    if (sl.command && (sl.command.includes('statusline.js') || sl.command.includes('statusline.py'))) {
       delete data.statusLine
     }
   }
