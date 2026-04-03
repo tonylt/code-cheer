@@ -73,7 +73,9 @@ Plans:
   2. `--update` 模式完整执行 git 子进程 → 消息选择 → 原子写 state.json 全流程，写入过程中 render 模式不读到半写文件
   3. `--debug-events` flag 向 stderr 输出 GIT_CONTEXT、EVENTS_WOULD_FIRE、STATE_SNAPSHOT 三段诊断信息，内容与 Python `--debug-events` 格式一致
   4. render 模式不读取 stdin（不挂起），`--update` 模式从 stdin 正确读取 Claude Code 传入的 JSON
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 11-01-PLAN.md — statusline.ts 完整入口点（3 种运行模式 + core 模块集成 + smoke test）
 
 ### Phase 12: Jest 测试套件
 **Goal**: 所有 pytest 测试行为迁移到 Jest，覆盖率达标，作为移植正确性的最终确认
@@ -106,7 +108,7 @@ Plans:
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
 | 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
-| 11. 入口点 | 0/? | Not started | - |
+| 11. 入口点 | 0/1 | In progress | - |
 | 12. Jest 测试套件 | 0/? | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
 
