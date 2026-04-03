@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 11 context gathered
-last_updated: "2026-04-03T14:11:08.093Z"
+status: executing
+stopped_at: Completed 12-jest-01-PLAN.md
+last_updated: "2026-04-03T16:38:53.450Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  completed_phases: 4
+  total_plans: 11
+  completed_plans: 9
   percent: 86
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 10 — core
+**Current focus:** Phase 12 — jest
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 12 (jest) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [█████████░] 86% (6/7 plans complete)
@@ -95,6 +95,12 @@ Progress: [█████████░] 86% (6/7 plans complete)
 - pick/pickDifferent 接受可选 `rng: () => number = Math.random` — Phase 12 注入 `() => 0` 实现确定性测试（D-06/D-07）
 - per-repo 隔离用 `!== null` 检查 repo_path（非 `!repo_path`），空字符串是有效 repo 路径（P5 陷阱）
 
+### Phase 12 Plan 01 Decisions (2026-04-04)
+
+- ts-node 作为 devDependency 必须安装：jest.config.ts 是 TypeScript 文件，Jest 加载时需要 ts-node 解析（Rule 3 自动修复）
+- resolvePaths(env?) 统一路径解析：三个导出函数均通过此 helper 获得路径，env 参数为测试注入临时目录（D-12 模式）
+- saveState/loadConfig/loadState/loadStats 接受显式路径参数：消除模块级常量，让函数在测试中可使用任意路径调用
+
 ### Critical Pitfalls to Watch
 
 - P1: 生产必须用 `node dist/statusline.js`（~40ms），禁止 `npx tsx`（~1.5s）
@@ -108,6 +114,6 @@ Progress: [█████████░] 86% (6/7 plans complete)
 
 ## Session Continuity
 
-Last session: 2026-04-03T14:11:08.087Z
-Stopped at: Phase 11 context gathered
+Last session: 2026-04-03T16:38:53.446Z
+Stopped at: Completed 12-jest-01-PLAN.md
 Resume with: `/gsd:execute-phase 8`

@@ -29,7 +29,7 @@
 
 ### 测试 (TEST)
 
-- [ ] **TEST-01**: Jest 测试套件覆盖所有现有 pytest 行为（110+ 测试迁移，覆盖率 ≥80%）
+- [x] **TEST-01**: Jest 测试套件覆盖所有现有 pytest 行为（110+ 测试迁移，覆盖率 ≥80%）
 
 ### 安装切换 (INSTALL)
 
@@ -76,7 +76,7 @@
 | TS-01 | Phase 11 | Pending |
 | TS-02 | Phase 11 | Pending |
 | TS-03 | Phase 11 | Pending |
-| TEST-01 | Phase 12 | Pending |
+| TEST-01 | Phase 12 | Complete |
 | INSTALL-01 | Phase 13 | Pending |
 
 **Coverage:**
