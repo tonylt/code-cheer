@@ -10,7 +10,7 @@
 ## Phases
 
 - [x] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵 (completed 2026-04-03)
-- [ ] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点
+- [x] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点 (completed 2026-04-03)
 - [ ] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致
 - [ ] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块
 - [ ] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性
@@ -44,7 +44,9 @@ Plans:
   2. 传入缺少必填字段的 vocab JSON 时，错误信息包含字段名和期望类型（而非 "undefined is not a function"）
   3. state.json 和 config.json 各有独立 schema，加载时分别验证
   4. 所有 core 模块可通过 `z.infer<typeof Schema>` 使用类型，无需手写重复 interface
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [x] 09-01-PLAN.md — Zod v4 schema 定义（vocab/state/config）+ barrel 导出 + 构建验证
 
 ### Phase 10: Core 模块移植
 **Goal**: 4 个 core 模块完整移植到 TypeScript，相同输入产生与 Python 版本相同的输出
@@ -53,9 +55,14 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. 给定相同 stats-cache.json 和 state.json，`display.ts` 输出的 statusLine 字符串与 Python `display.py` 逐字符相同
   2. `character.ts` 成功加载全部 4 个 vocab JSON，任一 JSON 不合 schema 时输出描述性错误而非静默跳过
-  3. `gitContext.ts` 并行启动 3 个 git 子进程，其中任一失败时其他进程不受影响，整体返回可用的部分结果
+  3. `gitContext.ts` 并行启动 4 个 git 子进程，其中任一失败时其他进程不受影响，整体返回可用的部分结果
   4. `trigger.ts` 消息选择在所有消息类型（random/time/usage/post_tool/git_events）和优先级分层上与 Python 版本行为一致，per-repo 隔离正确工作
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 10-01-PLAN.md — display.ts 移植（render + formatTokens + formatResets + _ctxBar）
+- [ ] 10-02-PLAN.md — character.ts 移植（loadCharacter + getGitEventMessage + Zod 验证）
+- [ ] 10-03-PLAN.md — gitContext.ts 移植（Promise.allSettled 并行 git 子进程）
+- [x] 10-04-PLAN.md — trigger.ts 移植（6 级优先级逻辑 + detectGitEvents + per-repo 隔离）
 
 ### Phase 11: 入口点
 **Goal**: `src/statusline.ts` 完整实现三种运行模式，与 Claude Code hook 和 statusLine API 兼容
@@ -97,8 +104,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
-| 09. Zod Schemas | 0/? | Not started | - |
-| 10. Core 模块移植 | 0/? | Not started | - |
+| 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
+| 10. Core 模块移植 | 1/4 | In Progress|  |
 | 11. 入口点 | 0/? | Not started | - |
 | 12. Jest 测试套件 | 0/? | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
