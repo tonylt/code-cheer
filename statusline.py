@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# @deprecated: use src/ TypeScript version
 # statusline.py
 import json
 import os

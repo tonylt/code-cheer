@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 # tests/test_statusline.py
 import json, os, sys, tempfile
 from unittest.mock import patch
