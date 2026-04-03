@@ -76,6 +76,45 @@ function loadStats(statsPath: string): Record<string, unknown> {
   }
 }
 
+// ─── Transcript reader ────────────────────────────────────────────────────────
+
+function loadTranscriptData(transcriptPath: string): { model?: string; sessionTokens?: number } {
+  try {
+    const today = new Date().toISOString().slice(0, 10)
+    const lines = fs.readFileSync(transcriptPath, 'utf-8').split('\n')
+    let lastModel: string | undefined
+    let sessionTokens = 0
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+      const entry = JSON.parse(trimmed) as Record<string, unknown>
+      if (entry['type'] !== 'assistant') continue
+      const msg = entry['message'] as Record<string, unknown> | undefined
+      if (!msg) continue
+
+      // Extract model — strip namespace prefix (e.g. "pa/claude-sonnet-4-6" → "claude-sonnet-4-6")
+      if (msg['model']) {
+        const raw = String(msg['model'])
+        lastModel = raw.includes('/') ? raw.slice(raw.lastIndexOf('/') + 1) : raw
+      }
+
+      // Sum tokens for today's entries only
+      if (typeof entry['timestamp'] === 'string' && entry['timestamp'].startsWith(today)) {
+        const usage = msg['usage'] as Record<string, unknown> | undefined
+        if (usage) {
+          sessionTokens +=
+            Number(usage['input_tokens'] ?? 0) + Number(usage['output_tokens'] ?? 0)
+        }
+      }
+    }
+
+    return { model: lastModel, sessionTokens: sessionTokens > 0 ? sessionTokens : undefined }
+  } catch {
+    return {}
+  }
+}
+
 // ─── State helpers ────────────────────────────────────────────────────────────
 
 function shouldResetSessionStart(existing: string | undefined): boolean {
@@ -271,6 +310,16 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
     resolvedModel = String(modelRaw)
   }
   if (resolvedModel) resolvedModel = resolvedModel.replace('claude-', '')
+
+  // Supplement from transcript when ccData lacks model/token info (Stop hook doesn't send them)
+  const transcriptPath = ccData['transcript_path']
+  if (typeof transcriptPath === 'string' && (!resolvedModel || stats['today_tokens'] === 'N/A')) {
+    const td = loadTranscriptData(transcriptPath)
+    if (!resolvedModel && td.model) resolvedModel = td.model.replace('claude-', '')
+    if (stats['today_tokens'] === 'N/A' && td.sessionTokens !== undefined) {
+      stats['today_tokens'] = td.sessionTokens
+    }
+  }
 
   // Extract today_tokens for caching (use resolved value from stats after fallback)
   const resolvedTokens =
