@@ -89,7 +89,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 12-01-PLAN.md — Jest 基础设施（ts-jest 配置 + statusline.ts 可测试性重构）
-- [ ] 12-02-PLAN.md — Core 模块测试（display/character/gitContext/trigger 共 100+ 测试）
+- [x] 12-02-PLAN.md — Core 模块测试（display/character/gitContext/trigger 共 100+ 测试）
 - [ ] 12-03-PLAN.md — statusline 集成测试 + 覆盖率验收（110+ 测试，≥80% 覆盖率）
 
 ### Phase 13: 安装切换
@@ -113,7 +113,7 @@ Plans:
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
 | 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
 | 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
-| 12. Jest 测试套件 | 1/3 | In Progress|  |
+| 12. Jest 测试套件 | 2/3 | In Progress|  |
 | 13. 安装切换 | 0/? | Not started | - |
 
 ---
