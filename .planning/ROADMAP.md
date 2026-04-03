@@ -101,7 +101,10 @@ Plans:
   2. 所有 Python 源文件（statusline.py, core/*.py）顶部包含 `# @deprecated: use src/ TypeScript version` 注释
   3. 现有用户重新运行 install.sh 后，功能表现与之前 Python 版本无差异（角色消息、token 显示、git events 均正常）
   4. install.sh 原有的非破坏性 settings.json patch 逻辑保持不变（不清除用户其他配置）
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 13-01-PLAN.md — Node.js install/uninstall scripts + settings.json patch + tests
+- [ ] 13-02-PLAN.md — Python @deprecated annotations + manual install verification
 
 ---
 
@@ -113,8 +116,8 @@ Plans:
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
 | 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
 | 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
-| 12. Jest 测试套件 | 3/3 | Complete   | 2026-04-03 |
-| 13. 安装切换 | 0/? | Not started | - |
+| 12. Jest 测试套件 | 3/3 | Complete    | 2026-04-03 |
+| 13. 安装切换 | 0/2 | In progress | - |
 
 ---
 
