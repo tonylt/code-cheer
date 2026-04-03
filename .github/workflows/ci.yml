@@ -41,3 +41,41 @@ jobs:
 
       - name: Run tests
         run: python3 -m pytest tests/
+
+  test-node:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["20", "22"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Validate cold start <100ms
+        run: |
+          START=$(date +%s%3N)
+          node dist/statusline.js
+          END=$(date +%s%3N)
+          MS=$((END - START))
+          echo "Cold start: ${MS}ms"
+          if [ "$MS" -gt 100 ]; then
+            echo "FAIL: cold start ${MS}ms exceeds 100ms threshold"
+            exit 1
+          fi
+          echo "PASS: cold start ${MS}ms"
