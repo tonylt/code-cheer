@@ -14,7 +14,7 @@
 - [x] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致 (completed 2026-04-03)
 - [x] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块 (completed 2026-04-03)
 - [x] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性 (completed 2026-04-03)
-- [ ] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated
+- [x] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated (completed 2026-04-03)
 
 ---
 
@@ -104,7 +104,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 13-01-PLAN.md — Node.js install/uninstall scripts + settings.json patch + tests
-- [ ] 13-02-PLAN.md — Python @deprecated annotations + manual install verification
+- [x] 13-02-PLAN.md — Python @deprecated annotations + manual install verification
 
 ---
 
@@ -117,7 +117,7 @@ Plans:
 | 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
 | 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
 | 12. Jest 测试套件 | 3/3 | Complete    | 2026-04-03 |
-| 13. 安装切换 | 1/2 | In Progress|  |
+| 13. 安装切换 | 2/2 | Complete   | 2026-04-03 |
 
 ---
 
