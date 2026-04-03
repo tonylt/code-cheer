@@ -33,7 +33,7 @@
 
 ### 安装切换 (INSTALL)
 
-- [ ] **INSTALL-01**: 全部 TypeScript 模块完成且 Jest 套件全部通过后，install.sh 更新 hook 命令指向 `node [abs-path] ~/.claude/code-pal/dist/statusline.js`；Python 源文件添加 `# @deprecated: use src/ TypeScript version` 注释。**整个 v3.0 开发期间，install.sh 和 Python 代码维持现有生产状态不变。**
+- [x] **INSTALL-01**: 全部 TypeScript 模块完成且 Jest 套件全部通过后，install.sh 更新 hook 命令指向 `node [abs-path] ~/.claude/code-pal/dist/statusline.js`；Python 源文件添加 `# @deprecated: use src/ TypeScript version` 注释。**整个 v3.0 开发期间，install.sh 和 Python 代码维持现有生产状态不变。**
 
 ## Migration Notes
 
@@ -77,7 +77,7 @@
 | TS-02 | Phase 11 | Pending |
 | TS-03 | Phase 11 | Pending |
 | TEST-01 | Phase 12 | Complete |
-| INSTALL-01 | Phase 13 | Pending |
+| INSTALL-01 | Phase 13 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 12 total

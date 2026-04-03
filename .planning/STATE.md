@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 12-jest-03-PLAN.md
-last_updated: "2026-04-03T16:59:21.482Z"
+status: executing
+stopped_at: Completed 13-install/13-01-PLAN.md
+last_updated: "2026-04-03T22:40:21.817Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 86
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # State: code-pal
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 12 — jest
+**Current focus:** Phase 13 — install
 
 ## Current Position
 
-Phase: 12 (jest) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
+Phase: 13 (install) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-03
 
-Progress: [█████████░] 86% (6/7 plans complete)
+Progress: [█████████░] 92% (12/13 plans complete)
 
 ## Phase Overview
 
@@ -41,7 +41,7 @@ Progress: [█████████░] 86% (6/7 plans complete)
 | 10 | Core 模块移植 | CORE-01, CORE-02, CORE-03, CORE-04 | Not started |
 | 11 | 入口点 | TS-01, TS-02, TS-03 | Not started |
 | 12 | Jest 测试套件 | TEST-01 | Not started |
-| 13 | 安装切换 | INSTALL-01 | Not started |
+| 13 | 安装切换 | INSTALL-01 | In Progress (1/2 complete) |
 
 ## Accumulated Context
 
@@ -101,6 +101,13 @@ Progress: [█████████░] 86% (6/7 plans complete)
 - resolvePaths(env?) 统一路径解析：三个导出函数均通过此 helper 获得路径，env 参数为测试注入临时目录（D-12 模式）
 - saveState/loadConfig/loadState/loadStats 接受显式路径参数：消除模块级常量，让函数在测试中可使用任意路径调用
 
+### Phase 13 Plan 01 Decisions (2026-04-04)
+
+- setup/unsetup 脚本名（非 install/uninstall）：npm 保留 install 为生命周期 hook，会在 npm install 时自动触发意外副作用
+- patchSettings 接受 opts 对象 {settingsPath, installDir} 路径覆盖：与 D-12 env-injection 模式一致，让函数在测试中可用任意路径调用
+- process.execPath 获取 node 绝对路径：直接来自当前进程，nvm/fnm 环境下比 which node 更可靠
+- install.js 和 uninstall.js 保持独立（无共享 lib）：逻辑量小，独立更简单直观
+
 ### Critical Pitfalls to Watch
 
 - P1: 生产必须用 `node dist/statusline.js`（~40ms），禁止 `npx tsx`（~1.5s）
@@ -114,6 +121,6 @@ Progress: [█████████░] 86% (6/7 plans complete)
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:59:21.478Z
-Stopped at: Completed 12-jest-03-PLAN.md
+Last session: 2026-04-03T22:40:21.814Z
+Stopped at: Completed 13-install/13-01-PLAN.md
 Resume with: `/gsd:execute-phase 8`
