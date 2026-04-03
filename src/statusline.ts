@@ -224,7 +224,7 @@ function readStdinString(): Promise<string> {
 
 // ─── Exported mode functions ──────────────────────────────────────────────────
 
-export function renderMode(env?: NodeJS.ProcessEnv): string {
+export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string {
   const { configPath, statePath, statsPath } = resolvePaths(env)
 
   const config = loadConfig(configPath)
@@ -232,10 +232,20 @@ export function renderMode(env?: NodeJS.ProcessEnv): string {
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
 
-  // Populate ccData and stats from cached state (written by updateMode via Stop hook)
-  const ccData: Record<string, unknown> = {}
-  if (state.last_model) ccData['model'] = state.last_model
-  if (state.last_tokens !== undefined) stats['today_tokens'] = state.last_tokens
+  // Parse stdin as ccData — mirrors Python: cc_data = read_stdin_json() in all modes
+  let ccData: Record<string, unknown> = {}
+  try {
+    const raw = stdin.trim()
+    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    ccData = {}
+  }
+
+  // Fallback to cached state values when stdin has no model/tokens
+  if (!ccData['model'] && state.last_model) ccData['model'] = state.last_model
+  if (stats['today_tokens'] === 'N/A' && state.last_tokens !== undefined) {
+    stats['today_tokens'] = state.last_tokens
+  }
 
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
@@ -514,19 +524,20 @@ async function main(): Promise<void> {
   const isDebug = process.argv.includes('--debug-events')
   const isUpdate = process.argv.includes('--update') || isDebug
 
+  // Always read stdin — mirrors Python which calls read_stdin_json() in all modes
+  const stdin = await readStdinString()
+
   if (isDebug) {
-    const stdin = await readStdinString()
     await debugMode(stdin)
     return
   }
 
   if (isUpdate) {
-    const stdin = await readStdinString()
     await updateMode(stdin)
     return
   }
 
-  process.stdout.write(renderMode())
+  process.stdout.write(renderMode(stdin))
 }
 
 if (require.main === module) {
