@@ -1,4 +1,5 @@
 # 切换 code-pal 应援角色（nova / luna / mochi / iris）
+# v3.0+: install with `npm run setup` (TypeScript version)
 ARGUMENT="$ARGUMENTS"
 
 If ARGUMENT is empty, use AskUserQuestion with these 4 options:

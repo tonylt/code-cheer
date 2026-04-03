@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 # tests/test_display.py
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

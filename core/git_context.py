@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 """Git context reader with parallel subprocess execution and silent fallback."""
 import subprocess
 import re
