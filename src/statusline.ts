@@ -104,6 +104,8 @@ function saveState(
     lastRepo?: string | undefined
     commitsToday?: number
     sessionStart?: string
+    lastModel?: string
+    lastTokens?: number
   }
 ): void {
   fs.mkdirSync(baseDir, { recursive: true })
@@ -117,6 +119,8 @@ function saveState(
   if (options?.lastRepo !== undefined) state.last_repo = options.lastRepo
   if (options?.commitsToday !== undefined) state.commits_today = options.commitsToday
   if (options?.sessionStart !== undefined) state.session_start = options.sessionStart
+  if (options?.lastModel !== undefined) state.last_model = options.lastModel
+  if (options?.lastTokens !== undefined) state.last_tokens = options.lastTokens
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
   fs.renameSync(statePath + '.tmp', statePath)
 }
@@ -189,9 +193,10 @@ export function renderMode(env?: NodeJS.ProcessEnv): string {
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
 
-  // Token fallback: supplement from ccData when stats-cache has no today entry
-  // render mode does NOT read stdin (per D-01)
+  // Populate ccData and stats from cached state (written by updateMode via Stop hook)
   const ccData: Record<string, unknown> = {}
+  if (state.last_model) ccData['model'] = state.last_model
+  if (state.last_tokens !== undefined) stats['today_tokens'] = state.last_tokens
 
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
@@ -256,6 +261,21 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
     sessionStartVal = existingSessionStart!
   }
 
+  // Extract model string from ccData for caching
+  const modelRaw = ccData['model']
+  let resolvedModel: string | undefined
+  if (modelRaw !== null && typeof modelRaw === 'object') {
+    const modelObj = modelRaw as Record<string, unknown>
+    resolvedModel = String(modelObj['display_name'] ?? modelObj['id'] ?? '')
+  } else if (modelRaw !== undefined && modelRaw !== null) {
+    resolvedModel = String(modelRaw)
+  }
+  if (resolvedModel) resolvedModel = resolvedModel.replace('claude-', '')
+
+  // Extract today_tokens for caching (use resolved value from stats after fallback)
+  const resolvedTokens =
+    typeof stats['today_tokens'] === 'number' ? (stats['today_tokens'] as number) : undefined
+
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
   const vocabDir = path.join(__dirname, '../vocab')
@@ -289,13 +309,15 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
   const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
   const newCommitsToday = gitContext.commits_today ?? 0
 
-  // Persist state (atomic write)
+  // Persist state (atomic write) — always save model/tokens so renderMode can display them
   if (message !== state.message || tier !== state.last_rate_tier) {
     saveState(statePath, baseDir, message, tier, slot, {
       lastGitEvents: newLastGitEvents,
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
+      lastModel: resolvedModel,
+      lastTokens: resolvedTokens,
     })
   } else {
     saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
@@ -303,6 +325,8 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
+      lastModel: resolvedModel,
+      lastTokens: resolvedTokens,
     })
   }
 }
