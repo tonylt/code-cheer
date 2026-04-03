@@ -11,36 +11,44 @@ import type { VocabData, StateType, ConfigType } from './schemas'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_DIR = process.env.CODE_PAL_BASE_DIR ?? path.join(os.homedir(), '.claude', 'code-pal')
-const CONFIG_PATH = path.join(BASE_DIR, 'config.json')
-const STATE_PATH = path.join(BASE_DIR, 'state.json')
-const STATS_PATH = process.env.CODE_PAL_STATS_PATH ?? path.join(os.homedir(), '.claude', 'stats-cache.json')
-
 const HARDCODED_FALLBACK = '(*>ω<) Nova: 加油！今天也要好好编程！\nunknown | N/A tokens'
+
+// ─── Path resolver ────────────────────────────────────────────────────────────
+
+function resolvePaths(env?: NodeJS.ProcessEnv) {
+  const e = env ?? process.env
+  const baseDir = e.CODE_PAL_BASE_DIR ?? path.join(os.homedir(), '.claude', 'code-pal')
+  return {
+    baseDir,
+    configPath: path.join(baseDir, 'config.json'),
+    statePath: path.join(baseDir, 'state.json'),
+    statsPath: e.CODE_PAL_STATS_PATH ?? path.join(os.homedir(), '.claude', 'stats-cache.json'),
+  }
+}
 
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
-function loadConfig(): { character: string } {
+function loadConfig(configPath: string): { character: string } {
   try {
-    const raw = fs.readFileSync(CONFIG_PATH, 'utf-8')
+    const raw = fs.readFileSync(configPath, 'utf-8')
     return JSON.parse(raw) as { character: string }
   } catch {
     return { character: 'nova' as const }
   }
 }
 
-function loadState(): StateType {
+function loadState(statePath: string): StateType {
   try {
-    const raw = fs.readFileSync(STATE_PATH, 'utf-8')
+    const raw = fs.readFileSync(statePath, 'utf-8')
     return parseState(JSON.parse(raw))
   } catch {
     return { ...DEFAULT_STATE }
   }
 }
 
-function loadStats(): Record<string, unknown> {
+function loadStats(statsPath: string): Record<string, unknown> {
   try {
-    const raw = fs.readFileSync(STATS_PATH, 'utf-8')
+    const raw = fs.readFileSync(statsPath, 'utf-8')
     const data = JSON.parse(raw) as Record<string, unknown>
     const d = new Date()
     const today =
@@ -68,23 +76,6 @@ function loadStats(): Record<string, unknown> {
   }
 }
 
-function loadStdinJson(): Promise<Record<string, unknown>> {
-  return new Promise((resolve) => {
-    let data = ''
-    process.stdin.setEncoding('utf-8')
-    process.stdin.on('data', (chunk: string) => { data += chunk })
-    process.stdin.on('end', () => {
-      try {
-        const raw = data.trim()
-        resolve(raw ? JSON.parse(raw) as Record<string, unknown> : {})
-      } catch {
-        resolve({})
-      }
-    })
-    setTimeout(() => resolve({}), 50)
-  })
-}
-
 // ─── State helpers ────────────────────────────────────────────────────────────
 
 function shouldResetSessionStart(existing: string | undefined): boolean {
@@ -103,6 +94,8 @@ function shouldResetSessionStart(existing: string | undefined): boolean {
 }
 
 function saveState(
+  statePath: string,
+  baseDir: string,
   message: string,
   tier: string,
   slot: string,
@@ -113,7 +106,7 @@ function saveState(
     sessionStart?: string
   }
 ): void {
-  fs.mkdirSync(BASE_DIR, { recursive: true })
+  fs.mkdirSync(baseDir, { recursive: true })
   const state: Record<string, unknown> = {
     message,
     last_updated: new Date().toISOString(),
@@ -124,8 +117,8 @@ function saveState(
   if (options?.lastRepo !== undefined) state.last_repo = options.lastRepo
   if (options?.commitsToday !== undefined) state.commits_today = options.commitsToday
   if (options?.sessionStart !== undefined) state.session_start = options.sessionStart
-  fs.writeFileSync(STATE_PATH + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
-  fs.renameSync(STATE_PATH + '.tmp', STATE_PATH)
+  fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
+  fs.renameSync(statePath + '.tmp', statePath)
 }
 
 // ─── Debug helpers ────────────────────────────────────────────────────────────
@@ -174,20 +167,65 @@ function eventReason(
   return event
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Stdin helper ─────────────────────────────────────────────────────────────
 
-async function main(): Promise<void> {
-  const updateOnly =
-    process.argv.includes('--update') || process.argv.includes('--debug-events')
-  const debugMode = process.argv.includes('--debug-events')
+function readStdinString(): Promise<string> {
+  return new Promise((resolve) => {
+    let data = ''
+    process.stdin.setEncoding('utf-8')
+    process.stdin.on('data', (chunk: string) => { data += chunk })
+    process.stdin.on('end', () => { resolve(data) })
+    setTimeout(() => resolve(data), 50)
+  })
+}
 
-  const config = loadConfig()
-  const state = loadState()
-  const stats = loadStats()
+// ─── Exported mode functions ──────────────────────────────────────────────────
+
+export function renderMode(env?: NodeJS.ProcessEnv): string {
+  const { configPath, statePath, statsPath } = resolvePaths(env)
+
+  const config = loadConfig(configPath)
+  const state = loadState(statePath)
+  const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
 
-  // Per D-01: render mode does NOT read stdin; update mode reads stdin
-  const ccData: Record<string, unknown> = updateOnly ? await loadStdinJson() : {}
+  // Token fallback: supplement from ccData when stats-cache has no today entry
+  // render mode does NOT read stdin (per D-01)
+  const ccData: Record<string, unknown> = {}
+
+  // Character loading with two-level fallback (D-06)
+  let character: VocabData
+  try {
+    character = loadCharacter(config.character ?? 'nova')
+  } catch {
+    try {
+      character = loadCharacter('nova')
+    } catch {
+      return HARDCODED_FALLBACK
+    }
+  }
+
+  const { message } = resolveMessage(character, state, stats, ccData, false, null)
+
+  return render(character, message, ccData, stats)
+}
+
+export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
+  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
+
+  const config = loadConfig(configPath)
+  const state = loadState(statePath)
+  const stats = loadStats(statsPath)
+  stats['cwd_name'] = path.basename(process.cwd())
+
+  // Parse stdin as JSON (empty string -> {})
+  let ccData: Record<string, unknown> = {}
+  try {
+    const raw = stdin.trim()
+    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    ccData = {}
+  }
 
   // Token fallback: supplement from ccData when stats-cache has no today entry
   if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
@@ -199,26 +237,20 @@ async function main(): Promise<void> {
     }
   }
 
-  // --update mode: git context + event detection + session tracking
-  let gitContext: GitContextResult | null = null
-  let triggeredEvents: string[] | null = null
-  let sessionStartVal: string | undefined
+  const gitContext = await loadGitContext(process.cwd())
+  const triggeredEvents = detectGitEvents(
+    gitContext as unknown as Record<string, unknown>,
+    state,
+    config as ConfigType & { event_thresholds?: Record<string, unknown> }
+  )
 
-  if (updateOnly) {
-    gitContext = await loadGitContext(process.cwd())
-    triggeredEvents = detectGitEvents(
-      gitContext as unknown as Record<string, unknown>,
-      state,
-      config as ConfigType & { event_thresholds?: Record<string, unknown> }
-    )
-
-    // D-10: session_start same-day preserve, cross-day reset
-    const existingSessionStart = state.session_start
-    if (shouldResetSessionStart(existingSessionStart)) {
-      sessionStartVal = new Date().toISOString()
-    } else {
-      sessionStartVal = existingSessionStart
-    }
+  // D-10: session_start same-day preserve, cross-day reset
+  const existingSessionStart = state.session_start
+  let sessionStartVal: string
+  if (shouldResetSessionStart(existingSessionStart)) {
+    sessionStartVal = new Date().toISOString()
+  } else {
+    sessionStartVal = existingSessionStart!
   }
 
   // Character loading with two-level fallback (D-06)
@@ -229,109 +261,197 @@ async function main(): Promise<void> {
     try {
       character = loadCharacter('nova')
     } catch {
-      process.stdout.write(HARDCODED_FALLBACK)
       return
     }
   }
 
   const slot = getTimeSlot()
-  const { message, tier } = resolveMessage(
-    character,
-    state,
-    stats,
-    ccData,
-    updateOnly,
-    triggeredEvents
-  )
+  const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
 
-  // Compute git state for persistence (update mode only)
-  let newLastGitEvents: string[] | undefined
-  let newLastRepo: string | null | undefined
-  let newCommitsToday: number | undefined
-
-  if (updateOnly && gitContext !== null) {
-    const currentRepo = gitContext.repo_path
-    let baseEvents: string[]
-    if (currentRepo !== null && currentRepo !== state.last_repo) {
-      baseEvents = []
-    } else {
-      const raw = state.last_git_events
-      baseEvents = Array.isArray(raw) ? raw : []
-    }
-    newLastGitEvents = [
-      ...baseEvents,
-      ...(triggeredEvents ?? []).filter((e) => !baseEvents.includes(e)),
-    ]
-    newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
-    newCommitsToday = gitContext.commits_today ?? 0
+  // Compute git state for persistence
+  const currentRepo = gitContext.repo_path
+  let baseEvents: string[]
+  if (currentRepo !== null && currentRepo !== state.last_repo) {
+    baseEvents = []
+  } else {
+    const raw = state.last_git_events
+    baseEvents = Array.isArray(raw) ? raw : []
   }
+  const newLastGitEvents = [
+    ...baseEvents,
+    ...triggeredEvents.filter((e) => !baseEvents.includes(e)),
+  ]
+  const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
+  const newCommitsToday = gitContext.commits_today ?? 0
 
-  // Persist state (update mode)
-  if (updateOnly && newLastGitEvents !== undefined) {
-    if (message !== state.message || tier !== state.last_rate_tier) {
-      saveState(message, tier, slot, {
-        lastGitEvents: newLastGitEvents,
-        lastRepo: newLastRepo ?? undefined,
-        commitsToday: newCommitsToday,
-        sessionStart: sessionStartVal,
-      })
-    } else {
-      saveState(state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
-        lastGitEvents: newLastGitEvents,
-        lastRepo: newLastRepo ?? undefined,
-        commitsToday: newCommitsToday,
-        sessionStart: sessionStartVal,
-      })
-    }
-  } else if (updateOnly) {
-    // update mode but no git context (non-git dir) — still save message + session_start
-    saveState(message, tier, slot, { sessionStart: sessionStartVal })
+  // Persist state (atomic write)
+  if (message !== state.message || tier !== state.last_rate_tier) {
+    saveState(statePath, baseDir, message, tier, slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
+  } else {
+    saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
   }
-
-  // --debug-events: output diagnostic info to stderr (D-04, D-05)
-  if (debugMode) {
-    const safeSessionStart = sessionStartVal ?? new Date().toISOString()
-    let sessionMinutes = 0
-    try {
-      const sessionStartDt = new Date(safeSessionStart)
-      sessionMinutes = Math.floor((Date.now() - sessionStartDt.getTime()) / 60000)
-    } catch {
-      sessionMinutes = 0
-    }
-
-    const gitCtxDisplay = {
-      commits_today: gitContext !== null ? (gitContext.commits_today ?? 0) : 0,
-      diff_lines: gitContext !== null ? (gitContext.diff_lines ?? 0) : 0,
-      session_minutes: sessionMinutes,
-    }
-    const eventsDisplay: Record<string, string> = {}
-    for (const e of triggeredEvents ?? []) {
-      eventsDisplay[e] = eventReason(
-        e,
-        (gitContext as unknown as Record<string, unknown>) ?? {},
-        config as Record<string, unknown>
-      )
-    }
-    const stateSnapshot = {
-      last_git_events: newLastGitEvents ?? [],
-      commits_today: newCommitsToday ?? 0,
-      session_start: safeSessionStart,
-      last_repo: newLastRepo ?? null,
-    }
-
-    const ts = localIsoSeconds()
-    process.stderr.write(`[${ts}] GIT_CONTEXT: ${JSON.stringify(gitCtxDisplay)}\n`)
-    process.stderr.write(`EVENTS_WOULD_FIRE: ${JSON.stringify(eventsDisplay)}\n`)
-    process.stderr.write(`STATE_SNAPSHOT: ${JSON.stringify(stateSnapshot)}\n`)
-  }
-
-  if (updateOnly) return
-
-  // Per D-09: process.stdout.write, NO trailing newline
-  process.stdout.write(render(character, message, ccData, stats))
 }
 
-main().catch((err: unknown) => {
-  process.stderr.write(`[code-pal] error: ${String(err)}\n`)
-  process.exit(1)
-})
+export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
+  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
+
+  const config = loadConfig(configPath)
+  const state = loadState(statePath)
+  const stats = loadStats(statsPath)
+  stats['cwd_name'] = path.basename(process.cwd())
+
+  // Parse stdin as JSON (empty string -> {})
+  let ccData: Record<string, unknown> = {}
+  try {
+    const raw = stdin.trim()
+    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    ccData = {}
+  }
+
+  // Token fallback
+  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
+    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
+    if (ctx !== undefined) {
+      const total =
+        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
+      if (total > 0) stats['today_tokens'] = total
+    }
+  }
+
+  const gitContext = await loadGitContext(process.cwd())
+  const triggeredEvents = detectGitEvents(
+    gitContext as unknown as Record<string, unknown>,
+    state,
+    config as ConfigType & { event_thresholds?: Record<string, unknown> }
+  )
+
+  // D-10: session_start same-day preserve, cross-day reset
+  const existingSessionStart = state.session_start
+  let sessionStartVal: string
+  if (shouldResetSessionStart(existingSessionStart)) {
+    sessionStartVal = new Date().toISOString()
+  } else {
+    sessionStartVal = existingSessionStart!
+  }
+
+  // Character loading with two-level fallback (D-06)
+  let character: VocabData
+  try {
+    character = loadCharacter(config.character ?? 'nova')
+  } catch {
+    try {
+      character = loadCharacter('nova')
+    } catch {
+      return
+    }
+  }
+
+  const slot = getTimeSlot()
+  const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
+
+  // Compute git state for persistence
+  const currentRepo = gitContext.repo_path
+  let baseEvents: string[]
+  if (currentRepo !== null && currentRepo !== state.last_repo) {
+    baseEvents = []
+  } else {
+    const raw = state.last_git_events
+    baseEvents = Array.isArray(raw) ? raw : []
+  }
+  const newLastGitEvents = [
+    ...baseEvents,
+    ...triggeredEvents.filter((e) => !baseEvents.includes(e)),
+  ]
+  const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
+  const newCommitsToday = gitContext.commits_today ?? 0
+
+  // Persist state (atomic write)
+  if (message !== state.message || tier !== state.last_rate_tier) {
+    saveState(statePath, baseDir, message, tier, slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
+  } else {
+    saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
+  }
+
+  // Debug output to stderr (D-04, D-05)
+  let sessionMinutes = 0
+  try {
+    const sessionStartDt = new Date(sessionStartVal)
+    sessionMinutes = Math.floor((Date.now() - sessionStartDt.getTime()) / 60000)
+  } catch {
+    sessionMinutes = 0
+  }
+
+  const gitCtxDisplay = {
+    commits_today: gitContext.commits_today ?? 0,
+    diff_lines: gitContext.diff_lines ?? 0,
+    session_minutes: sessionMinutes,
+  }
+  const eventsDisplay: Record<string, string> = {}
+  for (const e of triggeredEvents) {
+    eventsDisplay[e] = eventReason(
+      e,
+      (gitContext as unknown as Record<string, unknown>),
+      config as Record<string, unknown>
+    )
+  }
+  const stateSnapshot = {
+    last_git_events: newLastGitEvents,
+    commits_today: newCommitsToday,
+    session_start: sessionStartVal,
+    last_repo: newLastRepo ?? null,
+  }
+
+  const ts = localIsoSeconds()
+  process.stderr.write(`[${ts}] GIT_CONTEXT: ${JSON.stringify(gitCtxDisplay)}\n`)
+  process.stderr.write(`EVENTS_WOULD_FIRE: ${JSON.stringify(eventsDisplay)}\n`)
+  process.stderr.write(`STATE_SNAPSHOT: ${JSON.stringify(stateSnapshot)}\n`)
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+  const isDebug = process.argv.includes('--debug-events')
+  const isUpdate = process.argv.includes('--update') || isDebug
+
+  if (isDebug) {
+    const stdin = await readStdinString()
+    await debugMode(stdin)
+    return
+  }
+
+  if (isUpdate) {
+    const stdin = await readStdinString()
+    await updateMode(stdin)
+    return
+  }
+
+  process.stdout.write(renderMode())
+}
+
+if (require.main === module) {
+  main().catch((err: unknown) => {
+    process.stderr.write(`[code-pal] error: ${String(err)}\n`)
+    process.exit(1)
+  })
+}
