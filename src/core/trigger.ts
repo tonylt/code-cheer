@@ -59,6 +59,7 @@ export function cacheExpired(lastUpdated: string | undefined, minutes: number = 
   if (!lastUpdated) return true
   try {
     const dt = new Date(lastUpdated)
+    if (isNaN(dt.getTime())) return true
     const delta = (Date.now() - dt.getTime()) / 1000
     return delta > minutes * 60
   } catch {
