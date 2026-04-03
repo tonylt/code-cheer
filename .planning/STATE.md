@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-04-03T10:50:17.025Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-04-03T10:54:04.599Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
   percent: 57
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 10 (core) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-04-03
 
-Progress: [██████░░░░] 57% (4/7 plans complete)
+Progress: [█████████░] 86% (6/7 plans complete)
 
 ## Phase Overview
 
@@ -83,6 +83,12 @@ Progress: [██████░░░░] 57% (4/7 plans complete)
 - tsconfig types:["node"] 显式声明：strict 模式下 process.stderr.write 需要 @types/node 明确解析
 - parseWithReadableError 从 state.ts 导出：Phase 10 character.ts 可复用 vocab 验证错误处理
 
+### Phase 10 Plan 02 Decisions (2026-04-03)
+
+- vocabDir defaults to path.join(__dirname, '../vocab')：esbuild CJS bundle 保留 __dirname，在 dev 和 dist/ 安装场景下路径均正确（D-01）
+- private pick() in character.ts：Wave 1 并行执行时 trigger.ts 仍是 export {} stub，避免跨模块导入导致 typecheck 失败
+- getGitEventMessage 用 optional chaining：git_events 字段缺失时返回 null 而非 throw，与 Python fallback 行为对齐
+
 ### Phase 10 Plan 04 Decisions (2026-04-03)
 
 - resolveMessage 返回 `{ message: string; tier: string }` 对象（非 tuple）— Phase 11 statusline.ts 依赖此结构
@@ -102,6 +108,6 @@ Progress: [██████░░░░] 57% (4/7 plans complete)
 
 ## Session Continuity
 
-Last session: 2026-04-03T10:50:17.022Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-04-03T10:54:04.594Z
+Stopped at: Completed 10-02-PLAN.md
 Resume with: `/gsd:execute-phase 8`
