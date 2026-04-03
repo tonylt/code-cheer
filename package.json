@@ -1,0 +1,15 @@
+{
+  "name": "code-pal",
+  "version": "3.0.0",
+  "description": "Claude Code statusline companion",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/statusline.ts --bundle --platform=node --format=cjs --outfile=dist/statusline.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^6.0.0"
+  }
+}
