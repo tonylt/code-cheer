@@ -8,10 +8,26 @@ This file provides guidance to Claude Code when working in this repository.
 
 Installs to `~/.claude/code-pal/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
 
+## v3.0 Migration (in progress)
+
+Python → TypeScript/Node.js migration. Python files remain `@deprecated` until full cutover.
+
+- **Build**: `esbuild` bundles `src/` → `dist/statusline.js` (single CJS file, ~40ms cold start)
+- **Typecheck**: `tsc --noEmit` (esbuild skips type checking)
+- **Runtime**: `node dist/statusline.js` — NEVER use `npx tsx` (1.5s startup, too slow for statusline)
+- **Zero runtime deps**: Zod is devDependency only (compile-time schema validation)
+- **State writes**: atomic via `writeFileSync(tmp) + renameSync` to prevent half-read corruption
+
 ## Commands
 
 ```bash
-# Run tests
+# Build TypeScript → dist/statusline.js
+npm run build
+
+# Type check (no emit)
+npm run typecheck
+
+# Run tests (Python, legacy)
 python3 -m pytest tests/
 
 # Run a specific test file
@@ -33,11 +49,19 @@ python3 statusline.py --update
 ## Architecture
 
 ```
-statusline.py           entry point (two modes: render / --update)
-core/
-  character.py          load + validate vocab JSON from vocab/
-  trigger.py            message selection logic (tier, time slot, cache)
-  display.py            format output string for statusline
+statusline.py           Python entry point (legacy, @deprecated)
+core/                   Python modules (legacy, @deprecated)
+  character.py          load + validate vocab JSON
+  trigger.py            message selection logic
+  display.py            format output string
+src/                    TypeScript source (v3.0)
+  statusline.ts         TS entry point
+  core/
+    character.ts        vocab loading + validation
+    display.ts          statusline formatting
+    trigger.ts          message selection
+    gitContext.ts        git subprocess context
+dist/                   esbuild bundle output (gitignored)
 vocab/
   nova.json             character vocab (post_tool, time, usage, random)
   luna.json
@@ -90,6 +114,13 @@ install.sh registers two entries in `~/.claude/settings.json`:
 1. Create `vocab/<name>.json` following the structure of an existing vocab file
 2. Add the character to `commands/cheer.md` (options list + reply text)
 3. Add a test in `tests/test_character.py`
+
+## Pitfalls
+
+- Production must use `node dist/statusline.js` (~40ms), never `npx tsx` (~1.5s)
+- Git subprocesses: use `Promise.allSettled`, check `.status === 'fulfilled'` individually
+- TypeScript strict: `if (x)` is false when x=0; use `!== undefined` for existence checks
+- install.sh uses `$(which node)` absolute path for nvm/fnm compatibility
 
 ## Skill routing
 
