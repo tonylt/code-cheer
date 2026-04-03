@@ -12,7 +12,7 @@
 - [x] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵 (completed 2026-04-03)
 - [x] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点 (completed 2026-04-03)
 - [x] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致 (completed 2026-04-03)
-- [ ] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块
+- [x] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块 (completed 2026-04-03)
 - [ ] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性
 - [ ] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated
 
@@ -86,7 +86,11 @@ Plans:
   2. Jest 覆盖率报告显示行覆盖率 ≥80%
   3. trigger.test.ts 覆盖所有消息优先级路径、per-repo 隔离逻辑、session 跟踪边界情况
   4. 测试可在 CI（Node.js 20/22 矩阵）中稳定通过，无随机失败（time-sensitive 测试使用 mock 时钟）
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 12-01-PLAN.md — Jest 基础设施（ts-jest 配置 + statusline.ts 可测试性重构）
+- [ ] 12-02-PLAN.md — Core 模块测试（display/character/gitContext/trigger 共 100+ 测试）
+- [ ] 12-03-PLAN.md — statusline 集成测试 + 覆盖率验收（110+ 测试，≥80% 覆盖率）
 
 ### Phase 13: 安装切换
 **Goal**: 用户安装后 Claude Code 自动使用 TypeScript 构建产物；Python 版本明确标记为已废弃
@@ -108,8 +112,8 @@ Plans:
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
 | 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
-| 11. 入口点 | 0/1 | In progress | - |
-| 12. Jest 测试套件 | 0/? | Not started | - |
+| 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
+| 12. Jest 测试套件 | 0/3 | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
 
 ---
