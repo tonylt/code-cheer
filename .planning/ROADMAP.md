@@ -9,7 +9,7 @@
 
 ## Phases
 
-- [ ] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵
+- [x] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵 (completed 2026-04-03)
 - [ ] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点
 - [ ] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致
 - [ ] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块
@@ -96,7 +96,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 08. 脚手架与 CI | 0/2 | Planning complete | - |
+| 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/? | Not started | - |
 | 10. Core 模块移植 | 0/? | Not started | - |
 | 11. 入口点 | 0/? | Not started | - |

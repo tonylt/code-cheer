@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: verifying
-stopped_at: "Completed 08-02-PLAN.md (test-node CI job) — awaiting checkpoint:human-verify"
-last_updated: "2026-04-03T06:57:54.905Z"
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-03T07:24:44.294Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 
 ## Current Position
 
-Phase: 08 (ci) — EXECUTING
+Phase: 08 (ci) — COMPLETE
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Phase 08 complete — 2/2 plans done. Ready for Phase 09 (Zod Schemas)
 Last activity: 2026-04-03
 
-Progress: [░░░░░░░░░░] 0% (0/6 phases complete, 1/2 plans in Phase 08)
+Progress: [██████████] 100% (2/2 plans in Phase 08 complete)
 
 ## Phase Overview
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 08 | 脚手架与 CI | SETUP-01, CI-02 | Not started |
+| 08 | 脚手架与 CI | SETUP-01, CI-02 | Complete |
 | 09 | Zod Schemas | SETUP-02 | Not started |
 | 10 | Core 模块移植 | CORE-01, CORE-02, CORE-03, CORE-04 | Not started |
 | 11 | 入口点 | TS-01, TS-02, TS-03 | Not started |
@@ -70,6 +70,13 @@ Progress: [░░░░░░░░░░] 0% (0/6 phases complete, 1/2 plans in
 - strict: true 从第一天开启：TypeScript 6 strict 模式立即全开，不分阶段（per D-09）
 - export {} 在所有 stub 文件中：强制 module mode，避免 strict 下 TS2300 duplicate identifier 错误
 
+### Phase 08 Plan 02 Decisions (2026-04-03)
+
+- fail-fast: false on test-node matrix：Node 20 失败不取消 Node 22 运行，获得完整的双版本错误信息
+- Build 与 typecheck 分离步骤：esbuild 不做类型检查，分离是唯一强制类型安全的方式（per D-03）
+- 冷启动 100ms 阈值：与 Plan 01 实测 40ms 匹配，留有舒适余量
+- D-08 分支保护：test-node (20)/test-node (22) 设为 required status checks 需在 GitHub UI 手动配置
+
 ### Critical Pitfalls to Watch
 
 - P1: 生产必须用 `node dist/statusline.js`（~40ms），禁止 `npx tsx`（~1.5s）
@@ -83,6 +90,6 @@ Progress: [░░░░░░░░░░] 0% (0/6 phases complete, 1/2 plans in
 
 ## Session Continuity
 
-Last session: 2026-04-03T06:57:54.902Z
-Stopped at: Completed 08-02-PLAN.md (test-node CI job) — awaiting checkpoint:human-verify
+Last session: 2026-04-03T07:24:44.289Z
+Stopped at: Completed 08-02-PLAN.md
 Resume with: `/gsd:execute-phase 8`
