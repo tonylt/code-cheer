@@ -78,43 +78,6 @@ function loadStats(statsPath: string): Record<string, unknown> {
 
 // ─── Transcript reader ────────────────────────────────────────────────────────
 
-function loadTranscriptData(transcriptPath: string): { model?: string; sessionTokens?: number } {
-  try {
-    const today = new Date().toISOString().slice(0, 10)
-    const lines = fs.readFileSync(transcriptPath, 'utf-8').split('\n')
-    let lastModel: string | undefined
-    let sessionTokens = 0
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed) continue
-      const entry = JSON.parse(trimmed) as Record<string, unknown>
-      if (entry['type'] !== 'assistant') continue
-      const msg = entry['message'] as Record<string, unknown> | undefined
-      if (!msg) continue
-
-      // Extract model — strip namespace prefix (e.g. "pa/claude-sonnet-4-6" → "claude-sonnet-4-6")
-      if (msg['model']) {
-        const raw = String(msg['model'])
-        lastModel = raw.includes('/') ? raw.slice(raw.lastIndexOf('/') + 1) : raw
-      }
-
-      // Sum tokens for today's entries only
-      if (typeof entry['timestamp'] === 'string' && entry['timestamp'].startsWith(today)) {
-        const usage = msg['usage'] as Record<string, unknown> | undefined
-        if (usage) {
-          sessionTokens +=
-            Number(usage['input_tokens'] ?? 0) + Number(usage['output_tokens'] ?? 0)
-        }
-      }
-    }
-
-    return { model: lastModel, sessionTokens: sessionTokens > 0 ? sessionTokens : undefined }
-  } catch {
-    return {}
-  }
-}
-
 // ─── State helpers ────────────────────────────────────────────────────────────
 
 function shouldResetSessionStart(existing: string | undefined): boolean {
@@ -143,8 +106,6 @@ function saveState(
     lastRepo?: string | undefined
     commitsToday?: number
     sessionStart?: string
-    lastModel?: string
-    lastTokens?: number
   }
 ): void {
   fs.mkdirSync(baseDir, { recursive: true })
@@ -158,8 +119,6 @@ function saveState(
   if (options?.lastRepo !== undefined) state.last_repo = options.lastRepo
   if (options?.commitsToday !== undefined) state.commits_today = options.commitsToday
   if (options?.sessionStart !== undefined) state.session_start = options.sessionStart
-  if (options?.lastModel !== undefined) state.last_model = options.lastModel
-  if (options?.lastTokens !== undefined) state.last_tokens = options.lastTokens
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
   fs.renameSync(statePath + '.tmp', statePath)
 }
@@ -241,12 +200,6 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
     ccData = {}
   }
 
-  // Fallback to cached state values when stdin has no model/tokens
-  if (!ccData['model'] && state.last_model) ccData['model'] = state.last_model
-  if (stats['today_tokens'] === 'N/A' && state.last_tokens !== undefined) {
-    stats['today_tokens'] = state.last_tokens
-  }
-
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
   // path.join(__dirname, '../vocab') correctly to project-root/vocab/.
@@ -310,31 +263,6 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
     sessionStartVal = existingSessionStart!
   }
 
-  // Extract model string from ccData for caching
-  const modelRaw = ccData['model']
-  let resolvedModel: string | undefined
-  if (modelRaw !== null && typeof modelRaw === 'object') {
-    const modelObj = modelRaw as Record<string, unknown>
-    resolvedModel = String(modelObj['display_name'] ?? modelObj['id'] ?? '')
-  } else if (modelRaw !== undefined && modelRaw !== null) {
-    resolvedModel = String(modelRaw)
-  }
-  if (resolvedModel) resolvedModel = resolvedModel.replace('claude-', '')
-
-  // Supplement from transcript when ccData lacks model/token info (Stop hook doesn't send them)
-  const transcriptPath = ccData['transcript_path']
-  if (typeof transcriptPath === 'string' && (!resolvedModel || stats['today_tokens'] === 'N/A')) {
-    const td = loadTranscriptData(transcriptPath)
-    if (!resolvedModel && td.model) resolvedModel = td.model.replace('claude-', '')
-    if (stats['today_tokens'] === 'N/A' && td.sessionTokens !== undefined) {
-      stats['today_tokens'] = td.sessionTokens
-    }
-  }
-
-  // Extract today_tokens for caching (use resolved value from stats after fallback)
-  const resolvedTokens =
-    typeof stats['today_tokens'] === 'number' ? (stats['today_tokens'] as number) : undefined
-
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
   const vocabDir = path.join(__dirname, '../vocab')
@@ -368,15 +296,13 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
   const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
   const newCommitsToday = gitContext.commits_today ?? 0
 
-  // Persist state (atomic write) — always save model/tokens so renderMode can display them
+  // Persist state (atomic write)
   if (message !== state.message || tier !== state.last_rate_tier) {
     saveState(statePath, baseDir, message, tier, slot, {
       lastGitEvents: newLastGitEvents,
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
-      lastModel: resolvedModel,
-      lastTokens: resolvedTokens,
     })
   } else {
     saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
@@ -384,8 +310,6 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
-      lastModel: resolvedModel,
-      lastTokens: resolvedTokens,
     })
   }
 }
