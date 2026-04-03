@@ -10,8 +10,6 @@ export const StateSchema = z.object({
   commits_today: z.number().optional(),
   session_start: z.string().optional(),
   last_updated: z.string().optional(),
-  last_model: z.string().optional(),
-  last_tokens: z.number().optional(),
 })
 
 export type StateType = z.infer<typeof StateSchema>
