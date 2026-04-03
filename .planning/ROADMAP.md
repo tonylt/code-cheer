@@ -31,7 +31,7 @@
   4. `npm run build` 失败时，错误信息明确指向具体问题而非静默退出
 **Plans**: 2 plans
 Plans:
-- [ ] 08-01-PLAN.md — TypeScript 项目脚手架（package.json + tsconfig + src/ stubs + 构建验证）
+- [x] 08-01-PLAN.md — TypeScript 项目脚手架（package.json + tsconfig + src/ stubs + 构建验证）
 - [ ] 08-02-PLAN.md — CI Node.js 矩阵扩展（test-node job + 用户验证 checkpoint）
 **UI hint**: no
 
