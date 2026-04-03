@@ -32,7 +32,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 08-01-PLAN.md — TypeScript 项目脚手架（package.json + tsconfig + src/ stubs + 构建验证）
-- [ ] 08-02-PLAN.md — CI Node.js 矩阵扩展（test-node job + 用户验证 checkpoint）
+- [x] 08-02-PLAN.md — CI Node.js 矩阵扩展（test-node job + 用户验证 checkpoint）
 **UI hint**: no
 
 ### Phase 09: Zod Schemas
