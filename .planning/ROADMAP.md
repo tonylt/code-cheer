@@ -11,7 +11,7 @@
 
 - [x] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵 (completed 2026-04-03)
 - [x] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点 (completed 2026-04-03)
-- [ ] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致
+- [x] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致 (completed 2026-04-03)
 - [ ] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块
 - [ ] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性
 - [ ] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated
@@ -61,7 +61,7 @@ Plans:
 Plans:
 - [x] 10-01-PLAN.md — display.ts 移植（render + formatTokens + formatResets + _ctxBar）
 - [x] 10-02-PLAN.md — character.ts 移植（loadCharacter + getGitEventMessage + Zod 验证）
-- [ ] 10-03-PLAN.md — gitContext.ts 移植（Promise.allSettled 并行 git 子进程）
+- [x] 10-03-PLAN.md — gitContext.ts 移植（Promise.allSettled 并行 git 子进程）
 - [x] 10-04-PLAN.md — trigger.ts 移植（6 级优先级逻辑 + detectGitEvents + per-repo 隔离）
 
 ### Phase 11: 入口点
@@ -105,7 +105,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
 | 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
-| 10. Core 模块移植 | 3/4 | In Progress|  |
+| 10. Core 模块移植 | 4/4 | Complete   | 2026-04-03 |
 | 11. 入口点 | 0/? | Not started | - |
 | 12. Jest 测试套件 | 0/? | Not started | - |
 | 13. 安装切换 | 0/? | Not started | - |
