@@ -194,12 +194,15 @@ export function renderMode(env?: NodeJS.ProcessEnv): string {
   const ccData: Record<string, unknown> = {}
 
   // Character loading with two-level fallback (D-06)
+  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
+  // path.join(__dirname, '../vocab') correctly to project-root/vocab/.
+  const vocabDir = path.join(__dirname, '../vocab')
   let character: VocabData
   try {
-    character = loadCharacter(config.character ?? 'nova')
+    character = loadCharacter(config.character ?? 'nova', vocabDir)
   } catch {
     try {
-      character = loadCharacter('nova')
+      character = loadCharacter('nova', vocabDir)
     } catch {
       return HARDCODED_FALLBACK
     }
@@ -254,12 +257,14 @@ export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promis
   }
 
   // Character loading with two-level fallback (D-06)
+  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
+  const vocabDir = path.join(__dirname, '../vocab')
   let character: VocabData
   try {
-    character = loadCharacter(config.character ?? 'nova')
+    character = loadCharacter(config.character ?? 'nova', vocabDir)
   } catch {
     try {
-      character = loadCharacter('nova')
+      character = loadCharacter('nova', vocabDir)
     } catch {
       return
     }
@@ -346,12 +351,14 @@ export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise
   }
 
   // Character loading with two-level fallback (D-06)
+  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
+  const vocabDir = path.join(__dirname, '../vocab')
   let character: VocabData
   try {
-    character = loadCharacter(config.character ?? 'nova')
+    character = loadCharacter(config.character ?? 'nova', vocabDir)
   } catch {
     try {
-      character = loadCharacter('nova')
+      character = loadCharacter('nova', vocabDir)
     } catch {
       return
     }
