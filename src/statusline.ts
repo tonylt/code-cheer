@@ -200,6 +200,16 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
     ccData = {}
   }
 
+  // Token fallback: supplement from ccData when stats-cache has no today entry
+  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
+    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
+    if (ctx !== undefined) {
+      const total =
+        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
+      if (total > 0) stats['today_tokens'] = total
+    }
+  }
+
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
   // path.join(__dirname, '../vocab') correctly to project-root/vocab/.
