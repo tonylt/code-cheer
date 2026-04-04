@@ -99,7 +99,7 @@ export function render(
   } else {
     model = 'unknown'
   }
-  model = model.replace('claude-', '')
+
 
   // Stats fields
   const cwdName = typeof stats['cwd_name'] === 'string' ? stats['cwd_name'] : ''
