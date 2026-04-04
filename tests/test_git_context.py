@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 import os, sys
 from unittest.mock import patch, MagicMock
 import subprocess

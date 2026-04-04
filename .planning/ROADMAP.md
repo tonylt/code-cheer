@@ -10,11 +10,23 @@
 ## Phases
 
 - [x] **Phase 08: 脚手架与 CI** - 建立 TypeScript 构建管线，验证 <100ms 冷启动，扩展 CI 至 Node.js 矩阵 (completed 2026-04-03)
-- [ ] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点
-- [ ] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致
-- [ ] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块
-- [ ] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性
-- [ ] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated
+- [x] **Phase 09: Zod Schemas** - 定义 vocab/state/config 的运行时验证 schema，作为所有 core 模块的类型锚点 (completed 2026-04-03)
+- [x] **Phase 10: Core 模块移植** - 按依赖顺序移植 display → character → gitContext → trigger，行为与 Python 版本完全一致 (completed 2026-04-03)
+- [x] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块 (completed 2026-04-03)
+- [x] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性 (completed 2026-04-03)
+- [x] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated (completed 2026-04-03)
+- [x] **Phase 14: Config 验证补全** - 修复 loadConfig() 添加 ConfigSchema 运行时验证，补全 CI test-node job npm test 步骤 (completed 2026-04-04)
+**Goal**: JSON 加载时通过 Zod schema 验证，格式错误时输出具体错误信息；CI 真正覆盖 TypeScript 测试套件和生产安装路径
+**Depends on**: Phase 13
+**Requirements**: SETUP-02
+**Success Criteria** (what must be TRUE):
+  1. 无效 character 名称（如 "novaa"）时 stderr 输出 Zod 错误信息
+  2. config.json 不存在时 fallback 到 { character: 'nova' } 而不崩溃
+  3. CI test-node job 运行 Jest 测试套件，任一测试失败阻断合并
+  4. CI test-node job 验证 npm run setup 安装流程而非过时的 Python statusline.py
+**Plans**: 1 plan
+Plans:
+- [x] 14-01-PLAN.md — Config 验证补全（loadConfig Zod 验证 + CI Jest 步骤 + CI setup smoke test）
 
 ---
 
@@ -44,7 +56,9 @@ Plans:
   2. 传入缺少必填字段的 vocab JSON 时，错误信息包含字段名和期望类型（而非 "undefined is not a function"）
   3. state.json 和 config.json 各有独立 schema，加载时分别验证
   4. 所有 core 模块可通过 `z.infer<typeof Schema>` 使用类型，无需手写重复 interface
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [x] 09-01-PLAN.md — Zod v4 schema 定义（vocab/state/config）+ barrel 导出 + 构建验证
 
 ### Phase 10: Core 模块移植
 **Goal**: 4 个 core 模块完整移植到 TypeScript，相同输入产生与 Python 版本相同的输出
@@ -53,9 +67,14 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. 给定相同 stats-cache.json 和 state.json，`display.ts` 输出的 statusLine 字符串与 Python `display.py` 逐字符相同
   2. `character.ts` 成功加载全部 4 个 vocab JSON，任一 JSON 不合 schema 时输出描述性错误而非静默跳过
-  3. `gitContext.ts` 并行启动 3 个 git 子进程，其中任一失败时其他进程不受影响，整体返回可用的部分结果
+  3. `gitContext.ts` 并行启动 4 个 git 子进程，其中任一失败时其他进程不受影响，整体返回可用的部分结果
   4. `trigger.ts` 消息选择在所有消息类型（random/time/usage/post_tool/git_events）和优先级分层上与 Python 版本行为一致，per-repo 隔离正确工作
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 10-01-PLAN.md — display.ts 移植（render + formatTokens + formatResets + _ctxBar）
+- [x] 10-02-PLAN.md — character.ts 移植（loadCharacter + getGitEventMessage + Zod 验证）
+- [x] 10-03-PLAN.md — gitContext.ts 移植（Promise.allSettled 并行 git 子进程）
+- [x] 10-04-PLAN.md — trigger.ts 移植（6 级优先级逻辑 + detectGitEvents + per-repo 隔离）
 
 ### Phase 11: 入口点
 **Goal**: `src/statusline.ts` 完整实现三种运行模式，与 Claude Code hook 和 statusLine API 兼容
@@ -66,7 +85,9 @@ Plans:
   2. `--update` 模式完整执行 git 子进程 → 消息选择 → 原子写 state.json 全流程，写入过程中 render 模式不读到半写文件
   3. `--debug-events` flag 向 stderr 输出 GIT_CONTEXT、EVENTS_WOULD_FIRE、STATE_SNAPSHOT 三段诊断信息，内容与 Python `--debug-events` 格式一致
   4. render 模式不读取 stdin（不挂起），`--update` 模式从 stdin 正确读取 Claude Code 传入的 JSON
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 11-01-PLAN.md — statusline.ts 完整入口点（3 种运行模式 + core 模块集成 + smoke test）
 
 ### Phase 12: Jest 测试套件
 **Goal**: 所有 pytest 测试行为迁移到 Jest，覆盖率达标，作为移植正确性的最终确认
@@ -77,7 +98,11 @@ Plans:
   2. Jest 覆盖率报告显示行覆盖率 ≥80%
   3. trigger.test.ts 覆盖所有消息优先级路径、per-repo 隔离逻辑、session 跟踪边界情况
   4. 测试可在 CI（Node.js 20/22 矩阵）中稳定通过，无随机失败（time-sensitive 测试使用 mock 时钟）
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 12-01-PLAN.md — Jest 基础设施（ts-jest 配置 + statusline.ts 可测试性重构）
+- [x] 12-02-PLAN.md — Core 模块测试（display/character/gitContext/trigger 共 100+ 测试）
+- [x] 12-03-PLAN.md — statusline 集成测试 + 覆盖率验收（110+ 测试，≥80% 覆盖率）
 
 ### Phase 13: 安装切换
 **Goal**: 用户安装后 Claude Code 自动使用 TypeScript 构建产物；Python 版本明确标记为已废弃
@@ -88,7 +113,24 @@ Plans:
   2. 所有 Python 源文件（statusline.py, core/*.py）顶部包含 `# @deprecated: use src/ TypeScript version` 注释
   3. 现有用户重新运行 install.sh 后，功能表现与之前 Python 版本无差异（角色消息、token 显示、git events 均正常）
   4. install.sh 原有的非破坏性 settings.json patch 逻辑保持不变（不清除用户其他配置）
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 13-01-PLAN.md — Node.js install/uninstall scripts + settings.json patch + tests
+- [x] 13-02-PLAN.md — Python @deprecated annotations + manual install verification
+
+### Phase 14: Config 验证补全
+**Goal**: 修复 SETUP-02 — loadConfig() 添加 ConfigSchema 运行时验证；补全 CI test-node job 以运行 Jest 测试套件；更新 CI smoke test 指向 npm run setup
+**Depends on**: Phase 13 (v3.0 gap closure, per audit)
+**Requirements**: SETUP-02
+**Gap Closure**: Closes gaps identified in v3.0 milestone audit (v3.0-MILESTONE-AUDIT.md)
+**Success Criteria** (what must be TRUE):
+  1. `loadConfig()` 调用 `parseWithReadableError(ConfigSchema, ...)` 验证 config.json，无效 character 名称时 stderr 输出具体 Zod 错误而非静默 fallback
+  2. CI `test-node` job 包含 `npm test` 步骤，Jest 165 个测试在 Node.js 20/22 矩阵中均通过
+  3. CI smoke test 验证 `npm run setup` 安装流程（非 Python statusline.py 路径）
+**Plans**: 1 plan
+Plans:
+- [ ] 14-01-PLAN.md — ConfigSchema 验证 + CI Jest + CI smoke test 修复
+**UI hint**: no
 
 ---
 
@@ -97,11 +139,12 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 08. 脚手架与 CI | 2/2 | Complete   | 2026-04-03 |
-| 09. Zod Schemas | 0/? | Not started | - |
-| 10. Core 模块移植 | 0/? | Not started | - |
-| 11. 入口点 | 0/? | Not started | - |
-| 12. Jest 测试套件 | 0/? | Not started | - |
-| 13. 安装切换 | 0/? | Not started | - |
+| 09. Zod Schemas | 0/1 | Complete    | 2026-04-03 |
+| 10. Core 模块移植 | 4/4 | Complete    | 2026-04-03 |
+| 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
+| 12. Jest 测试套件 | 3/3 | Complete    | 2026-04-03 |
+| 13. 安装切换 | 2/2 | Complete    | 2026-04-03 |
+| 14. Config 验证补全 | 1/1 | Complete    | 2026-04-04 |
 
 ---
 
@@ -111,7 +154,7 @@ Plans:
 |-------------|-------|-----------|
 | SETUP-01 | Phase 08 | 构建管线基础，第一步验证 |
 | CI-02 | Phase 08 | CI 扩展与脚手架同步完成 |
-| SETUP-02 | Phase 09 | 类型锚点，core 模块依赖 |
+| SETUP-02 | Phase 14 | 审计发现 loadConfig() 跳过 Zod 验证，Phase 14 gap closure |
 | CORE-01 | Phase 10 | display.ts 最简单，先移植 |
 | CORE-02 | Phase 10 | character.ts 次之 |
 | CORE-03 | Phase 10 | gitContext.ts 引入异步 |

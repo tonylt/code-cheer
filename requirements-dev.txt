@@ -1,1 +1,2 @@
+# @deprecated: Python tests replaced by Jest (see tests/*.test.ts)
 pytest>=7.4,<9

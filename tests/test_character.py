@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 import os, sys, json, pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

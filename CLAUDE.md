@@ -27,6 +27,9 @@ npm run build
 # Type check (no emit)
 npm run typecheck
 
+# Run TypeScript tests (Jest)
+npm test
+
 # Run tests (Python, legacy)
 python3 -m pytest tests/
 
@@ -39,10 +42,16 @@ python3 statusline.py
 # Force a message update (simulates Stop hook)
 python3 statusline.py --update
 
-# Install
+# Install (Node.js path — v3.0)
+npm run setup
+
+# Uninstall (Node.js path — v3.0)
+npm run unsetup
+
+# Install (Python legacy path)
 ./install.sh
 
-# Uninstall
+# Uninstall (Python legacy path)
 ./install.sh --uninstall
 ```
 
@@ -55,22 +64,30 @@ core/                   Python modules (legacy, @deprecated)
   trigger.py            message selection logic
   display.py            format output string
 src/                    TypeScript source (v3.0)
-  statusline.ts         TS entry point
+  statusline.ts         TS entry point (renderMode/updateMode/debugMode)
   core/
     character.ts        vocab loading + validation
     display.ts          statusline formatting
     trigger.ts          message selection
-    gitContext.ts        git subprocess context
+    gitContext.ts       git subprocess context (parallel with Promise.allSettled)
+  schemas/              Zod schemas (config, state, vocab)
 dist/                   esbuild bundle output (gitignored)
+scripts/                Node.js install/uninstall pipeline (v3.0)
+  install.js            patchSettings — wires statusline into settings.json
+  uninstall.js          unpatchSettings — restores settings.json
 vocab/
   nova.json             character vocab (post_tool, time, usage, random)
   luna.json
   mochi.json
   iris.json
+  leijun.json           Lei Jun character
 commands/
   cheer.md              /cheer slash command (Claude Code custom command)
-install.sh              copies files to ~/.claude/code-pal/, patches settings.json
-tests/                  pytest unit tests for each core module
+install.sh              Python legacy installer (still functional, @deprecated)
+jest.config.ts          Jest configuration (ts-jest, 80% line coverage threshold)
+tests/                  test suite
+  *.test.ts             Jest TypeScript tests (167 tests)
+  test_*.py             pytest Python tests (126 tests, legacy)
 ```
 
 ## Key files
@@ -104,7 +121,7 @@ install.sh registers two entries in `~/.claude/settings.json`:
 ## State files (runtime, not in repo)
 
 ```
-~/.claude/code-pal/config.json   # {"character": "nova"}
+~/.claude/code-pal/config.json   # {"character": "nova", "version": "3.0.1"}
 ~/.claude/code-pal/state.json    # last message, tier, slot, timestamp
 ~/.claude/stats-cache.json         # token usage by day (written by Claude Code)
 ```

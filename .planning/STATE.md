@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-04-03T07:24:44.294Z"
-last_activity: 2026-04-03
+stopped_at: Completed 14-config-validation/14-01-PLAN.md
+last_updated: "2026-04-04T02:09:09.436Z"
+last_activity: 2026-04-04
 progress:
-  total_phases: 6
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 0
+  total_phases: 7
+  completed_phases: 7
+  total_plans: 14
+  completed_plans: 14
+  percent: 92
 ---
 
 # State: code-pal
@@ -21,27 +21,27 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 08 — ci
+**Current focus:** Phase 14 — config-validation
 
 ## Current Position
 
-Phase: 08 (ci) — COMPLETE
-Plan: 2 of 2
-Status: Phase 08 complete — 2/2 plans done. Ready for Phase 09 (Zod Schemas)
-Last activity: 2026-04-03
+Phase: 14
+Plan: Not started
+Status: Phase complete — ready for verification
+Last activity: 2026-04-04
 
-Progress: [██████████] 100% (2/2 plans in Phase 08 complete)
+Progress: [█████████░] 92% (12/13 plans complete)
 
 ## Phase Overview
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 08 | 脚手架与 CI | SETUP-01, CI-02 | Complete |
-| 09 | Zod Schemas | SETUP-02 | Not started |
+| 09 | Zod Schemas | SETUP-02 | Complete |
 | 10 | Core 模块移植 | CORE-01, CORE-02, CORE-03, CORE-04 | Not started |
 | 11 | 入口点 | TS-01, TS-02, TS-03 | Not started |
 | 12 | Jest 测试套件 | TEST-01 | Not started |
-| 13 | 安装切换 | INSTALL-01 | Not started |
+| 13 | 安装切换 | INSTALL-01 | In Progress (1/2 complete) |
 
 ## Accumulated Context
 
@@ -77,6 +77,37 @@ Progress: [██████████] 100% (2/2 plans in Phase 08 complete)
 - 冷启动 100ms 阈值：与 Plan 01 实测 40ms 匹配，留有舒适余量
 - D-08 分支保护：test-node (20)/test-node (22) 设为 required status checks 需在 GitHub UI 手动配置
 
+### Phase 09 Plan 01 Decisions (2026-04-03)
+
+- Zod v4 (not v3)：smaller bundle (5.36kb vs 12.47kb gzipped)，z.prettifyError 替代废弃的 error.format()
+- tsconfig types:["node"] 显式声明：strict 模式下 process.stderr.write 需要 @types/node 明确解析
+- parseWithReadableError 从 state.ts 导出：Phase 10 character.ts 可复用 vocab 验证错误处理
+
+### Phase 10 Plan 02 Decisions (2026-04-03)
+
+- vocabDir defaults to path.join(__dirname, '../vocab')：esbuild CJS bundle 保留 __dirname，在 dev 和 dist/ 安装场景下路径均正确（D-01）
+- private pick() in character.ts：Wave 1 并行执行时 trigger.ts 仍是 export {} stub，避免跨模块导入导致 typecheck 失败
+- getGitEventMessage 用 optional chaining：git_events 字段缺失时返回 null 而非 throw，与 Python fallback 行为对齐
+
+### Phase 10 Plan 04 Decisions (2026-04-03)
+
+- resolveMessage 返回 `{ message: string; tier: string }` 对象（非 tuple）— Phase 11 statusline.ts 依赖此结构
+- pick/pickDifferent 接受可选 `rng: () => number = Math.random` — Phase 12 注入 `() => 0` 实现确定性测试（D-06/D-07）
+- per-repo 隔离用 `!== null` 检查 repo_path（非 `!repo_path`），空字符串是有效 repo 路径（P5 陷阱）
+
+### Phase 12 Plan 01 Decisions (2026-04-04)
+
+- ts-node 作为 devDependency 必须安装：jest.config.ts 是 TypeScript 文件，Jest 加载时需要 ts-node 解析（Rule 3 自动修复）
+- resolvePaths(env?) 统一路径解析：三个导出函数均通过此 helper 获得路径，env 参数为测试注入临时目录（D-12 模式）
+- saveState/loadConfig/loadState/loadStats 接受显式路径参数：消除模块级常量，让函数在测试中可使用任意路径调用
+
+### Phase 13 Plan 01 Decisions (2026-04-04)
+
+- setup/unsetup 脚本名（非 install/uninstall）：npm 保留 install 为生命周期 hook，会在 npm install 时自动触发意外副作用
+- patchSettings 接受 opts 对象 {settingsPath, installDir} 路径覆盖：与 D-12 env-injection 模式一致，让函数在测试中可用任意路径调用
+- process.execPath 获取 node 绝对路径：直接来自当前进程，nvm/fnm 环境下比 which node 更可靠
+- install.js 和 uninstall.js 保持独立（无共享 lib）：逻辑量小，独立更简单直观
+
 ### Critical Pitfalls to Watch
 
 - P1: 生产必须用 `node dist/statusline.js`（~40ms），禁止 `npx tsx`（~1.5s）
@@ -88,8 +119,19 @@ Progress: [██████████] 100% (2/2 plans in Phase 08 complete)
 
 无
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260404-g3n | fix loadConfig tests, requirements Zod language, remove parseWithReadableError | 2026-04-04 | 205b70f | [260404-g3n-fix-loadconfig-tests-requirements-zod-la](./quick/260404-g3n-fix-loadconfig-tests-requirements-zod-la/) |
+| 260404-icc | updateMode/debugMode重构、applyTokenFallback提取、loadConfig stderr修复、EXDEV测试、角色三层回退测试、parseState测试、TODOS T1删除 | 2026-04-04 | f996ee4 | [260404-icc-updatemode-debugmode-applytokenfallback-](./quick/260404-icc-updatemode-debugmode-applytokenfallback-/) |
+| 260404-k51 | config版本字段(T2)、/cheer git统计显示+优雅降级(T3)、T4关闭为TypeScript迁移取代 | 2026-04-04 | 8fa7eee | [260404-k51-todos](./quick/260404-k51-todos/) |
+| 260404-kew | 清理 leijun.json 22 处违禁词（遥遥领先/行业第一/行业最强/没有之一） | 2026-04-04 | e18dd7c | [260404-kew-leijun](./quick/260404-kew-leijun/) |
+| 260404-ksq | 全面重写 leijun.json 2024-2025 真实雷军风格（同学们×142、Are U OK×5、说真的×42、不服跑一跑/心动/厚道/All in/永远相信） | 2026-04-04 | e4b01e8 | [260404-ksq-leijun-2024-2025](./quick/260404-ksq-leijun-2024-2025/) |
+
 ## Session Continuity
 
-Last session: 2026-04-03T07:24:44.289Z
-Stopped at: Completed 08-02-PLAN.md
+Last activity: 2026-04-04 - Completed quick task 260404-ksq: leijun.json 2024-2025 风格全面重写
+Last session: 2026-04-04T07:04:47Z
+Stopped at: Completed quick/260404-ksq-PLAN.md
 Resume with: `/gsd:execute-phase 8`

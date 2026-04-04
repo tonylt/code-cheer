@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 import random
 from datetime import datetime
 
