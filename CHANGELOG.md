@@ -27,3 +27,9 @@ All notable changes to code-pal are documented here.
 - `install.js` copies `package.json` to install directory as required by CI smoke test
 - `unsetup` script removes the Python legacy `statusLine` entry from `settings.json`
 - `patchSettings` atomic write uses `writeFileSync(tmp) + renameSync` to prevent half-written settings on crash
+- `last_git_events` now resets on new day (was: only reset on repo change), so `first_commit_today` and milestone events fire correctly every day
+- `ctxPct` NaN guard in `display.ts` prevents `RangeError` crash when `used_percentage` is non-numeric
+- `install.js` `spawnSync` null status check (`|| .error`) correctly detects spawn failures (was: `status: null` passed silently)
+- `loadConfig` catch block now logs all non-ENOENT errors to stderr (was: only `SyntaxError`), so Zod validation errors surface to users
+- `applyTokenFallback` extracted as shared helper; `runUpdateCore` eliminates ~70 lines of duplication between `updateMode` and `debugMode`
+- `parseState` returns `DEFAULT_STATE` for non-object inputs instead of throwing
