@@ -6,6 +6,8 @@
 
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
+code-cheer is **reactive**, not decorative. Unlike passive companions, it watches your coding activity — first commit of the day, milestone pushes, late-night sessions, near-full context window — and responds in character.
+
 - Git-aware reactions — first commit of the day, commit milestones (5/10/20), late-night commits, big diffs, and more trigger character-specific lines
 - 4 anime characters — Nova, Luna, Mochi, Iris, each with a distinct personality. Switch anytime with `/cheer`
 - Live stats — model, project folder, token count, and a context window progress bar at a glance
@@ -161,13 +163,13 @@ npm test
 
 ## Contributing
 
-Pull requests welcome! Some ideas:
+Pull requests welcome! The easiest way to contribute is adding a new character or vocab lines — no TypeScript required, just a JSON file (plus one line of config). See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide.
+
+Some ideas:
 - New characters
 - New vocab lines
 - Language packs
 - Bug fixes
-
-See [Tests](#tests) above before submitting.
 
 ---
 
