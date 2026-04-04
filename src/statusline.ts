@@ -258,8 +258,9 @@ async function runUpdateCore(
 
   // D-10: session_start same-day preserve, cross-day reset
   const existingSessionStart = state.session_start
+  const isNewDay = shouldResetSessionStart(existingSessionStart)
   let sessionStartVal: string
-  if (shouldResetSessionStart(existingSessionStart)) {
+  if (isNewDay) {
     sessionStartVal = new Date().toISOString()
   } else {
     sessionStartVal = existingSessionStart!
@@ -283,9 +284,10 @@ async function runUpdateCore(
   const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
 
   // Compute git state for persistence
+  // Reset on repo change OR new day (prevents cross-day event dedup leakage)
   const currentRepo = gitContext.repo_path
   let baseEvents: string[]
-  if (currentRepo !== null && currentRepo !== state.last_repo) {
+  if ((currentRepo !== null && currentRepo !== state.last_repo) || isNewDay) {
     baseEvents = []
   } else {
     const raw = state.last_git_events
