@@ -113,6 +113,7 @@ export function render(
     const usedPct = ctxObj['used_percentage']
     if (usedPct !== undefined && usedPct !== null) {
       ctxPct = Number(usedPct)
+      if (isNaN(ctxPct)) ctxPct = undefined
     }
   }
 

@@ -29,7 +29,7 @@ function checkDeps() {
 
   // git available
   const git = spawnSync('git', ['--version'], { encoding: 'utf8' })
-  if (git.status !== 0) {
+  if (git.status !== 0 || git.error) {
     die('git is required but not found. Install git first.')
   }
 }
@@ -41,7 +41,7 @@ function runBuild() {
     cwd: REPO_DIR,
     shell: true,
   })
-  if (result.status !== 0) {
+  if (result.status !== 0 || result.error) {
     die('Build failed. Run `npm run build` manually to see errors.')
   }
 }
