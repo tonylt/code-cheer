@@ -1,4 +1,4 @@
-# 切换 code-cheer 应援角色（nova / luna / mochi / iris / leijun）
+# 切换 code-cheer 应援角色（nova / luna / mochi / iris）
 # v3.0+: install with `npm run setup` (TypeScript version)
 # Writes version field to config.json; displays git commit stats from state.json if commits_today > 0
 ARGUMENT="$ARGUMENTS"
@@ -11,7 +11,7 @@ If ARGUMENT is empty, use AskUserQuestion with these 4 options:
 
 The tool will automatically append an "Other" option. If the user selects Other and types "leijun" or "雷总", treat it as leijun.
 
-If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi / iris / leijun"
+If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi / iris"
 
 Once a character is chosen (NAME = lowercase chosen name):
 
