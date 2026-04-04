@@ -2,6 +2,12 @@
 
 ## Open
 
+### T11: GitHub 仓库 avatar（P1）
+**From:** `/office-hours` plan「Nova 视觉标识系统」Deliverable 1（deferred）
+**Scope:** 512×512px pixel art Nova avatar for GitHub repository & npm package profile picture
+**Needs:** Aseprite / AI pixel art tools (Pal, Pixelicious, etc.) — cannot be generated via pure code
+**Design ref:** DESIGN.md — Nova color `#f4a900`, warm dark bg `#1a1410`, kaomoji `(*>ω<)`, Courier New / pixel font
+
 ## Completed
 
 ### T5: vocab 漂移检测测试
