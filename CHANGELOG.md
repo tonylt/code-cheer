@@ -7,8 +7,12 @@ All notable changes to code-cheer (formerly code-pal) are documented here.
 ### Added
 
 - **English vocab support**: set `"language": "en"` in `~/.claude/code-cheer/config.json` to switch all characters to English messages. English vocab files (`.en.json`) added for all 5 characters; falls back to Chinese if English file is missing
+- **Locale auto-detection**: when `language` is not set in `config.json`, the `LANG` environment variable is used to infer the language — `zh_*` → Chinese, any other non-empty value → English, unset → default (Chinese)
 - **MIT License**: project is now open-source under MIT
 - **CONTRIBUTING.md**: 5-step guide for adding new characters (vocab JSON → config.ts → build → cheer.md → tests)
+- **CONTRIBUTING.md — Adding a new language**: step-by-step guide for adding translations (file naming, key parity, registering a new language code, updating READMEs)
+- **Invalid language warning**: `config.json` with an unrecognised `language` value (e.g. `"french"`) now prints a `[code-cheer]` warning to stderr instead of silently ignoring it
+- **Vocab drift tests**: CI catches key-structure mismatches between `*.json` (Chinese) and `*.en.json` (English) vocab files for all 5 characters
 - **GitHub issue templates**: `bug_report.yml` and `new_character.yml` for structured community contributions
 - **TUI width protection**: message truncates at 40 chars, model name and cwd truncate at 20 chars to stay within ~80-column terminals
 - **Progress bar color tiers**: context window bar turns yellow (`≥80%`) and bright red (`≥95%`) to match the vocab warning/critical tiers
