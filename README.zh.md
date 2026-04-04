@@ -1,3 +1,5 @@
+[![CI](https://github.com/tonylt/code-cheer/actions/workflows/ci.yml/badge.svg)](https://github.com/tonylt/code-cheer/actions/workflows/ci.yml)
+
 [English](./README.md)
 
 # code-cheer
