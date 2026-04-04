@@ -82,3 +82,13 @@ jobs:
             exit 1
           fi
           echo "PASS: cold start ${MS}ms"
+
+      - name: Smoke test setup script
+        if: matrix.node-version == '20'
+        run: |
+          npm run setup
+          test -f "$HOME/.claude/code-pal/dist/statusline.js" || (echo "setup did not install dist/statusline.js" && exit 1)
+          test -f "$HOME/.claude/code-pal/package.json" || (echo "setup did not install package.json" && exit 1)
+          node "$HOME/.claude/code-pal/dist/statusline.js" || (echo "installed statusline.js failed to run" && exit 1)
+          npm run unsetup
+          test ! -d "$HOME/.claude/code-pal" || (echo "unsetup left files behind" && exit 1)
