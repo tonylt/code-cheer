@@ -20,12 +20,12 @@
   <!-- Centre — subtitle -->
   <text x="360" y="130"
         font-size="14"
-        fill="#666666">reactive anime companion for Claude Code</text>
+        fill="#9a8f7a">reactive anime companion for Claude Code</text>
 
   <!-- Centre — feature line -->
   <text x="360" y="160"
         font-size="12"
-        fill="#555555">* watches your commits * token usage * late-night sessions</text>
+        fill="#9a8f7a">* watches your commits * token usage * late-night sessions</text>
 
   <!-- Right — character selector -->
   <text x="980" y="90"
