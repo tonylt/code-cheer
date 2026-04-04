@@ -12,21 +12,45 @@ function pick(options: string[]): string {
 }
 
 /**
+ * Resolve the vocab file path for a character, with English fallback.
+ *
+ * @param dir - Vocab directory
+ * @param name - Character name
+ * @param lang - Optional language ('zh' | 'en'); defaults to zh behavior
+ * @returns Absolute path to the vocab JSON file to load
+ */
+function resolveVocabPath(dir: string, name: string, lang?: 'zh' | 'en'): string {
+  if (lang === 'en') {
+    const enPath = path.join(dir, `${name}.en.json`)
+    if (fs.existsSync(enPath)) {
+      return enPath
+    }
+    // Fallback to zh vocab with warning
+    const zhPath = path.join(dir, `${name}.json`)
+    process.stderr.write(`[code-cheer] English vocab not found for '${name}', falling back to zh\n`)
+    return zhPath
+  }
+  return path.join(dir, `${name}.json`)
+}
+
+/**
  * Load and validate a character vocab JSON.
  *
  * @param name - Character name (e.g. 'nova', 'luna', 'mochi', 'iris', 'leijun')
  * @param vocabDir - Optional override for vocab directory path.
  *   Defaults to path.join(__dirname, '../vocab') (D-01, D-02).
  *   Pass a custom path in tests to inject fixture data.
+ * @param lang - Optional language override ('zh' | 'en'). Defaults to 'zh' behavior.
+ *   When 'en', loads ${name}.en.json; falls back to ${name}.json if not found.
  * @returns Validated VocabData object
  * @throws Error if file not found or schema validation fails
  */
-export function loadCharacter(name: string, vocabDir?: string): VocabData {
+export function loadCharacter(name: string, vocabDir?: string, lang?: 'zh' | 'en'): VocabData {
   if (name.includes('/') || name.includes('\\') || name.includes('..')) {
     throw new Error(`Invalid character name: '${name}'`)
   }
   const dir = vocabDir !== undefined ? vocabDir : path.join(__dirname, '../vocab')
-  const vocabPath = path.join(dir, `${name}.json`)
+  const vocabPath = resolveVocabPath(dir, name, lang)
 
   if (!fs.existsSync(vocabPath)) {
     throw new Error(`Character '${name}' not found at ${vocabPath}`)
