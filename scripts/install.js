@@ -62,7 +62,9 @@ function copyFiles() {
     recursive: true,
     force: true,
   })
-  ok('Copied dist/ and vocab/')
+  // Copy package.json (required by CI smoke test)
+  fs.copyFileSync(path.join(REPO_DIR, 'package.json'), path.join(INSTALL_DIR, 'package.json'))
+  ok('Copied dist/, vocab/, and package.json')
 
   // Write default config.json if not exists
   const configPath = path.join(INSTALL_DIR, 'config.json')

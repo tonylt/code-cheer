@@ -77,11 +77,10 @@ function unpatchSettings(opts) {
   fs.renameSync(tmp, settingsPath)
   ok('settings.json cleaned')
 
-  // Remove dist/
-  const distDir = path.join(installDir, 'dist')
-  if (fs.existsSync(distDir)) {
-    fs.rmSync(distDir, { recursive: true, force: true })
-    ok('Removed dist/')
+  // Remove entire install directory (dist/, vocab/, config.json, state.json, etc.)
+  if (fs.existsSync(installDir)) {
+    fs.rmSync(installDir, { recursive: true, force: true })
+    ok('Removed ' + installDir)
   }
 }
 
