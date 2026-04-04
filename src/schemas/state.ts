@@ -22,17 +22,6 @@ function validationError(label: string, detail: string): Error {
   return new Error(`Invalid ${label}: ${detail}`)
 }
 
-// D-08: validate and throw with readable error, caller decides fallback
-// D-09: vocab validation throws directly
-export function parseWithReadableError<T>(
-  _schema: unknown,
-  _raw: unknown,
-  _label: string,
-): T {
-  // Legacy stub — replaced by parseConfig/parseVocab. Should not be called at runtime.
-  throw new Error('parseWithReadableError: use parseConfig or parseVocab instead')
-}
-
 // D-07: null/undefined returns default, valid data parsed, invalid throws
 export function parseState(raw: unknown): StateType {
   if (raw === null || raw === undefined) {

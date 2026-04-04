@@ -324,7 +324,7 @@ describe('loadConfig', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('outputs Zod error to stderr when character is invalid', () => {
+  it('outputs validation error to stderr when character is invalid', () => {
     const configPath = path.join(tmpDir, 'config.json')
     fs.writeFileSync(configPath, JSON.stringify({ character: 'novaa' }))
 
