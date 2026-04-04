@@ -177,7 +177,7 @@ function readStdinString(): Promise<string> {
     process.stdin.setEncoding('utf-8')
     process.stdin.on('data', (chunk: string) => { data += chunk })
     process.stdin.on('end', () => { resolve(data) })
-    setTimeout(() => resolve(data), 50)
+    setTimeout(() => resolve(data), 5)
   })
 }
 
@@ -458,8 +458,7 @@ async function main(): Promise<void> {
   const isDebug = process.argv.includes('--debug-events')
   const isUpdate = process.argv.includes('--update') || isDebug
 
-  // Only read stdin in update/debug mode — renderMode is polled rapidly and must not block
-  const stdin = (isUpdate || isDebug) ? await readStdinString() : ''
+  const stdin = await readStdinString()
 
   if (isDebug) {
     await debugMode(stdin)
