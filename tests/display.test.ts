@@ -139,11 +139,10 @@ describe('render', () => {
     expect(line2).toContain('unknown')
   })
 
-  it('strips claude- prefix from model string', () => {
+  it('shows model string as-is', () => {
     const output = render(CHAR, 'msg', { model: 'claude-sonnet-4-6' }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('sonnet-4-6')
-    expect(line2).not.toContain('claude-sonnet')
+    expect(line2).toContain('claude-sonnet-4-6')
   })
 
   it('uses display_name from model object', () => {
