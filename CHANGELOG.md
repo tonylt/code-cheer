@@ -2,6 +2,25 @@
 
 All notable changes to code-cheer (formerly code-pal) are documented here.
 
+## [3.1.1] - 2026-04-05
+
+### Added
+
+- **DESIGN.md**: Warm Pixel-Editorial design system — background `#1a1410`, primary amber `#f4a900`, muted warm `#9a8f7a`, and per-character colors for Nova/Luna/Iris/Mochi. Single source of truth for all visual decisions
+- **README hero banner**: `assets/banner.svg` (1280×240) rendered via `node scripts/gen-banner.js` — shows Nova kaomoji, project name, subtitle, and character selector
+- **ASCII install banner**: `printBanner()` in `scripts/install.js` displays character name, install path, and a random vocab tagline after successful installation; wrapped in `try/catch` so banner failure never breaks install
+- **gen-banner.js**: zero-dependency Node.js script to regenerate `assets/banner.svg` from DESIGN.md colors
+
+### Fixed
+
+- **LANG auto-inference removed**: `LANG=C.UTF-8` (POSIX/Docker) and `LANG=en_US.UTF-8` (English locale) no longer auto-set `language: 'en'` for users who haven't explicitly configured a language in `config.json`. Only an explicit `"language"` key in config takes effect
+- **banner.svg colors aligned with DESIGN.md**: background `#111111`→`#1a1410`, subtitle/feature text `#666666`/`#555555`→`#9a8f7a`, character list uses per-character colors at 55% opacity instead of anonymous gray
+- **gen-banner.js template synced**: generator script now produces output identical to `assets/banner.svg`
+
+### Docs
+
+- **CONTRIBUTING.md**: documents the two-place update required in `parseConfig` when adding a new language code (warning check + ternary chain)
+
 ## [3.1.0] - 2026-04-04
 
 ### Added
