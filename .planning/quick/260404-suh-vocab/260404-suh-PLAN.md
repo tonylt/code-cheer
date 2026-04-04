@@ -227,3 +227,33 @@ node -e "
 <output>
 完成后创建 `.planning/quick/260404-suh-vocab/260404-suh-SUMMARY.md`
 </output>
+
+<!-- /autoplan restore point: /Users/tony/.gstack/projects/tonylt-code-cheer/feat-v3.1.0-open-source-release-autoplan-restore-20260404-210314.md -->
+
+## Decision Audit Trail
+
+| # | Phase | Decision | Classification | Principle | Rationale | Rejected |
+|---|-------|----------|----------------|-----------|-----------|---------|
+| 1 | CEO | 前提全部有效，无挑战 | Mechanical | P6 | 前提逻辑一致，无矛盾 | 无 |
+| 2 | CEO | `.en.json` 后缀方案最优 | Mechanical | P5 | 零 runtime dep，扩展简单 | 内嵌lang key, i18n lib |
+| 3 | CEO | 英文 vocab 需求合理（开源发布） | Taste Decision | P1 | 开源可见性，英文 README 存在 | 等待需求验证 |
+| 4 | CEO | vocab 漂移检测 → TODOS.md T5 | Mechanical | P3 | 现有 5 文件结构一致；工具集成推迟 | 立即修复 |
+| 5 | CEO | locale 自动检测 → TODOS.md T6 | Mechanical | P5 | 明确优于魔法；v3.1.0 先不做 | 立即实现 |
+| 6 | Eng | resolveVocabPath 侧效应可接受 | Mechanical | P5 | 私有函数，副作用有限；元组重构复杂度不值得 | 元组方案 |
+| 7 | Eng | 错误标签硬编码 → LOW，推迟 | Mechanical | P5 | 用户感知影响极小，非紧急 | 立即修复 |
+| 8 | Eng | statusline 集成测试缺口 → TODOS.md T7 | Mechanical | P1 | 完整性要求；4个调用点未测试 | 接受风险 |
+| 9 | DX | 无效 language 静默忽略 vs throw | Taste Decision | P5 | 计划明确选择向后兼容；throw 破坏现有用法 | 验证+throw |
+| 10 | DX | README language 文档缺失 → HIGH | Mechanical | P1 | 英文用户无法发现功能 | 接受文档债务 |
+| 11 | DX | CONTRIBUTING 语言贡献指引缺失 → MEDIUM | Mechanical | P1 | 社区贡献需要指引 | 接受 |
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` | Scope & strategy | 1 | issues_open | vocab 漂移 T5, locale 自动检测 T6, TASTE: 英文需求时机 |
+| Codex Review | `/codex review` | Independent 2nd opinion | 0 | unavailable (503) | — |
+| Eng Review | `/plan-eng-review` | Architecture & tests | 1 | issues_open | statusline 集成测试 T7, 错误标签 LOW |
+| Design Review | skipped | No UI scope | 0 | skipped | — |
+| DX Review | `/plan-devex-review` | Developer experience | 1 | issues_open | README 文档 T8, CONTRIBUTING T9, TASTE: 无效值处理 |
+
+**VERDICT:** DONE_WITH_CONCERNS — 技术实现正确 (190/190 测试通过)，3 个 TODOS 需后续处理 (T5/T7/T8)，2 个 TASTE decisions 留给用户确认。
