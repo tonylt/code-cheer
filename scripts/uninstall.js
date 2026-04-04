@@ -24,7 +24,13 @@ function unpatchSettings(opts) {
 
   if (!fs.existsSync(settingsPath)) return
 
-  const data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
+  let data
+  try {
+    data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
+  } catch {
+    process.stderr.write('[code-pal] settings.json is malformed — skipping unpatch\n')
+    return
+  }
   fs.copyFileSync(settingsPath, settingsPath + '.bak')
 
   // Restore statusLine from backup or remove if ours

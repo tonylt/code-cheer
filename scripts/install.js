@@ -96,14 +96,18 @@ function patchSettings(nodeBin, opts) {
   const installDir   = (opts && opts.installDir)   || INSTALL_DIR
   const node         = nodeBin || process.execPath
 
-  const statusCmd = node + ' ' + installDir + '/dist/statusline.js'
-  const updateCmd = node + ' ' + installDir + '/dist/statusline.js --update'
+  const statusCmd = '"' + node + '" "' + installDir + '/dist/statusline.js"'
+  const updateCmd = '"' + node + '" "' + installDir + '/dist/statusline.js" --update'
 
   // Load or create
   let data = {}
   if (fs.existsSync(settingsPath)) {
     fs.copyFileSync(settingsPath, settingsPath + '.bak')
-    data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
+    try {
+      data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
+    } catch {
+      process.stderr.write('[code-pal] settings.json is malformed — starting fresh\n')
+    }
   } else {
     // Ensure parent directory exists
     fs.mkdirSync(path.dirname(settingsPath), { recursive: true })
