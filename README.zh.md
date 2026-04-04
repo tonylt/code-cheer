@@ -6,8 +6,10 @@
 
 **Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
 
+code-cheer **响应你的编程行为**，而不是被动摆设。它感知你今天的首次提交、里程碑推送、深夜编码、上下文窗口即将用完——并以角色专属的方式反应。
+
 - Git 事件感知 — 首次提交、提交里程碑（5/10/20 次）、深夜提交、大 diff 等自动触发角色专属台词
-- 5 个动漫角色 — Nova、Luna、Mochi、Iris、雷军，各具独特性格，随时用 `/cheer` 切换
+- 4 个动漫角色 — Nova、Luna、Mochi、Iris，各具独特性格，随时用 `/cheer` 切换
 - 实时状态栏 — 模型名、当前项目目录、token 用量、上下文进度条一行看清
 
 ---
@@ -55,7 +57,6 @@ npm run setup
 /cheer luna
 /cheer mochi
 /cheer iris
-/cheer leijun
 ```
 
 ---
@@ -68,7 +69,6 @@ npm run setup
 | **Luna 月野** | `(´• ω •\`)` | 温柔治愈，陪伴系 |
 | **Mochi 年糕** | `(=^･ω･^=)` | 软萌奶凶，傲娇猫系 |
 | **Iris 晴** | `(￣ω￣)` | 女王御姐，冷静挑衅 |
-| **雷军** | `(ง •_•)ง` | "Are you OK" 能量 |
 
 ---
 
@@ -107,7 +107,6 @@ Statusline polls node dist/statusline.js
 ~/.claude/code-cheer/vocab/luna.json
 ~/.claude/code-cheer/vocab/mochi.json
 ~/.claude/code-cheer/vocab/iris.json
-~/.claude/code-cheer/vocab/leijun.json
 ```
 
 每个文件包含以下触发类别：`post_tool`（工具后）、`time`（时段：morning/afternoon/evening/midnight）、`usage`（用量告警：warning/critical）、`random`（随机兜底）。
@@ -144,8 +143,7 @@ code-cheer/
 │   ├── nova.json
 │   ├── luna.json
 │   ├── mochi.json
-│   ├── iris.json
-│   └── leijun.json
+│   └── iris.json
 ├── commands/
 │   └── cheer.md        # /cheer 斜杠命令
 └── tests/              # Jest 测试套件（167 个测试）
@@ -165,13 +163,13 @@ npm test
 
 ## 贡献
 
-欢迎提 Pull Request！一些想法：
+欢迎提 Pull Request！最简单的贡献方式是新增角色或台词——不需要写 TypeScript，只需一个 JSON 文件（加一行配置）。详见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+
+一些想法：
 - 新角色
 - 新台词
 - 多语言台词包
 - Bug 修复
-
-提交前请参阅上方[测试](#测试)章节。
 
 ---
 
