@@ -6,7 +6,7 @@ import { loadCharacter } from './core/character'
 import { loadGitContext } from './core/gitContext'
 import type { GitContextResult } from './core/gitContext'
 import { resolveMessage, detectGitEvents, getTimeSlot } from './core/trigger'
-import { parseState, DEFAULT_STATE } from './schemas'
+import { parseState, DEFAULT_STATE, ConfigSchema, parseWithReadableError } from './schemas'
 import type { VocabData, StateType, ConfigType } from './schemas'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -28,12 +28,12 @@ function resolvePaths(env?: NodeJS.ProcessEnv) {
 
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
-function loadConfig(configPath: string): { character: string } {
+export function loadConfig(configPath: string): ConfigType {
   try {
     const raw = fs.readFileSync(configPath, 'utf-8')
-    return JSON.parse(raw) as { character: string }
+    return parseWithReadableError(ConfigSchema, JSON.parse(raw), 'config.json')
   } catch {
-    return { character: 'nova' as const }
+    return { character: 'nova' }
   }
 }
 
