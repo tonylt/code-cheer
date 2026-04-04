@@ -61,6 +61,26 @@ Restart Claude Code. The statusline activates immediately.
 
 ---
 
+## Configuration
+
+Edit `~/.claude/code-cheer/config.json` to customize behavior:
+
+```json
+{
+  "character": "nova",
+  "language": "en"
+}
+```
+
+| Field | Values | Default | Description |
+|-------|--------|---------|-------------|
+| `character` | `nova`, `luna`, `mochi`, `iris` | `nova` | Active character |
+| `language` | `"zh"`, `"en"` | `"zh"` | Vocab language — Chinese or English |
+
+Each character has both Chinese (`vocab/nova.json`) and English (`vocab/nova.en.json`) vocab files. Setting `"language": "en"` switches all character lines to English.
+
+---
+
 ## Characters
 
 | Character | Emoji | Style |
@@ -103,10 +123,14 @@ Statusline polls node dist/statusline.js
 Edit any character's JSON file to add your own lines:
 
 ```bash
-~/.claude/code-cheer/vocab/nova.json
+~/.claude/code-cheer/vocab/nova.json      # Chinese (default)
+~/.claude/code-cheer/vocab/nova.en.json   # English
 ~/.claude/code-cheer/vocab/luna.json
+~/.claude/code-cheer/vocab/luna.en.json
 ~/.claude/code-cheer/vocab/mochi.json
+~/.claude/code-cheer/vocab/mochi.en.json
 ~/.claude/code-cheer/vocab/iris.json
+~/.claude/code-cheer/vocab/iris.en.json
 ```
 
 Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/evening/midnight), `usage` (warning/critical), and `random`.
@@ -140,10 +164,14 @@ code-cheer/
 ├── dist/
 │   └── statusline.js   # esbuild bundle (gitignored, built by npm run build)
 ├── vocab/
-│   ├── nova.json
+│   ├── nova.json        # Chinese vocab
+│   ├── nova.en.json     # English vocab
 │   ├── luna.json
+│   ├── luna.en.json
 │   ├── mochi.json
-│   └── iris.json
+│   ├── mochi.en.json
+│   ├── iris.json
+│   └── iris.en.json
 ├── commands/
 │   └── cheer.md        # /cheer slash command
 └── tests/              # Jest test suite (167 tests)
