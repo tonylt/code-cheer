@@ -1,9 +1,9 @@
-// Schema constants (value exports)
-export { VocabSchema } from './vocab'
-export { StateSchema, DEFAULT_STATE, parseState, parseWithReadableError } from './state'
-export { ConfigSchema, CHARACTER_NAMES } from './config'
+// Value exports
+export { parseVocab, GIT_EVENT_KEYS } from './vocab'
+export { DEFAULT_STATE, parseState, parseWithReadableError } from './state'
+export { parseConfig, CHARACTER_NAMES } from './config'
 
 // Type exports
-export type { VocabData } from './vocab'
+export type { VocabData, GitEventKey } from './vocab'
 export type { StateType } from './state'
 export type { ConfigType } from './config'

@@ -6,7 +6,7 @@ import { loadCharacter } from './core/character'
 import { loadGitContext } from './core/gitContext'
 import type { GitContextResult } from './core/gitContext'
 import { resolveMessage, detectGitEvents, getTimeSlot } from './core/trigger'
-import { parseState, DEFAULT_STATE, ConfigSchema, parseWithReadableError } from './schemas'
+import { parseState, DEFAULT_STATE, parseConfig } from './schemas'
 import type { VocabData, StateType, ConfigType } from './schemas'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -31,7 +31,7 @@ function resolvePaths(env?: NodeJS.ProcessEnv) {
 export function loadConfig(configPath: string): ConfigType {
   try {
     const raw = fs.readFileSync(configPath, 'utf-8')
-    return parseWithReadableError(ConfigSchema, JSON.parse(raw), 'config.json')
+    return parseConfig(JSON.parse(raw), 'config.json')
   } catch {
     return { character: 'nova' }
   }
@@ -458,8 +458,8 @@ async function main(): Promise<void> {
   const isDebug = process.argv.includes('--debug-events')
   const isUpdate = process.argv.includes('--update') || isDebug
 
-  // Always read stdin — mirrors Python which calls read_stdin_json() in all modes
-  const stdin = await readStdinString()
+  // Only read stdin in update/debug mode — renderMode is polled rapidly and must not block
+  const stdin = (isUpdate || isDebug) ? await readStdinString() : ''
 
   if (isDebug) {
     await debugMode(stdin)

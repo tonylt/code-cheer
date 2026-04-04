@@ -1,7 +1,5 @@
-import { z } from 'zod'
-
-// D-03: 8 fixed git_event keys, each z.array(z.string()).optional()
-const GIT_EVENT_KEYS = [
+// D-03: 8 fixed git_event keys, each string[] optional
+export const GIT_EVENT_KEYS = [
   'first_commit_today',
   'milestone_5',
   'milestone_10',
@@ -12,43 +10,96 @@ const GIT_EVENT_KEYS = [
   'long_day',
 ] as const
 
-const GitEventsSchema = z.object(
-  Object.fromEntries(
-    GIT_EVENT_KEYS.map((k) => [k, z.array(z.string()).optional()])
-  ) as Record<(typeof GIT_EVENT_KEYS)[number], z.ZodOptional<z.ZodArray<z.ZodString>>>
-).partial()
+export type GitEventKey = typeof GIT_EVENT_KEYS[number]
 
 // D-04: triggers sub-fields all optional
-const TimeSchema = z.object({
-  morning: z.array(z.string()).optional(),
-  afternoon: z.array(z.string()).optional(),
-  evening: z.array(z.string()).optional(),
-  midnight: z.array(z.string()).optional(),
-}).partial()
+export type VocabData = {
+  meta: {
+    name: string
+    ascii: string
+    style: string
+    color: string
+  }
+  triggers?: {
+    random?: string[]
+    post_tool?: string[]
+    time?: {
+      morning?: string[]
+      afternoon?: string[]
+      evening?: string[]
+      midnight?: string[]
+    }
+    usage?: {
+      warning?: string[]
+      critical?: string[]
+    }
+  }
+  git_events?: Partial<Record<GitEventKey, string[]>>
+}
 
-const UsageSchema = z.object({
-  warning: z.array(z.string()).optional(),
-  critical: z.array(z.string()).optional(),
-  // No "normal" — normal tier uses random messages (per CONTEXT.md specifics)
-}).partial()
+// Validate an array field: must be string[] if present
+function optStrArr(val: unknown): string[] | undefined {
+  if (val === undefined || val === null) return undefined
+  if (!Array.isArray(val)) return undefined
+  return (val as unknown[]).filter((x): x is string => typeof x === 'string')
+}
 
-const TriggersSchema = z.object({
-  random: z.array(z.string()).optional(),
-  post_tool: z.array(z.string()).optional(),
-  time: TimeSchema.optional(),
-  usage: UsageSchema.optional(),
-}).partial()
+// D-05: meta fields all required — throws if missing
+export function parseVocab(raw: unknown, label: string): VocabData {
+  if (!raw || typeof raw !== 'object') {
+    process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
+    throw new Error(`Invalid ${label}: expected object`)
+  }
+  const obj = raw as Record<string, unknown>
+  const meta = obj.meta as Record<string, unknown> | undefined
+  if (!meta || typeof meta !== 'object') {
+    process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
+    throw new Error(`Invalid ${label}: missing meta`)
+  }
+  for (const key of ['name', 'ascii', 'style', 'color'] as const) {
+    if (typeof meta[key] !== 'string') {
+      process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected string\n  → at meta.${key}\n`)
+      throw new Error(`Invalid ${label}: meta.${key} must be string`)
+    }
+  }
 
-// D-05: meta fields all required
-export const VocabSchema = z.object({
-  meta: z.object({
-    name: z.string(),
-    ascii: z.string(),
-    style: z.string(),
-    color: z.string(),
-  }),
-  triggers: TriggersSchema.optional(),
-  git_events: GitEventsSchema.optional(),
-})
+  const tr = obj.triggers as Record<string, unknown> | undefined
+  const triggers: VocabData['triggers'] = tr ? {
+    random:    optStrArr(tr['random']),
+    post_tool: optStrArr(tr['post_tool']),
+    time: tr['time'] && typeof tr['time'] === 'object'
+      ? {
+          morning:   optStrArr((tr['time'] as Record<string, unknown>)['morning']),
+          afternoon: optStrArr((tr['time'] as Record<string, unknown>)['afternoon']),
+          evening:   optStrArr((tr['time'] as Record<string, unknown>)['evening']),
+          midnight:  optStrArr((tr['time'] as Record<string, unknown>)['midnight']),
+        }
+      : undefined,
+    usage: tr['usage'] && typeof tr['usage'] === 'object'
+      ? {
+          warning:  optStrArr((tr['usage'] as Record<string, unknown>)['warning']),
+          critical: optStrArr((tr['usage'] as Record<string, unknown>)['critical']),
+        }
+      : undefined,
+  } : undefined
 
-export type VocabData = z.infer<typeof VocabSchema>
+  const ge = obj.git_events as Record<string, unknown> | undefined
+  const git_events: VocabData['git_events'] = ge
+    ? Object.fromEntries(
+        GIT_EVENT_KEYS
+          .map((k) => [k, optStrArr(ge[k])])
+          .filter(([, v]) => v !== undefined)
+      ) as Partial<Record<GitEventKey, string[]>>
+    : undefined
+
+  return {
+    meta: {
+      name:  meta['name']  as string,
+      ascii: meta['ascii'] as string,
+      style: meta['style'] as string,
+      color: meta['color'] as string,
+    },
+    triggers,
+    git_events,
+  }
+}

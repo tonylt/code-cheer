@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { VocabSchema, parseWithReadableError } from '../schemas'
+import { parseVocab } from '../schemas'
 import type { VocabData } from '../schemas'
 
 /**
@@ -32,7 +32,7 @@ export function loadCharacter(name: string, vocabDir?: string): VocabData {
   const content = fs.readFileSync(vocabPath, 'utf-8')
   const parsed: unknown = JSON.parse(content)
 
-  return parseWithReadableError(VocabSchema, parsed, `vocab/${name}.json`)
+  return parseVocab(parsed, `vocab/${name}.json`)
 }
 
 /**
