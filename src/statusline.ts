@@ -28,16 +28,27 @@ function resolvePaths(env?: NodeJS.ProcessEnv) {
 
 // ─── Loaders ─────────────────────────────────────────────────────────────────
 
-export function loadConfig(configPath: string): ConfigType {
+export function loadConfig(configPath: string, env?: NodeJS.ProcessEnv): ConfigType {
+  const e = env ?? process.env
   try {
     const raw = fs.readFileSync(configPath, 'utf-8')
-    return parseConfig(JSON.parse(raw), 'config.json')
+    const config = parseConfig(JSON.parse(raw), 'config.json')
+    if (config.language === undefined) {
+      const lang = e.LANG
+      if (lang?.includes('zh')) return { ...config, language: 'zh' }
+      if (lang !== undefined) return { ...config, language: 'en' }
+    }
+    return config
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code
     if (code !== 'ENOENT') {
       process.stderr.write(`[code-cheer] config.json error — using defaults\n`)
     }
-    return { character: 'nova' }
+    const fallback: ConfigType = { character: 'nova' }
+    const lang = e.LANG
+    if (lang?.includes('zh')) return { ...fallback, language: 'zh' }
+    if (lang !== undefined) return { ...fallback, language: 'en' }
+    return fallback
   }
 }
 
@@ -232,7 +243,7 @@ async function runUpdateCore(
 ): Promise<UpdateCoreResult> {
   const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
 
-  const config = loadConfig(configPath)
+  const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
@@ -337,7 +348,7 @@ async function runUpdateCore(
 export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string {
   const { configPath, statePath, statsPath } = resolvePaths(env)
 
-  const config = loadConfig(configPath)
+  const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
@@ -405,7 +416,7 @@ export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise
 
   // Load config again for eventReason (needed for thresholds)
   const { configPath } = resolvePaths(env)
-  const config = loadConfig(configPath)
+  const config = loadConfig(configPath, env)
 
   const gitCtxDisplay = {
     commits_today: gitContext.commits_today ?? 0,
