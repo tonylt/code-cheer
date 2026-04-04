@@ -121,4 +121,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Phase 13 complete: TypeScript install pipeline — npm run setup/unsetup, @deprecated Python files, INSTALL-01 satisfied. v3.0 milestone complete.*
+*Last updated: 2026-04-04 — Phase 14 complete: Config validation — loadConfig() Zod runtime validation, CI Jest + setup smoke test, SETUP-02 fully satisfied. v3.0 milestone complete.*
