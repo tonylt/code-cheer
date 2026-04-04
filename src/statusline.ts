@@ -36,7 +36,6 @@ export function loadConfig(configPath: string, env?: NodeJS.ProcessEnv): ConfigT
     if (config.language === undefined) {
       const lang = e.LANG
       if (lang?.includes('zh')) return { ...config, language: 'zh' }
-      if (lang !== undefined) return { ...config, language: 'en' }
     }
     return config
   } catch (err: unknown) {
@@ -47,7 +46,6 @@ export function loadConfig(configPath: string, env?: NodeJS.ProcessEnv): ConfigT
     const fallback: ConfigType = { character: 'nova' }
     const lang = e.LANG
     if (lang?.includes('zh')) return { ...fallback, language: 'zh' }
-    if (lang !== undefined) return { ...fallback, language: 'en' }
     return fallback
   }
 }

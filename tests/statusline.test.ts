@@ -541,11 +541,11 @@ describe('loadConfig', () => {
     expect(result.language).toBe('zh')
   })
 
-  it('T6: infers language=en when config has no language and LANG is set but not zh', () => {
+  it('T6: leaves language=undefined when config has no language and LANG is non-zh', () => {
     const configPath = path.join(tmpDir, 'config.json')
     fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
     const result = loadConfig(configPath, { LANG: 'en_US.UTF-8' })
-    expect(result.language).toBe('en')
+    expect(result.language).toBeUndefined()
   })
 
   it('T6: keeps language=undefined when config has no language and LANG is unset', () => {
@@ -555,9 +555,9 @@ describe('loadConfig', () => {
     expect(result.language).toBeUndefined()
   })
 
-  it('T6: infers language=en when config.json does not exist and LANG is en', () => {
+  it('T6: leaves language=undefined when config.json does not exist and LANG is en', () => {
     const result = loadConfig('/nonexistent/config.json', { LANG: 'en_US.UTF-8' })
-    expect(result.language).toBe('en')
+    expect(result.language).toBeUndefined()
     expect(result.character).toBe('nova')
   })
 
@@ -573,18 +573,18 @@ describe('loadConfig', () => {
     expect(result.language).toBe('zh')
   })
 
-  it('T6: infers language=en when LANG=C.UTF-8 (POSIX/Docker locale)', () => {
+  it('T6: leaves language=undefined when LANG=C.UTF-8 (POSIX/Docker locale)', () => {
     const configPath = path.join(tmpDir, 'config.json')
     fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
     const result = loadConfig(configPath, { LANG: 'C.UTF-8' })
-    expect(result.language).toBe('en')
+    expect(result.language).toBeUndefined()
   })
 
-  it('T6: infers language=en when LANG=C (minimal POSIX locale)', () => {
+  it('T6: leaves language=undefined when LANG=C (minimal POSIX locale)', () => {
     const configPath = path.join(tmpDir, 'config.json')
     fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
     const result = loadConfig(configPath, { LANG: 'C' })
-    expect(result.language).toBe('en')
+    expect(result.language).toBeUndefined()
   })
 
   // T10: invalid language warning ──────────────────────────────────────────────

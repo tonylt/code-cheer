@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed quick/260404-suh-PLAN.md — English vocab + language switch
-last_updated: "2026-04-04T14:05:40.167Z"
+stopped_at: Completed quick/260405-8cw-PLAN.md — README.md and README.zh.md banner image
+last_updated: "2026-04-04T22:03:48.445Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 7
@@ -135,10 +135,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 | 260404-suh | 为 5 个角色添加英文 vocab（.en.json）+ config language 字段 + character.ts lang-aware 加载 | 2026-04-04 | 6534eb8 | [260404-suh-vocab](./quick/260404-suh-vocab/) |
 | 260404-v33 | 在两个 README 中添加 Configuration/配置 节，记录 language 字段（zh/en，默认 zh）及 .en.json vocab 引用 | 2026-04-04 | 585b862 | [260404-v33-t8-readme-md-readme-zh-md-language](./quick/260404-v33-t8-readme-md-readme-zh-md-language/) |
 | 260405-85j | ASCII install banner（printBanner + ANSI颜色 + 语言感知台词）+ SVG hero banner 生成脚本 | 2026-04-05 | 245a45e | [260405-85j-ascii-install-banner-readme-banner-svg](./quick/260405-85j-ascii-install-banner-readme-banner-svg/) |
+| 260405-8cw | 在 README.md 和 README.zh.md 顶部添加 banner 图片引用 | 2026-04-05 | 8e95eda | [260405-8cw-readme-md-readme-zh-md-banner](./quick/260405-8cw-readme-md-readme-zh-md-banner/) |
 
 ## Session Continuity
 
-Last activity: 2026-04-05 - Completed quick task 260405-85j: ASCII install banner + README banner SVG
-Last session: 2026-04-05T00:00:00Z
-Stopped at: Completed quick/260405-85j-PLAN.md — ASCII install banner + gen-banner.js
+Last activity: 2026-04-05 - Completed quick task 260405-8cw: 在 README.md 和 README.zh.md 顶部添加 banner 图片引用
+Last session: 2026-04-05T05:56:00Z
+Stopped at: Completed quick/260405-8cw-PLAN.md — README.md and README.zh.md banner image
 Resume with: `/gsd:execute-phase 8`
