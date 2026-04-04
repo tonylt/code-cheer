@@ -2,6 +2,23 @@
 
 All notable changes to code-pal are documented here.
 
+## [3.0.1] - 2026-04-04
+
+### Added
+
+- **Config version field**: `config.json` now includes a `version` field written on install and `/cheer` switch, enabling future upgrade detection (T2)
+- **Commit stats in `/cheer`**: switching characters now shows today's commit count from `state.json` (3 tiers: 1-3 / 4-9 / ≥10 commits)
+
+### Changed
+
+- **Leijun vocab rewrite**: `leijun.json` fully rewritten to match authentic 2024-2025 Lei Jun speech patterns — 142× 同学们, 42× 说真的, 5× Are U OK, 0× banned phrases (遥遥领先/行业第一/etc.)
+
+### Fixed
+
+- `/cheer` reads `state.json` before resetting it — commits_today was always 0 because state was cleared before the Read
+- Leijun reply text in `/cheer` updated from "朋友们" to "同学们" to match rewritten vocab style
+- Removed 22 banned phrases (遥遥领先, 行业第一, 行业最强, 没有之一) from leijun.json
+
 ## [3.0.0] - 2026-04-04
 
 ### Added
