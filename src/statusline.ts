@@ -33,8 +33,9 @@ export function loadConfig(configPath: string): ConfigType {
     const raw = fs.readFileSync(configPath, 'utf-8')
     return parseConfig(JSON.parse(raw), 'config.json')
   } catch (err: unknown) {
-    if (err instanceof SyntaxError) {
-      process.stderr.write(`[code-pal] config.json is not valid JSON — using defaults\n`)
+    const code = (err as NodeJS.ErrnoException).code
+    if (code !== 'ENOENT') {
+      process.stderr.write(`[code-pal] config.json error — using defaults\n`)
     }
     return { character: 'nova' }
   }
@@ -76,6 +77,22 @@ function loadStats(statsPath: string): Record<string, unknown> {
     return { today_tokens: 'N/A' }
   } catch {
     return { today_tokens: 'N/A' }
+  }
+}
+
+// ─── Token fallback helper ────────────────────────────────────────────────────
+
+function applyTokenFallback(
+  stats: Record<string, unknown>,
+  ccData: Record<string, unknown>
+): void {
+  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
+    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
+    if (ctx !== undefined) {
+      const total =
+        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
+      if (total > 0) stats['today_tokens'] = total
+    }
   }
 }
 
@@ -193,6 +210,126 @@ function readStdinString(): Promise<string> {
   })
 }
 
+// ─── Shared update core ───────────────────────────────────────────────────────
+
+interface UpdateCoreResult {
+  message: string
+  tier: string
+  slot: string
+  gitContext: GitContextResult
+  triggeredEvents: string[]
+  sessionStartVal: string
+  newLastGitEvents: string[]
+  newLastRepo: string | null | undefined
+  newCommitsToday: number
+  baseDir: string
+  statePath: string
+}
+
+async function runUpdateCore(
+  stdin: string,
+  env?: NodeJS.ProcessEnv
+): Promise<UpdateCoreResult> {
+  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
+
+  const config = loadConfig(configPath)
+  const state = loadState(statePath)
+  const stats = loadStats(statsPath)
+  stats['cwd_name'] = path.basename(process.cwd())
+
+  // Parse stdin as JSON (empty string -> {})
+  let ccData: Record<string, unknown> = {}
+  try {
+    const raw = stdin.trim()
+    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
+  } catch {
+    ccData = {}
+  }
+
+  // Token fallback: supplement from ccData when stats-cache has no today entry
+  applyTokenFallback(stats, ccData)
+
+  const gitContext = await loadGitContext(process.cwd())
+  const triggeredEvents = detectGitEvents(
+    gitContext as unknown as Record<string, unknown>,
+    state,
+    config as ConfigType & { event_thresholds?: Record<string, unknown> }
+  )
+
+  // D-10: session_start same-day preserve, cross-day reset
+  const existingSessionStart = state.session_start
+  let sessionStartVal: string
+  if (shouldResetSessionStart(existingSessionStart)) {
+    sessionStartVal = new Date().toISOString()
+  } else {
+    sessionStartVal = existingSessionStart!
+  }
+
+  // Character loading with two-level fallback (D-06)
+  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
+  const vocabDir = path.join(__dirname, '../vocab')
+  let character: VocabData
+  try {
+    character = loadCharacter(config.character ?? 'nova', vocabDir)
+  } catch {
+    try {
+      character = loadCharacter('nova', vocabDir)
+    } catch {
+      throw new Error('character_load_failed')
+    }
+  }
+
+  const slot = getTimeSlot()
+  const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
+
+  // Compute git state for persistence
+  const currentRepo = gitContext.repo_path
+  let baseEvents: string[]
+  if (currentRepo !== null && currentRepo !== state.last_repo) {
+    baseEvents = []
+  } else {
+    const raw = state.last_git_events
+    baseEvents = Array.isArray(raw) ? raw : []
+  }
+  const newLastGitEvents = [
+    ...baseEvents,
+    ...triggeredEvents.filter((e) => !baseEvents.includes(e)),
+  ]
+  const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
+  const newCommitsToday = gitContext.commits_today ?? 0
+
+  // Persist state (atomic write)
+  if (message !== state.message || tier !== state.last_rate_tier) {
+    saveState(statePath, baseDir, message, tier, slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
+  } else {
+    saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
+      lastGitEvents: newLastGitEvents,
+      lastRepo: newLastRepo ?? undefined,
+      commitsToday: newCommitsToday,
+      sessionStart: sessionStartVal,
+    })
+  }
+
+  return {
+    message,
+    tier,
+    slot,
+    gitContext,
+    triggeredEvents,
+    sessionStartVal,
+    newLastGitEvents,
+    newLastRepo,
+    newCommitsToday,
+    baseDir,
+    statePath,
+  }
+}
+
 // ─── Exported mode functions ──────────────────────────────────────────────────
 
 export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string {
@@ -213,14 +350,7 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   }
 
   // Token fallback: supplement from ccData when stats-cache has no today entry
-  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
-    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
-    if (ctx !== undefined) {
-      const total =
-        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
-      if (total > 0) stats['today_tokens'] = total
-    }
-  }
+  applyTokenFallback(stats, ccData)
 
   // Character loading with two-level fallback (D-06)
   // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve
@@ -243,191 +373,24 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
 }
 
 export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
-  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
-
-  const config = loadConfig(configPath)
-  const state = loadState(statePath)
-  const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
-
-  // Parse stdin as JSON (empty string -> {})
-  let ccData: Record<string, unknown> = {}
   try {
-    const raw = stdin.trim()
-    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    ccData = {}
-  }
-
-  // Token fallback: supplement from ccData when stats-cache has no today entry
-  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
-    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
-    if (ctx !== undefined) {
-      const total =
-        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
-      if (total > 0) stats['today_tokens'] = total
-    }
-  }
-
-  const gitContext = await loadGitContext(process.cwd())
-  const triggeredEvents = detectGitEvents(
-    gitContext as unknown as Record<string, unknown>,
-    state,
-    config as ConfigType & { event_thresholds?: Record<string, unknown> }
-  )
-
-  // D-10: session_start same-day preserve, cross-day reset
-  const existingSessionStart = state.session_start
-  let sessionStartVal: string
-  if (shouldResetSessionStart(existingSessionStart)) {
-    sessionStartVal = new Date().toISOString()
-  } else {
-    sessionStartVal = existingSessionStart!
-  }
-
-  // Character loading with two-level fallback (D-06)
-  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
-  const vocabDir = path.join(__dirname, '../vocab')
-  let character: VocabData
-  try {
-    character = loadCharacter(config.character ?? 'nova', vocabDir)
-  } catch {
-    try {
-      character = loadCharacter('nova', vocabDir)
-    } catch {
-      return
-    }
-  }
-
-  const slot = getTimeSlot()
-  const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
-
-  // Compute git state for persistence
-  const currentRepo = gitContext.repo_path
-  let baseEvents: string[]
-  if (currentRepo !== null && currentRepo !== state.last_repo) {
-    baseEvents = []
-  } else {
-    const raw = state.last_git_events
-    baseEvents = Array.isArray(raw) ? raw : []
-  }
-  const newLastGitEvents = [
-    ...baseEvents,
-    ...triggeredEvents.filter((e) => !baseEvents.includes(e)),
-  ]
-  const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
-  const newCommitsToday = gitContext.commits_today ?? 0
-
-  // Persist state (atomic write)
-  if (message !== state.message || tier !== state.last_rate_tier) {
-    saveState(statePath, baseDir, message, tier, slot, {
-      lastGitEvents: newLastGitEvents,
-      lastRepo: newLastRepo ?? undefined,
-      commitsToday: newCommitsToday,
-      sessionStart: sessionStartVal,
-    })
-  } else {
-    saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
-      lastGitEvents: newLastGitEvents,
-      lastRepo: newLastRepo ?? undefined,
-      commitsToday: newCommitsToday,
-      sessionStart: sessionStartVal,
-    })
+    await runUpdateCore(stdin, env)
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'character_load_failed') return
+    throw err
   }
 }
 
 export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
-  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
-
-  const config = loadConfig(configPath)
-  const state = loadState(statePath)
-  const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
-
-  // Parse stdin as JSON (empty string -> {})
-  let ccData: Record<string, unknown> = {}
+  let result: UpdateCoreResult
   try {
-    const raw = stdin.trim()
-    if (raw) ccData = JSON.parse(raw) as Record<string, unknown>
-  } catch {
-    ccData = {}
+    result = await runUpdateCore(stdin, env)
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'character_load_failed') return
+    throw err
   }
 
-  // Token fallback
-  if (stats['today_tokens'] === 'N/A' || stats['today_tokens'] === undefined) {
-    const ctx = ccData['context_window'] as Record<string, unknown> | undefined
-    if (ctx !== undefined) {
-      const total =
-        Number(ctx['total_input_tokens'] ?? 0) + Number(ctx['total_output_tokens'] ?? 0)
-      if (total > 0) stats['today_tokens'] = total
-    }
-  }
-
-  const gitContext = await loadGitContext(process.cwd())
-  const triggeredEvents = detectGitEvents(
-    gitContext as unknown as Record<string, unknown>,
-    state,
-    config as ConfigType & { event_thresholds?: Record<string, unknown> }
-  )
-
-  // D-10: session_start same-day preserve, cross-day reset
-  const existingSessionStart = state.session_start
-  let sessionStartVal: string
-  if (shouldResetSessionStart(existingSessionStart)) {
-    sessionStartVal = new Date().toISOString()
-  } else {
-    sessionStartVal = existingSessionStart!
-  }
-
-  // Character loading with two-level fallback (D-06)
-  // Pass explicit vocabDir so ts-jest (__dirname=src/) and dist/ (__dirname=dist/) both resolve correctly.
-  const vocabDir = path.join(__dirname, '../vocab')
-  let character: VocabData
-  try {
-    character = loadCharacter(config.character ?? 'nova', vocabDir)
-  } catch {
-    try {
-      character = loadCharacter('nova', vocabDir)
-    } catch {
-      return
-    }
-  }
-
-  const slot = getTimeSlot()
-  const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
-
-  // Compute git state for persistence
-  const currentRepo = gitContext.repo_path
-  let baseEvents: string[]
-  if (currentRepo !== null && currentRepo !== state.last_repo) {
-    baseEvents = []
-  } else {
-    const raw = state.last_git_events
-    baseEvents = Array.isArray(raw) ? raw : []
-  }
-  const newLastGitEvents = [
-    ...baseEvents,
-    ...triggeredEvents.filter((e) => !baseEvents.includes(e)),
-  ]
-  const newLastRepo = currentRepo !== null ? currentRepo : state.last_repo
-  const newCommitsToday = gitContext.commits_today ?? 0
-
-  // Persist state (atomic write)
-  if (message !== state.message || tier !== state.last_rate_tier) {
-    saveState(statePath, baseDir, message, tier, slot, {
-      lastGitEvents: newLastGitEvents,
-      lastRepo: newLastRepo ?? undefined,
-      commitsToday: newCommitsToday,
-      sessionStart: sessionStartVal,
-    })
-  } else {
-    saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
-      lastGitEvents: newLastGitEvents,
-      lastRepo: newLastRepo ?? undefined,
-      commitsToday: newCommitsToday,
-      sessionStart: sessionStartVal,
-    })
-  }
+  const { gitContext, triggeredEvents, sessionStartVal, newLastGitEvents, newCommitsToday, newLastRepo } = result
 
   // Debug output to stderr (D-04, D-05)
   let sessionMinutes = 0
@@ -437,6 +400,10 @@ export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise
   } catch {
     sessionMinutes = 0
   }
+
+  // Load config again for eventReason (needed for thresholds)
+  const { configPath } = resolvePaths(env)
+  const config = loadConfig(configPath)
 
   const gitCtxDisplay = {
     commits_today: gitContext.commits_today ?? 0,
