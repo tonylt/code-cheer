@@ -3,7 +3,7 @@
      font-family="'Courier New', 'Lucida Console', monospace">
 
   <!-- Background -->
-  <rect width="1280" height="240" fill="#111111"/>
+  <rect width="1280" height="240" fill="#1a1410"/>
 
   <!-- Left — Nova kaomoji -->
   <text x="60" y="130"
