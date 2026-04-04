@@ -1,23 +1,5 @@
 # TODOS
 
-## T1: save_state() 磁盘满时静默失败
-
-**What:** `save_state()` 在 `~/.claude/` 所在磁盘容量不足时，`open()` 会抛异常但被吞掉。state 不更新，用户看不到任何错误。
-
-**Why:** v2 增加了更多 state 写入操作（last_git_events, commits_today, last_repo），磁盘资源问题更容易被触发暴露。
-
-**Pros:** 用户能看到明确的错误提示而不是静默失败。
-
-**Cons:** 状态栏可能临时显示错误信息。
-
-**How to fix:** `save_state()` 加 `try/except IOError`，写 stderr 一行日志，render 模式检测到 state 未更新时显示固定 fallback 消息。
-
-**Depends on / blocked by:** 无。任何时候都可以加。
-
-**Context:** 发现于 v2 eng review (2026-04-01)，pre-existing bug，不影响 v2 实现。
-
----
-
 ## T2: config.json 版本号，支持未来升级迁移
 
 **What:** config.json 目前只有 `{"character": "nova"}`，没有版本号。未来如果 state.json 或 config.json 结构发生破坏性变更，install.sh 无法检测用户的已安装版本。
