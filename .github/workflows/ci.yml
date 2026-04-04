@@ -32,12 +32,12 @@ jobs:
       - name: Smoke test install.sh
         run: |
           bash install.sh
-          test -f "$HOME/.claude/code-pal/statusline.py" || (echo "statusline.py missing" && exit 1)
-          test -f "$HOME/.claude/code-pal/config.json"   || (echo "config.json missing" && exit 1)
-          test -f "$HOME/.claude/settings.json"           || (echo "settings.json missing" && exit 1)
+          test -f "$HOME/.claude/code-cheer/statusline.py" || (echo "statusline.py missing" && exit 1)
+          test -f "$HOME/.claude/code-cheer/config.json"   || (echo "config.json missing" && exit 1)
+          test -f "$HOME/.claude/settings.json"             || (echo "settings.json missing" && exit 1)
           grep -q "statusLine" "$HOME/.claude/settings.json" || (echo "statusLine not wired" && exit 1)
           bash install.sh --uninstall
-          test ! -d "$HOME/.claude/code-pal" || (echo "uninstall left files behind" && exit 1)
+          test ! -d "$HOME/.claude/code-cheer" || (echo "uninstall left files behind" && exit 1)
 
       - name: Run tests
         run: python3 -m pytest tests/
@@ -87,8 +87,8 @@ jobs:
         if: matrix.node-version == '20'
         run: |
           npm run setup
-          test -f "$HOME/.claude/code-pal/dist/statusline.js" || (echo "setup did not install dist/statusline.js" && exit 1)
-          test -f "$HOME/.claude/code-pal/package.json" || (echo "setup did not install package.json" && exit 1)
-          node "$HOME/.claude/code-pal/dist/statusline.js" || (echo "installed statusline.js failed to run" && exit 1)
+          test -f "$HOME/.claude/code-cheer/dist/statusline.js" || (echo "setup did not install dist/statusline.js" && exit 1)
+          test -f "$HOME/.claude/code-cheer/package.json" || (echo "setup did not install package.json" && exit 1)
+          node "$HOME/.claude/code-cheer/dist/statusline.js" || (echo "installed statusline.js failed to run" && exit 1)
           npm run unsetup
-          test ! -d "$HOME/.claude/code-pal" || (echo "unsetup left files behind" && exit 1)
+          test ! -d "$HOME/.claude/code-cheer" || (echo "unsetup left files behind" && exit 1)
