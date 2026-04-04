@@ -211,6 +211,68 @@ function installCheer() {
   ok('Installed /cheer command')
 }
 
+// ── printBanner ───────────────────────────────────────────────────────────────
+function printBanner() {
+  try {
+    // Read installed config for character and language
+    var config = {}
+    try {
+      config = JSON.parse(fs.readFileSync(path.join(INSTALL_DIR, 'config.json'), 'utf8'))
+    } catch (_) { /* use defaults */ }
+
+    var character = config.character || 'nova'
+    var language = config.language || 'zh'
+    var version = require('../package.json').version
+
+    // Capitalise character name for display
+    var displayName = character.charAt(0).toUpperCase() + character.slice(1)
+
+    // ANSI colours
+    var yellow = '\x1b[93m'
+    var green  = '\x1b[32m'
+    var reset  = '\x1b[0m'
+
+    // Box width for a consistent look
+    var topLine    = '+===============================+'
+    var titleLine  = '|  (*>ω<)  code-cheer  v' + version + '  |'
+    // Pad title line to match box width if version changes length
+    var innerWidth = topLine.length - 2  // characters between | and |
+    while (titleLine.length < innerWidth + 2) { titleLine += ' ' }
+    titleLine = titleLine.slice(0, innerWidth + 1) + '|'
+
+    console.log()
+    console.log(yellow + '   ' + topLine  + reset)
+    console.log(yellow + '   ' + titleLine + reset)
+    console.log(yellow + '   ' + topLine  + reset)
+    console.log(green  + '   character  : ' + displayName + reset)
+    console.log(green  + '   installed  : ~/.claude/code-cheer/' + reset)
+    console.log(green  + '   statusline : active *' + reset)
+
+    // Random tagline (graceful — never throws)
+    try {
+      var vocabFile = language === 'en'
+        ? path.join(INSTALL_DIR, 'vocab', character + '.en.json')
+        : path.join(INSTALL_DIR, 'vocab', character + '.json')
+      var vocabData = JSON.parse(fs.readFileSync(vocabFile, 'utf8'))
+      var arr = vocabData.triggers && vocabData.triggers.random
+      if (Array.isArray(arr) && arr.length > 0) {
+        var tagline = arr[Math.floor(Math.random() * arr.length)]
+        console.log()
+        console.log('   ' + tagline)
+      }
+    } catch (_) { /* vocab unavailable — skip tagline silently */ }
+
+    // Tip line (language-aware)
+    console.log()
+    if (language === 'en') {
+      console.log('   tip: ' + displayName + ' will appear in your status bar after each Claude response')
+    } else {
+      console.log('   tip: ' + displayName + ' 会在每次 Claude 回复后出现在状态栏')
+    }
+    console.log()
+  } catch (_) { /* banner failure must never break installation */ }
+}
+
 // ── main ──────────────────────────────────────────────────────────────────────
 function main() {
   console.log('Installing code-cheer…')
@@ -226,11 +288,7 @@ function main() {
   patchSettings(process.execPath)
   installCheer()
 
-  console.log()
-  console.log('(*>ω<) Nova: 安装完成！准备好了吗！冲冲冲！！')
-  console.log()
-  console.log('  Restart Claude Code to activate the statusline.')
-  console.log('  Switch characters with: /cheer')
+  printBanner()
 }
 
 // ── exports (for testing) ─────────────────────────────────────────────────────
