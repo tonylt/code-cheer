@@ -33,7 +33,7 @@ jest.mock('child_process', () => {
   return { execFile: execFileMock }
 })
 
-import { renderMode, updateMode, debugMode } from '../src/statusline'
+import { renderMode, updateMode, debugMode, loadConfig } from '../src/statusline'
 
 // ─── Shared setup ─────────────────────────────────────────────────────────────
 
@@ -305,5 +305,43 @@ describe('statusline', () => {
       await debugMode('{}')
       expect(fs.existsSync(path.join(tmpDir, 'state.json'))).toBe(true)
     })
+  })
+})
+
+// ─── loadConfig (standalone) ─────────────────────────────────────────────────
+
+describe('loadConfig', () => {
+  let tmpDir: string
+  let stderrSpy: jest.SpyInstance
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-cfg-test-'))
+    stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true)
+  })
+
+  afterEach(() => {
+    stderrSpy.mockRestore()
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('outputs Zod error to stderr when character is invalid', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'novaa' }))
+
+    const result = loadConfig(configPath)
+
+    expect(stderrSpy).toHaveBeenCalled()
+    const stderrOutput = (stderrSpy.mock.calls as Array<Array<string | Uint8Array>>)
+      .map((c) => String(c[0]))
+      .join('')
+    expect(stderrOutput).toContain('config.json')
+    expect(stderrOutput).toContain('character')
+    expect(result).toEqual({ character: 'nova' })
+  })
+
+  it('falls back to nova when config.json does not exist', () => {
+    const result = loadConfig('/nonexistent/config.json')
+    expect(result).toEqual({ character: 'nova' })
+    expect(stderrSpy).not.toHaveBeenCalled()
   })
 })
