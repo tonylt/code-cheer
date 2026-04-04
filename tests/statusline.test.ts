@@ -413,6 +413,77 @@ describe('character three-level fallback', () => {
   })
 })
 
+// ─── language integration — T7 ────────────────────────────────────────────────
+// Verifies config.language is correctly passed to all 4 loadCharacter call sites:
+// renderMode (primary + fallback), runUpdateCore via updateMode (primary + fallback).
+
+describe('language integration — config.language passed to loadCharacter', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-cheer-lang-int-test-'))
+    process.env.CODE_CHEER_BASE_DIR = tmpDir
+    process.env.CODE_CHEER_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
+    currentImpl = null
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    delete process.env.CODE_CHEER_BASE_DIR
+    delete process.env.CODE_CHEER_STATS_PATH
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  // renderMode ──────────────────────────────────────────────────────────────────
+
+  it('renderMode: passes language=en to loadCharacter when config.language=en', () => {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova', language: 'en' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    renderMode()
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'en')
+  })
+
+  it('renderMode: passes language=zh to loadCharacter when config.language=zh', () => {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova', language: 'zh' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    renderMode()
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'zh')
+  })
+
+  it('renderMode: passes language=undefined when config has no language field', () => {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    renderMode()
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), undefined)
+  })
+
+  // updateMode (runUpdateCore) ──────────────────────────────────────────────────
+
+  it('updateMode: passes language=en to loadCharacter when config.language=en', async () => {
+    currentImpl = async () => { throw new Error('not a git repo') }
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova', language: 'en' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    await updateMode('{}')
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'en')
+  })
+
+  it('updateMode: passes language=zh to loadCharacter when config.language=zh', async () => {
+    currentImpl = async () => { throw new Error('not a git repo') }
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova', language: 'zh' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    await updateMode('{}')
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'zh')
+  })
+
+  it('updateMode: passes language=undefined when config has no language field', async () => {
+    currentImpl = async () => { throw new Error('not a git repo') }
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
+    const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
+    await updateMode('{}')
+    expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), undefined)
+  })
+})
+
 // ─── parseState edge cases ────────────────────────────────────────────────────
 
 describe('parseState edge cases', () => {
