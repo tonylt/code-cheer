@@ -4,9 +4,9 @@ This file provides guidance to Claude Code when working in this repository.
 
 ## Project
 
-**code-pal** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
+**code-cheer** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
 
-Installs to `~/.claude/code-pal/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
+Installs to `~/.claude/code-cheer/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
 
 ## v3.0 Migration (in progress)
 
@@ -105,11 +105,11 @@ install.sh registers two entries in `~/.claude/settings.json`:
 {
   "statusLine": {
     "type": "command",
-    "command": "python3 ~/.claude/code-pal/statusline.py"
+    "command": "node ~/.claude/code-cheer/dist/statusline.js"
   },
   "hooks": {
     "Stop": [{
-      "hooks": [{"type": "command", "command": "python3 ~/.claude/code-pal/statusline.py --update"}]
+      "hooks": [{"type": "command", "command": "node ~/.claude/code-cheer/dist/statusline.js --update"}]
     }]
   }
 }
@@ -121,8 +121,8 @@ install.sh registers two entries in `~/.claude/settings.json`:
 ## State files (runtime, not in repo)
 
 ```
-~/.claude/code-pal/config.json   # {"character": "nova", "version": "3.0.1"}
-~/.claude/code-pal/state.json    # last message, tier, slot, timestamp
+~/.claude/code-cheer/config.json   # {"character": "nova", "version": "3.0.1"}
+~/.claude/code-cheer/state.json    # last message, tier, slot, timestamp
 ~/.claude/stats-cache.json         # token usage by day (written by Claude Code)
 ```
 

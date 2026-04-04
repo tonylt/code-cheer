@@ -1,4 +1,4 @@
-# 切换 code-pal 应援角色（nova / luna / mochi / iris / leijun）
+# 切换 code-cheer 应援角色（nova / luna / mochi / iris / leijun）
 # v3.0+: install with `npm run setup` (TypeScript version)
 # Writes version field to config.json; displays git commit stats from state.json if commits_today > 0
 ARGUMENT="$ARGUMENTS"
@@ -15,10 +15,10 @@ If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi
 
 Once a character is chosen (NAME = lowercase chosen name):
 
-First, read ~/.claude/code-pal/state.json (if it exists) using the Read tool to capture the current commits_today value before resetting state.
+First, read ~/.claude/code-cheer/state.json (if it exists) using the Read tool to capture the current commits_today value before resetting state.
 
 Then run a single Bash command:
-  python3 -c "import os; open(os.path.expanduser('~/.claude/code-pal/config.json'),'w').write('{\"character\": \"NAME\", \"version\": \"3.0.1\"}'); open(os.path.expanduser('~/.claude/code-pal/state.json'),'w').write('{\"message\":\"\",\"last_updated\":\"\",\"last_rate_tier\":\"normal\",\"last_slot\":null}')"
+  python3 -c "import os; open(os.path.expanduser('~/.claude/code-cheer/config.json'),'w').write('{\"character\": \"NAME\", \"version\": \"3.0.1\"}'); open(os.path.expanduser('~/.claude/code-cheer/state.json'),'w').write('{\"message\":\"\",\"last_updated\":\"\",\"last_rate_tier\":\"normal\",\"last_slot\":null}')"
 
 If the state.json read above contained "commits_today" with a value > 0, append a stats line after the character reply message.
 

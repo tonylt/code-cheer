@@ -47,18 +47,18 @@ function optStrArr(val: unknown): string[] | undefined {
 // D-05: meta fields all required — throws if missing
 export function parseVocab(raw: unknown, label: string): VocabData {
   if (!raw || typeof raw !== 'object') {
-    process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
+    process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
     throw new Error(`Invalid ${label}: expected object`)
   }
   const obj = raw as Record<string, unknown>
   const meta = obj.meta as Record<string, unknown> | undefined
   if (!meta || typeof meta !== 'object') {
-    process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
+    process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
     throw new Error(`Invalid ${label}: missing meta`)
   }
   for (const key of ['name', 'ascii', 'style', 'color'] as const) {
     if (typeof meta[key] !== 'string') {
-      process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ Invalid input: expected string\n  → at meta.${key}\n`)
+      process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected string\n  → at meta.${key}\n`)
       throw new Error(`Invalid ${label}: meta.${key} must be string`)
     }
   }

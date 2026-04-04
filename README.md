@@ -1,6 +1,6 @@
 [中文](./README.zh.md)
 
-# code-pal
+# code-cheer
 
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
@@ -14,7 +14,7 @@
 
 ```
 (=^･ω･^=) Mochi: 跑完这个就去休息… 才不是
-sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
+sonnet-4-6 | code-cheer | 47k tokens | [████░░░░░░] 32%
 ```
 
 The statusline updates after each Claude response: character message on line 1, model + project + tokens + context bar on line 2.
@@ -33,13 +33,15 @@ The statusline updates after each Claude response: character message on line 1, 
 ## Install
 
 ```bash
-git clone https://github.com/tonylt/code-pal.git
-cd code-pal
+git clone https://github.com/tonylt/code-cheer.git
+cd code-cheer
 npm install
 npm run setup
 ```
 
 Restart Claude Code. The statusline activates immediately.
+
+> **Migrating from code-pal?** Running `npm run setup` automatically migrates your config from `~/.claude/code-pal/` to `~/.claude/code-cheer/`.
 
 ---
 
@@ -74,7 +76,7 @@ Claude response ends (Stop hook)
 node dist/statusline.js --update
   → reads token stats from stats-cache.json
   → selects message by: usage tier > time slot > random
-  → writes to ~/.claude/code-pal/state.json
+  → writes to ~/.claude/code-cheer/state.json
         ↓
 Statusline polls node dist/statusline.js
   → reads state.json → renders to status bar
@@ -97,10 +99,10 @@ Statusline polls node dist/statusline.js
 Edit any character's JSON file to add your own lines:
 
 ```bash
-~/.claude/code-pal/vocab/nova.json
-~/.claude/code-pal/vocab/luna.json
-~/.claude/code-pal/vocab/mochi.json
-~/.claude/code-pal/vocab/iris.json
+~/.claude/code-cheer/vocab/nova.json
+~/.claude/code-cheer/vocab/luna.json
+~/.claude/code-cheer/vocab/mochi.json
+~/.claude/code-cheer/vocab/iris.json
 ```
 
 Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/evening/midnight), `usage` (warning/critical), and `random`.
@@ -120,7 +122,7 @@ Removes all files and cleans up `~/.claude/settings.json`. If you had a previous
 ## File structure
 
 ```
-code-pal/
+code-cheer/
 ├── src/
 │   ├── statusline.ts   # main entry point
 │   └── core/
@@ -174,7 +176,7 @@ Check that `npm run setup` completed without errors. Restart Claude Code. Verify
 `cat ~/.claude/settings.json | grep statusLine`
 
 **`node` command not found or wrong version?**
-code-pal requires Node.js 18+. Verify with `node --version`. Install via [nodejs.org](https://nodejs.org) or a version manager like nvm/fnm.
+code-cheer requires Node.js 18+. Verify with `node --version`. Install via [nodejs.org](https://nodejs.org) or a version manager like nvm/fnm.
 
 **`npm run setup` errors?**
 Run from the repo root directory. Check that `~/.claude/` directory exists (created by Claude Code on first run).
@@ -183,10 +185,13 @@ Run from the repo root directory. Check that `~/.claude/` directory exists (crea
 Verify the hook is registered: `cat ~/.claude/settings.json | grep -A5 Stop`. If missing, re-run `npm run setup`. Restart Claude Code after install.
 
 **Claude Code version mismatch?**
-code-pal requires Claude Code v2.1.80 or later. Check your version and update if needed.
+code-cheer requires Claude Code v2.1.80 or later. Check your version and update if needed.
 
 **Another tool already uses statusLine?**
-code-pal requires exclusive access to the statusLine setting. On install, it backs up any existing statusLine config to `~/.claude/code-pal/statusline-backup.json`. Uninstalling restores your previous config. If you want to switch between tools, uninstall one before installing the other.
+code-cheer requires exclusive access to the statusLine setting. On install, it backs up any existing statusLine config to `~/.claude/code-cheer/statusline-backup.json`. Uninstalling restores your previous config. If you want to switch between tools, uninstall one before installing the other.
+
+**Migrating from code-pal (old directory)?**
+The installation directory changed from `~/.claude/code-pal/` to `~/.claude/code-cheer/`. Running `npm run setup` handles this automatically. You can safely delete the old `~/.claude/code-pal/` directory after setup completes.
 
 ---
 
