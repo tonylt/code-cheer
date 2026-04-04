@@ -2,23 +2,19 @@
 
 ## Open
 
+## Completed
+
 ### T5: vocab 漂移检测测试
-**Source:** /autoplan CEO review (2026-04-04) | **Priority:** MEDIUM
-添加测试验证所有 `.en.json` 与对应 `.json` 的顶层 key 结构一致，防止未来更新中文 vocab 忘记更新英文版时产生漂移。
+**Completed:** 2026-04-04 — `tests/character.test.ts` 新增 `flatKeys()` 工具函数和 `vocab drift — en/zh key parity` describe 块，枚举 5 个角色的 `.en.json` 文件并递归比对与对应 `.json` 的 key 结构。207/207 测试通过。
 
 ### T6: locale 自动检测
-**Source:** /autoplan CEO review (2026-04-04) | **Priority:** LOW
-当 config.json 未设置 `language` 时，从系统 locale（`process.env.LANG`）自动推断，降低英文用户配置摩擦。
+**Completed:** 2026-04-04 — `src/statusline.ts` `loadConfig()` 在 `config.language === undefined` 时检查 `process.env.LANG`：`zh_*` → `'zh'`，其他非空值 → `'en'`，未设置 → `undefined`（保留默认中文行为）。try path 和 ENOENT catch path 均覆盖。9 个新测试验证所有分支。
 
 ### T9: CONTRIBUTING 语言贡献指引
-**Source:** /autoplan DX review (2026-04-04) | **Priority:** MEDIUM
-在 CONTRIBUTING.md 添加「添加新语言」章节，说明如何贡献新语言 vocab 文件。
+**Completed:** 2026-04-04 — `CONTRIBUTING.md` 新增「Adding a new language」章节（4 步：创建文件、验证 key parity、注册语言代码、更新 README），位于「Adding a new character」章节之后。
 
 ### T10: 无效 language 值 stderr 警告
-**Source:** /autoplan DX Taste Decision (2026-04-04) | **Priority:** LOW
-将 `parseConfig` 中无效 language 值的处理从静默忽略升级为 `process.stderr.write` 警告（不 throw，保持向后兼容）。示例：`"language": "french"` → 警告 + 回退到默认行为。
-
-## Completed
+**Completed:** 2026-04-04 — `src/schemas/config.ts` `parseConfig()` 在 `typeof obj.language === 'string' && obj.language !== '' && obj.language !== 'en' && obj.language !== 'zh'` 时写入 stderr 警告，保持向后兼容（不 throw）。2 个新测试验证 'french' 触发警告、null/'' 不触发。
 
 ### T8: README language 文档
 **Completed:** 2026-04-04 — `README.md` 新增 `## Configuration` 节，`README.zh.md` 新增 `## 配置` 节，均包含 config.json 示例、language 字段说明（`"zh"` | `"en"`，默认 `"zh"`）及 `.en.json` vocab 文件引用。commit 585b862。
