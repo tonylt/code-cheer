@@ -308,6 +308,122 @@ describe('statusline', () => {
   })
 })
 
+// ─── saveState EXDEV fallback ─────────────────────────────────────────────────
+
+describe('saveState EXDEV fallback', () => {
+  let tmpDir: string
+  // Use require() to get the mutable CJS module object (bypasses ESM namespace freeze)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const fsModule = require('fs') as Record<string, unknown>
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-exdev-test-'))
+    process.env.CODE_PAL_BASE_DIR = tmpDir
+    process.env.CODE_PAL_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
+    currentImpl = null
+  })
+
+  afterEach(() => {
+    // jest.config.ts has restoreMocks: true — spies are restored automatically
+    delete process.env.CODE_PAL_BASE_DIR
+    delete process.env.CODE_PAL_STATS_PATH
+    // Use original fs ref for cleanup (spies restored before afterEach by restoreMocks)
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  test('EXDEV triggers copyFileSync + unlinkSync instead of throw', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
+
+    const exdevErr = Object.assign(new Error('EXDEV'), { code: 'EXDEV' })
+    const originalRename = fsModule.renameSync
+    const originalCopy = fsModule.copyFileSync
+    const originalUnlink = fsModule.unlinkSync
+
+    let copyCalled = false
+    let unlinkCalled = false
+    fsModule.renameSync = () => { throw exdevErr }
+    fsModule.copyFileSync = () => { copyCalled = true }
+    fsModule.unlinkSync = () => { unlinkCalled = true }
+
+    try {
+      await expect(updateMode('{}')).resolves.toBeUndefined()
+      expect(copyCalled).toBe(true)
+      expect(unlinkCalled).toBe(true)
+    } finally {
+      fsModule.renameSync = originalRename
+      fsModule.copyFileSync = originalCopy
+      fsModule.unlinkSync = originalUnlink
+    }
+  })
+
+  test('non-EXDEV rename error re-throws', async () => {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
+
+    const epermErr = Object.assign(new Error('EPERM'), { code: 'EPERM' })
+    const originalRename = fsModule.renameSync
+    fsModule.renameSync = () => { throw epermErr }
+
+    try {
+      await expect(updateMode('{}')).rejects.toThrow('EPERM')
+    } finally {
+      fsModule.renameSync = originalRename
+    }
+  })
+})
+
+// ─── character three-level fallback ───────────────────────────────────────────
+
+describe('character three-level fallback', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-char-fallback-test-'))
+    process.env.CODE_PAL_BASE_DIR = tmpDir
+    process.env.CODE_PAL_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
+    currentImpl = null
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    delete process.env.CODE_PAL_BASE_DIR
+    delete process.env.CODE_PAL_STATS_PATH
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  test('renderMode returns HARDCODED_FALLBACK when both loadCharacter calls fail', () => {
+    const { loadCharacter: _lc } = require('../src/core/character')
+    jest.spyOn(require('../src/core/character'), 'loadCharacter').mockImplementation(() => {
+      throw new Error('character not found')
+    })
+
+    const result = renderMode('', { CODE_PAL_BASE_DIR: tmpDir, CODE_PAL_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
+    expect(result).toContain('Nova')
+    expect(result).toContain('加油')
+  })
+
+  test('updateMode resolves without throwing when both loadCharacter calls fail', async () => {
+    jest.spyOn(require('../src/core/character'), 'loadCharacter').mockImplementation(() => {
+      throw new Error('character not found')
+    })
+
+    await expect(
+      updateMode('{}', { CODE_PAL_BASE_DIR: tmpDir, CODE_PAL_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
+    ).resolves.toBeUndefined()
+  })
+})
+
+// ─── parseState edge cases ────────────────────────────────────────────────────
+
+describe('parseState edge cases', () => {
+  it('parseState(123) returns DEFAULT_STATE without throwing', () => {
+    const { parseState } = require('../src/schemas')
+    expect(() => parseState(123 as unknown)).not.toThrow()
+    const result = parseState(123 as unknown)
+    expect(result).toHaveProperty('message')
+  })
+})
+
 // ─── loadConfig (standalone) ─────────────────────────────────────────────────
 
 describe('loadConfig', () => {
