@@ -4,12 +4,27 @@ All notable changes to code-cheer (formerly code-pal) are documented here.
 
 ## [3.1.0] - 2026-04-04
 
+### Added
+
+- **MIT License**: project is now open-source under MIT
+- **CONTRIBUTING.md**: 5-step guide for adding new characters (vocab JSON → config.ts → build → cheer.md → tests)
+- **GitHub issue templates**: `bug_report.yml` and `new_character.yml` for structured community contributions
+- **TUI width protection**: message truncates at 40 chars, model name and cwd truncate at 20 chars to stay within ~80-column terminals
+- **Progress bar color tiers**: context window bar turns yellow (`≥80%`) and bright red (`≥95%`) to match the vocab warning/critical tiers
+
 ### Changed
 
 - **Project renamed**: code-pal → code-cheer. Installation directory changes from `~/.claude/code-pal/` to `~/.claude/code-cheer/`
 - **Environment variables renamed**: `CODE_PAL_BASE_DIR` → `CODE_CHEER_BASE_DIR`, `CODE_PAL_STATS_PATH` → `CODE_CHEER_STATS_PATH`
 - **Error log prefix**: all stderr messages now use `[code-cheer]` prefix
 - **package.json name**: `code-pal` → `code-cheer`
+- **Iris character color**: changed from ANSI 97 (bright white, invisible on light terminals) to 90 (dark gray, visible on both light and dark terminal themes)
+- **Python CI job** renamed to `test (legacy)` to clarify deprecation status
+- **README**: moved the "reactive, not decorative" rationale before feature bullets for clearer first-impression messaging
+
+### Fixed
+
+- Progress bar percentage now displays as integer (`Math.floor`) matching the bar fill level (was: raw float)
 
 ## [3.0.1] - 2026-04-04
 
