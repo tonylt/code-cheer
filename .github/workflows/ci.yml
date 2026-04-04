@@ -7,7 +7,9 @@ on:
     branches: ["main"]
 
 jobs:
-  test:
+  # legacy: Python code is @deprecated (v3.0 migrated to TypeScript)
+  # This job validates existing Python tests but is not required for contributions
+  test (legacy):
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
