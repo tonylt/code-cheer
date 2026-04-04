@@ -15,7 +15,18 @@
 - [x] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块 (completed 2026-04-03)
 - [x] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性 (completed 2026-04-03)
 - [x] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated (completed 2026-04-03)
-- [ ] **Phase 14: Config 验证补全** - 修复 loadConfig() 添加 ConfigSchema 运行时验证，补全 CI test-node job npm test 步骤
+- [x] **Phase 14: Config 验证补全** - 修复 loadConfig() 添加 ConfigSchema 运行时验证，补全 CI test-node job npm test 步骤 (completed 2026-04-04)
+**Goal**: JSON 加载时通过 Zod schema 验证，格式错误时输出具体错误信息；CI 真正覆盖 TypeScript 测试套件和生产安装路径
+**Depends on**: Phase 13
+**Requirements**: SETUP-02
+**Success Criteria** (what must be TRUE):
+  1. 无效 character 名称（如 "novaa"）时 stderr 输出 Zod 错误信息
+  2. config.json 不存在时 fallback 到 { character: 'nova' } 而不崩溃
+  3. CI test-node job 运行 Jest 测试套件，任一测试失败阻断合并
+  4. CI test-node job 验证 npm run setup 安装流程而非过时的 Python statusline.py
+**Plans**: 1 plan
+Plans:
+- [x] 14-01-PLAN.md — Config 验证补全（loadConfig Zod 验证 + CI Jest 步骤 + CI setup smoke test）
 
 ---
 
@@ -133,7 +144,7 @@ Plans:
 | 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
 | 12. Jest 测试套件 | 3/3 | Complete    | 2026-04-03 |
 | 13. 安装切换 | 2/2 | Complete    | 2026-04-03 |
-| 14. Config 验证补全 | 0/1 | Not started | - |
+| 14. Config 验证补全 | 1/1 | Complete   | 2026-04-04 |
 
 ---
 

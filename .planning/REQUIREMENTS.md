@@ -8,7 +8,7 @@
 ### 项目脚手架 (SETUP)
 
 - [x] **SETUP-01**: 开发者可运行 `npm run build` 产出 `dist/statusline.js`，`node dist/statusline.js` 冷启动 <100ms（满足 Claude Code statusLine 轮询约束）
-- [ ] **SETUP-02**: vocab/state/config JSON 在加载时通过 Zod schema 验证，格式错误时输出具体错误信息而非静默失败
+- [x] **SETUP-02**: vocab/state/config JSON 在加载时通过 Zod schema 验证，格式错误时输出具体错误信息而非静默失败
 
 ### CI 更新 (CI)
 
