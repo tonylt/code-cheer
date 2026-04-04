@@ -67,6 +67,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Run Jest tests
+        run: npm test
+
       - name: Validate cold start <100ms
         run: |
           START=$(date +%s%3N)
