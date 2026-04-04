@@ -183,6 +183,24 @@ export type ConfigType = {
 ```
 
 Also update the `parseConfig` function in the same file to recognise the new code.
+There are **two places** in `parseConfig` that need updating (both in `src/schemas/config.ts`):
+
+```typescript
+// 1. The warning check — add the new code to the accepted-values list
+// Before:
+if (typeof obj.language === 'string' && obj.language !== '' && obj.language !== 'en' && obj.language !== 'zh') {
+// After (adding 'ja'):
+if (typeof obj.language === 'string' && obj.language !== '' && obj.language !== 'en' && obj.language !== 'zh' && obj.language !== 'ja') {
+
+// 2. The parse ternary — add a branch for the new code
+// Before:
+const language = obj.language === 'en' ? 'en' : obj.language === 'zh' ? 'zh' : undefined
+// After (adding 'ja'):
+const language = obj.language === 'en' ? 'en' : obj.language === 'zh' ? 'zh' : obj.language === 'ja' ? 'ja' : undefined
+```
+
+Skipping step 2 will cause the new language code to pass TypeScript type-checking
+but silently return `undefined` at runtime, which is hard to debug.
 
 ### Step 4 — Update README and README.zh.md
 
