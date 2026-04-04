@@ -5,7 +5,7 @@
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
 - Git-aware reactions — first commit of the day, commit milestones (5/10/20), late-night commits, big diffs, and more trigger character-specific lines
-- 5 anime characters — Nova, Luna, Mochi, Iris, Lei Jun, each with a distinct personality. Switch anytime with `/cheer`
+- 4 anime characters — Nova, Luna, Mochi, Iris, each with a distinct personality. Switch anytime with `/cheer`
 - Live stats — model, project folder, token count, and a context window progress bar at a glance
 
 ---
@@ -51,7 +51,6 @@ Restart Claude Code. The statusline activates immediately.
 /cheer luna
 /cheer mochi
 /cheer iris
-/cheer leijun
 ```
 
 ---
@@ -64,7 +63,6 @@ Restart Claude Code. The statusline activates immediately.
 | **Luna 月野** | `(´• ω •\`)` | Gentle and comforting |
 | **Mochi 年糕** | `(=^･ω･^=)` | Tsundere cat |
 | **Iris 晴** | `(￣ω￣)` | Cool and teasing |
-| **Lei Jun 雷军** | `(ง •_•)ง` | "Are you OK" energy |
 
 ---
 
@@ -103,7 +101,6 @@ Edit any character's JSON file to add your own lines:
 ~/.claude/code-pal/vocab/luna.json
 ~/.claude/code-pal/vocab/mochi.json
 ~/.claude/code-pal/vocab/iris.json
-~/.claude/code-pal/vocab/leijun.json
 ```
 
 Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/evening/midnight), `usage` (warning/critical), and `random`.
@@ -140,8 +137,7 @@ code-pal/
 │   ├── nova.json
 │   ├── luna.json
 │   ├── mochi.json
-│   ├── iris.json
-│   └── leijun.json
+│   └── iris.json
 ├── commands/
 │   └── cheer.md        # /cheer slash command
 └── tests/              # Jest test suite (167 tests)
