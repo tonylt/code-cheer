@@ -8,7 +8,7 @@
 ### 项目脚手架 (SETUP)
 
 - [x] **SETUP-01**: 开发者可运行 `npm run build` 产出 `dist/statusline.js`，`node dist/statusline.js` 冷启动 <100ms（满足 Claude Code statusLine 轮询约束）
-- [x] **SETUP-02**: vocab/state/config JSON 在加载时通过 Zod schema 验证，格式错误时输出具体错误信息而非静默失败
+- [x] **SETUP-02**: vocab/state/config JSON 在加载时通过 schema 验证（runtime validation with readable errors），格式错误时输出具体错误信息而非静默失败
 
 ### CI 更新 (CI)
 
@@ -17,7 +17,7 @@
 ### Core 模块移植 (CORE)
 
 - [x] **CORE-01**: `src/core/display.ts` 与 Python `display.py` 输出完全一致——相同输入产生相同 statusLine 字符串
-- [x] **CORE-02**: `src/core/character.ts` 可加载 4 个角色 vocab JSON，通过 Zod 验证，schema 不符时抛出描述性错误而非静默跳过
+- [x] **CORE-02**: `src/core/character.ts` 可加载 4 个角色 vocab JSON，通过 runtime validation，schema 不符时抛出描述性错误而非静默跳过
 - [x] **CORE-03**: `src/core/gitContext.ts` 并行运行 3 个 git 子进程，任一失败时静默 fallback，不中断整体 --update 流程
 - [x] **CORE-04**: `src/core/trigger.ts` 消息选择行为与 Python `trigger.py` 完全一致（所有消息类型、优先级分层、per-repo 隔离、session 跟踪）
 
