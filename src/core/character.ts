@@ -61,7 +61,7 @@ export function loadCharacter(name: string, vocabDir?: string, lang?: 'zh' | 'en
   const content = fs.readFileSync(vocabPath, 'utf-8')
   const parsed: unknown = JSON.parse(content)
 
-  return parseVocab(parsed, `vocab/${name}.json`)
+  return parseVocab(parsed, `vocab/${path.basename(vocabPath)}`)
 }
 
 /**

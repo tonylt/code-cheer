@@ -274,7 +274,7 @@ async function runUpdateCore(
     character = loadCharacter(config.character ?? 'nova', vocabDir, config.language)
   } catch {
     try {
-      character = loadCharacter('nova', vocabDir, config.language)
+      character = loadCharacter('nova', vocabDir)
     } catch {
       throw new Error('character_load_failed')
     }
@@ -363,7 +363,7 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
     character = loadCharacter(config.character ?? 'nova', vocabDir, config.language)
   } catch {
     try {
-      character = loadCharacter('nova', vocabDir, config.language)
+      character = loadCharacter('nova', vocabDir)
     } catch {
       return HARDCODED_FALLBACK
     }
