@@ -85,7 +85,8 @@ export function render(
   const asciiface = character.meta.ascii
   const name = character.meta.name
   const color = character.meta.color
-  const rawLine1 = `${asciiface} ${name}: ${message}`
+  const truncMsg = message.length > 40 ? message.slice(0, 39) + '…' : message
+  const rawLine1 = `${asciiface} ${name}: ${truncMsg}`
   const line1 = color ? `\x1b[${color}m${rawLine1}\x1b[0m` : rawLine1
 
   // Model extraction — handle string or object forms
@@ -117,15 +118,24 @@ export function render(
     }
   }
 
-  // Build line 2 parts
-  const parts: string[] = [model]
-  if (cwdName) {
-    parts.push(cwdName)
+  // Build line 2 parts — truncate long strings to keep line within ~80 cols
+  const truncModel = model.length > 20 ? model.slice(0, 19) + '…' : model
+  const truncCwd = cwdName.length > 20 ? cwdName.slice(0, 19) + '…' : cwdName
+  const parts: string[] = [truncModel]
+  if (truncCwd) {
+    parts.push(truncCwd)
   }
   parts.push(`${tokens} tokens`)
   if (ctxPct !== undefined) {
-    const bar = _ctxBar(Math.floor(ctxPct))
-    parts.push(`[${bar}] ${ctxPct}%`)
+    const pctFloor = Math.floor(ctxPct)
+    const bar = _ctxBar(pctFloor)
+    const barStr = `[${bar}] ${pctFloor}%`
+    const coloredBar = pctFloor >= 95
+      ? `\x1b[91m${barStr}\x1b[0m`
+      : pctFloor >= 80
+        ? `\x1b[93m${barStr}\x1b[0m`
+        : barStr
+    parts.push(coloredBar)
   }
 
   const line2 = parts.join(' | ')

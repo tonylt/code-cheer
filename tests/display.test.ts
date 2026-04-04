@@ -182,4 +182,66 @@ describe('render', () => {
     const line1 = output.split('\n')[0]
     expect(line1).not.toContain('\x1b[')
   })
+
+  it('truncates message longer than 40 chars to 39 chars + ellipsis', () => {
+    const longMsg = 'a'.repeat(41)
+    const output = render(CHAR, longMsg, {}, {})
+    const line1 = output.split('\n')[0]
+    // rawLine1 should contain 39 a's + '…'
+    expect(line1).toContain('a'.repeat(39) + '…')
+    expect(line1).not.toContain('a'.repeat(41))
+  })
+
+  it('does not truncate message of exactly 40 chars', () => {
+    const exactMsg = 'b'.repeat(40)
+    const output = render(CHAR, exactMsg, {}, {})
+    const line1 = output.split('\n')[0]
+    expect(line1).toContain('b'.repeat(40))
+    expect(line1).not.toContain('…')
+  })
+
+  it('truncates model name longer than 20 chars to 19 chars + ellipsis', () => {
+    const longModel = 'x'.repeat(21)
+    const output = render(CHAR, 'msg', { model: longModel }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('x'.repeat(19) + '…')
+    expect(line2).not.toContain('x'.repeat(21))
+  })
+
+  it('truncates cwd_name longer than 20 chars to 19 chars + ellipsis', () => {
+    const longCwd = 'y'.repeat(21)
+    const output = render(CHAR, 'msg', {}, { cwd_name: longCwd })
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('y'.repeat(19) + '…')
+    expect(line2).not.toContain('y'.repeat(21))
+  })
+
+  it('progress bar shows yellow ANSI color at 80% context', () => {
+    const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[93m')
+    expect(line2).toContain('80%')
+  })
+
+  it('progress bar shows red ANSI color at 95% context', () => {
+    const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[91m')
+    expect(line2).toContain('95%')
+  })
+
+  it('progress bar has no color at 79% context', () => {
+    const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('\x1b[91m')
+    expect(line2).not.toContain('\x1b[93m')
+    expect(line2).toContain('79%')
+  })
+
+  it('progress bar displays floor of decimal percentage', () => {
+    const output = render(CHAR, 'msg', { context_window: { used_percentage: 82.7 } }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('82%')
+    expect(line2).not.toContain('82.7%')
+  })
 })
