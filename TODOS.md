@@ -10,10 +10,6 @@
 **Source:** /autoplan CEO review (2026-04-04) | **Priority:** LOW
 当 config.json 未设置 `language` 时，从系统 locale（`process.env.LANG`）自动推断，降低英文用户配置摩擦。
 
-### T8: README language 文档
-**Source:** /autoplan DX review (2026-04-04) | **Priority:** HIGH
-在 README.md 和 README.zh.md 添加「配置」章节，说明 `language` 字段用法。英文用户目前必须读源码才能发现此功能。
-
 ### T9: CONTRIBUTING 语言贡献指引
 **Source:** /autoplan DX review (2026-04-04) | **Priority:** MEDIUM
 在 CONTRIBUTING.md 添加「添加新语言」章节，说明如何贡献新语言 vocab 文件。
@@ -23,6 +19,9 @@
 将 `parseConfig` 中无效 language 值的处理从静默忽略升级为 `process.stderr.write` 警告（不 throw，保持向后兼容）。示例：`"language": "french"` → 警告 + 回退到默认行为。
 
 ## Completed
+
+### T8: README language 文档
+**Completed:** 2026-04-04 — `README.md` 新增 `## Configuration` 节，`README.zh.md` 新增 `## 配置` 节，均包含 config.json 示例、language 字段说明（`"zh"` | `"en"`，默认 `"zh"`）及 `.en.json` vocab 文件引用。commit 585b862。
 
 ### T7: statusline.ts language 集成测试
 **Completed:** 2026-04-04 — `tests/statusline.test.ts` 新增 6 个集成测试，通过 jest.spyOn 验证 `config.language` 在 renderMode×2 + runUpdateCore×2（经由 updateMode）共 4 个 loadCharacter 调用点正确透传。196/196 测试通过。
