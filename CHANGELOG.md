@@ -6,6 +6,7 @@ All notable changes to code-cheer (formerly code-pal) are documented here.
 
 ### Added
 
+- **English vocab support**: set `"language": "en"` in `~/.claude/code-cheer/config.json` to switch all characters to English messages. English vocab files (`.en.json`) added for all 5 characters; falls back to Chinese if English file is missing
 - **MIT License**: project is now open-source under MIT
 - **CONTRIBUTING.md**: 5-step guide for adding new characters (vocab JSON → config.ts → build → cheer.md → tests)
 - **GitHub issue templates**: `bug_report.yml` and `new_character.yml` for structured community contributions
