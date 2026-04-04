@@ -55,14 +55,14 @@ describe('patchSettings', () => {
 
     expect(data.statusLine).toEqual({
       type: 'command',
-      command: `${FAKE_NODE} ${installDir}/dist/statusline.js`,
+      command: `"${FAKE_NODE}" "${installDir}/dist/statusline.js"`,
     })
 
     const stop = (data as any).hooks?.Stop
     expect(Array.isArray(stop)).toBe(true)
     expect(stop).toHaveLength(1)
     expect(stop[0]).toEqual({
-      hooks: [{ type: 'command', command: `${FAKE_NODE} ${installDir}/dist/statusline.js --update` }],
+      hooks: [{ type: 'command', command: `"${FAKE_NODE}" "${installDir}/dist/statusline.js" --update` }],
     })
   })
 
@@ -88,7 +88,8 @@ describe('patchSettings', () => {
 
     // Stop now has the new code-pal entry
     expect(hooks.Stop).toHaveLength(1)
-    expect(hooks.Stop[0].hooks[0].command).toContain('statusline.js --update')
+    expect(hooks.Stop[0].hooks[0].command).toContain('statusline.js')
+    expect(hooks.Stop[0].hooks[0].command).toContain('--update')
   })
 
   it('cleans old statusline.py Stop hook entries on upgrade (D-05)', () => {
@@ -121,7 +122,7 @@ describe('patchSettings', () => {
 
     // New Node.js entry should be added
     const hasNode = stop.some((h: any) =>
-      JSON.stringify(h).includes('statusline.js --update')
+      JSON.stringify(h).includes('statusline.js') && JSON.stringify(h).includes('--update')
     )
     expect(hasNode).toBe(true)
   })
@@ -143,7 +144,8 @@ describe('patchSettings', () => {
 
     // Must have exactly 1 Stop entry (no duplicates)
     expect(stop).toHaveLength(1)
-    expect((stop[0] as any).hooks[0].command).toContain('statusline.js --update')
+    expect((stop[0] as any).hooks[0].command).toContain('statusline.js')
+    expect((stop[0] as any).hooks[0].command).toContain('--update')
   })
 
   it('backs up third-party statusLine to statusline-backup.json', () => {

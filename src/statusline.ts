@@ -32,7 +32,10 @@ export function loadConfig(configPath: string): ConfigType {
   try {
     const raw = fs.readFileSync(configPath, 'utf-8')
     return parseConfig(JSON.parse(raw), 'config.json')
-  } catch {
+  } catch (err: unknown) {
+    if (err instanceof SyntaxError) {
+      process.stderr.write(`[code-pal] config.json is not valid JSON — using defaults\n`)
+    }
     return { character: 'nova' }
   }
 }
@@ -62,7 +65,7 @@ function loadStats(statsPath: string): Record<string, unknown> {
           const byModel = entry.tokensByModel
           if (byModel !== null && typeof byModel === 'object') {
             const total = Object.values(byModel as Record<string, unknown>).reduce<number>(
-              (acc, v) => acc + Number(v),
+              (acc, v) => acc + (typeof v === 'number' ? v : 0),
               0
             )
             return { today_tokens: total }
@@ -120,7 +123,16 @@ function saveState(
   if (options?.commitsToday !== undefined) state.commits_today = options.commitsToday
   if (options?.sessionStart !== undefined) state.session_start = options.sessionStart
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
-  fs.renameSync(statePath + '.tmp', statePath)
+  try {
+    fs.renameSync(statePath + '.tmp', statePath)
+  } catch (err: unknown) {
+    if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'EXDEV') {
+      fs.copyFileSync(statePath + '.tmp', statePath)
+      fs.unlinkSync(statePath + '.tmp')
+    } else {
+      throw err
+    }
+  }
 }
 
 // ─── Debug helpers ────────────────────────────────────────────────────────────
@@ -177,7 +189,7 @@ function readStdinString(): Promise<string> {
     process.stdin.setEncoding('utf-8')
     process.stdin.on('data', (chunk: string) => { data += chunk })
     process.stdin.on('end', () => { resolve(data) })
-    setTimeout(() => resolve(data), 5)
+    setTimeout(() => resolve(data), 50)
   })
 }
 

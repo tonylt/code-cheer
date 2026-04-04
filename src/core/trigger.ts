@@ -85,7 +85,7 @@ export function detectGitEvents(
 
   const bigDiffThreshold = typeof thresholds.big_diff === 'number' ? thresholds.big_diff : 200
   const milestoneCounts: number[] = Array.isArray(thresholds.milestone_counts)
-    ? (thresholds.milestone_counts as number[])
+    ? (thresholds.milestone_counts as unknown[]).filter((x): x is number => typeof x === 'number')
     : [5, 10, 20]
   const bigSessionMinutes = typeof thresholds.big_session_minutes === 'number' ? thresholds.big_session_minutes : 120
   const longDayCommits = typeof thresholds.long_day_commits === 'number' ? thresholds.long_day_commits : 15

@@ -22,6 +22,9 @@ function pick(options: string[]): string {
  * @throws Error if file not found or schema validation fails
  */
 export function loadCharacter(name: string, vocabDir?: string): VocabData {
+  if (name.includes('/') || name.includes('\\') || name.includes('..')) {
+    throw new Error(`Invalid character name: '${name}'`)
+  }
   const dir = vocabDir !== undefined ? vocabDir : path.join(__dirname, '../vocab')
   const vocabPath = path.join(dir, `${name}.json`)
 
