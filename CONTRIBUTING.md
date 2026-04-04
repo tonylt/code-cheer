@@ -118,6 +118,78 @@ If `meta.*` fields are missing or mistyped, you'll see a `[code-cheer] schema va
 
 ---
 
+## Adding a new language
+
+Each character can have vocab files in multiple languages.
+Language files follow the naming pattern `vocab/<name>.<lang>.json`.
+
+Currently supported: `zh` (Chinese, default), `en` (English).
+
+### Step 1 — Create `vocab/<name>.<lang>.json`
+
+Copy the structure from `vocab/nova.en.json`. All keys from the base `vocab/<name>.json`
+must be present in the translation. Keep the same JSON structure; only translate the message strings.
+
+```json
+{
+  "meta": { "name": "Nova", "ascii": "(*>ω<)", "style": "your translation here", "color": "96" },
+  "triggers": {
+    "random": ["translated message..."],
+    "post_tool": ["translated message..."],
+    "time": {
+      "morning": ["..."],
+      "afternoon": ["..."],
+      "evening": ["..."],
+      "midnight": ["..."]
+    },
+    "usage": { "warning": ["..."], "critical": ["..."] }
+  },
+  "git_events": {
+    "first_commit_today": ["..."],
+    "milestone_5": ["..."],
+    "milestone_10": ["..."],
+    "milestone_20": ["..."],
+    "late_night_commit": ["..."],
+    "big_diff": ["..."],
+    "big_session": ["..."],
+    "long_day": ["..."]
+  }
+}
+```
+
+### Step 2 — Verify key parity
+
+Run `npm test` — the vocab drift tests will catch any missing top-level or sub-keys.
+
+### Step 3 — Register the language code
+
+If adding a **new** language code (not `zh` or `en`), add it to the `language` field
+in `src/schemas/config.ts`:
+
+```typescript
+// Before
+export type ConfigType = {
+  character: typeof CHARACTER_NAMES[number]
+  version?: string
+  language?: 'zh' | 'en'
+}
+
+// After (example adding 'ja')
+export type ConfigType = {
+  character: typeof CHARACTER_NAMES[number]
+  version?: string
+  language?: 'zh' | 'en' | 'ja'
+}
+```
+
+Also update the `parseConfig` function in the same file to recognise the new code.
+
+### Step 4 — Update README and README.zh.md
+
+Add the new language code to the Configuration section's `language` field description.
+
+---
+
 ## TypeScript test requirements
 
 - **Framework**: Jest with ts-jest
