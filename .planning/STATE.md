@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 15-02-PLAN.md — migration logic + GitHub rename
-last_updated: "2026-04-04T09:58:17.328Z"
+status: executing
+stopped_at: Completed quick/260404-suh-PLAN.md — English vocab + language switch
+last_updated: "2026-04-04T14:05:40.167Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 11
+  completed_plans: 13
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** 角色在开发者工作上下文中感知并回应，而不只是通用短语
-**Current focus:** Phase 15 — rename-code-cheer (COMPLETE)
+**Current focus:** Phase 08 — ci
 
 ## Current Position
 
-Phase: 15
+Phase: 14
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Executing Phase 08
 Last activity: 2026-04-04
 
 Progress: [██████████] 100% (13/13 plans complete)
@@ -38,10 +38,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 |-------|------|--------------|--------|
 | 08 | 脚手架与 CI | SETUP-01, CI-02 | Complete |
 | 09 | Zod Schemas | SETUP-02 | Complete |
-| 10 | Core 模块移植 | CORE-01, CORE-02, CORE-03, CORE-04 | Not started |
-| 11 | 入口点 | TS-01, TS-02, TS-03 | Not started |
-| 12 | Jest 测试套件 | TEST-01 | Not started |
-| 13 | 安装切换 | INSTALL-01 | In Progress (1/2 complete) |
+| 10 | Core 模块移植 | CORE-01, CORE-02, CORE-03, CORE-04 | Complete |
+| 11 | 入口点 | TS-01, TS-02, TS-03 | Complete |
+| 12 | Jest 测试套件 | TEST-01 | Complete |
+| 13 | 安装切换 | INSTALL-01 | Complete |
+| 14 | Config 验证补全 | SETUP-02, CI-02 | Complete |
 
 ## Accumulated Context
 
@@ -132,10 +133,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 | 260404-q3r | 删除所有 Python 遗留文件（14个文件），更新 CI/gitignore/CLAUDE.md 为纯 Node.js | 2026-04-04 | 1d6c2a6 | [260404-q3r-cleanup-python-version-files](./quick/260404-q3r-cleanup-python-version-files/) |
 | 260404-qv1 | 在 README.md 和 README.zh.md 顶部添加 GitHub Actions CI status badge | 2026-04-04 | df3ba55 | [260404-qv1-add-ci-status-badge-for-this-repo](./quick/260404-qv1-add-ci-status-badge-for-this-repo/) |
 | 260404-suh | 为 5 个角色添加英文 vocab（.en.json）+ config language 字段 + character.ts lang-aware 加载 | 2026-04-04 | 6534eb8 | [260404-suh-vocab](./quick/260404-suh-vocab/) |
+| 260404-v33 | 在两个 README 中添加 Configuration/配置 节，记录 language 字段（zh/en，默认 zh）及 .en.json vocab 引用 | 2026-04-04 | 585b862 | [260404-v33-t8-readme-md-readme-zh-md-language](./quick/260404-v33-t8-readme-md-readme-zh-md-language/) |
 
 ## Session Continuity
 
-Last activity: 2026-04-04 - Completed quick task 260404-suh: 英文 vocab + language 切换支持
-Last session: 2026-04-04T12:58:50Z
-Stopped at: Completed quick/260404-suh-PLAN.md — English vocab + language switch
+Last activity: 2026-04-04 - Completed quick task 260404-v33: 在两个 README 中添加 language 字段文档
+Last session: 2026-04-04T13:05:00Z
+Stopped at: Completed quick/260404-v33-PLAN.md — README language config docs
 Resume with: `/gsd:execute-phase 8`
