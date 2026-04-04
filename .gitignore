@@ -3,6 +3,10 @@ node_modules/
 npm-debug.log*
 coverage/
 
+# Python cache (leftover)
+__pycache__/
+*.py[cod]
+
 # esbuild output
 dist/
 

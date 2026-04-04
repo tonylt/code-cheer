@@ -2,6 +2,18 @@
 
 All notable changes to code-cheer (formerly code-pal) are documented here.
 
+## [3.0.2] - 2026-04-04
+
+### Removed
+
+- **Python legacy files deleted**: `statusline.py`, `core/` (5 modules), `tests/test_*.py` (5 files), `install.sh`, `requirements-dev.txt` — TypeScript rewrite is complete, Python code served no further purpose
+- **Python CI job removed**: `.github/workflows/ci.yml` now runs Node.js 20/22 matrix only
+
+### Changed
+
+- **`.gitignore` replaced**: Python-generated 200+ line template swapped for a 13-line Node.js-specific file
+- **`CLAUDE.md` updated**: all `@deprecated` / legacy references removed, commands and architecture sections now reflect Node.js-only state
+
 ## [3.1.0] - 2026-04-04
 
 ### Changed

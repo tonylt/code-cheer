@@ -8,4 +8,4 @@
 ### T3: /cheer 命令展示当天 git 统计
 **Completed:** v3.0.1 (2026-04-04) — `commands/cheer.md` 现在在切换角色前先读取 `state.json` 的 `commits_today`，切换后展示三级统计消息（1-3次/4-9次/≥10次）。
 
-> T4 (CI lint/类型检查) 已在 v3.0 TypeScript 迁移中被取代：CI 已有 `npm run typecheck` (strict mode)，Python 文件标记为 @deprecated。
+> T4 (CI lint/类型检查) 已在 v3.0 TypeScript 迁移中被取代：CI 已有 `npm run typecheck` (strict mode)。Python 文件已在 v3.0.2 中彻底删除。
