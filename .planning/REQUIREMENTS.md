@@ -8,7 +8,7 @@
 ### 项目脚手架 (SETUP)
 
 - [x] **SETUP-01**: 开发者可运行 `npm run build` 产出 `dist/statusline.js`，`node dist/statusline.js` 冷启动 <100ms（满足 Claude Code statusLine 轮询约束）
-- [x] **SETUP-02**: vocab/state/config JSON 在加载时通过 Zod schema 验证，格式错误时输出具体错误信息而非静默失败
+- [ ] **SETUP-02**: vocab/state/config JSON 在加载时通过 Zod schema 验证，格式错误时输出具体错误信息而非静默失败
 
 ### CI 更新 (CI)
 
@@ -23,9 +23,9 @@
 
 ### 入口点 (TS)
 
-- [ ] **TS-01**: render 模式读 state.json 输出单行无换行 statusLine 字符串，与 Claude Code statusLine API 兼容（`process.stdout.write`，无尾部换行）
-- [ ] **TS-02**: --update 模式完整执行：并行 git 子进程 → 消息选择 → 原子写 state.json（tmp + renameSync 模式）
-- [ ] **TS-03**: --debug-events flag 向 stderr 输出 GIT_CONTEXT / EVENTS_WOULD_FIRE / STATE_SNAPSHOT 诊断信息
+- [x] **TS-01**: render 模式读 state.json 输出单行无换行 statusLine 字符串，与 Claude Code statusLine API 兼容（`process.stdout.write`，无尾部换行）
+- [x] **TS-02**: --update 模式完整执行：并行 git 子进程 → 消息选择 → 原子写 state.json（tmp + renameSync 模式）
+- [x] **TS-03**: --debug-events flag 向 stderr 输出 GIT_CONTEXT / EVENTS_WOULD_FIRE / STATE_SNAPSHOT 诊断信息
 
 ### 测试 (TEST)
 
@@ -68,14 +68,14 @@
 |-------------|-------|--------|
 | SETUP-01 | Phase 08 | Complete |
 | CI-02 | Phase 08 | Complete |
-| SETUP-02 | Phase 09 | Complete |
+| SETUP-02 | Phase 14 | Pending (gap closure) |
 | CORE-01 | Phase 10 | Complete |
 | CORE-02 | Phase 10 | Complete |
 | CORE-03 | Phase 10 | Complete |
 | CORE-04 | Phase 10 | Complete |
-| TS-01 | Phase 11 | Pending |
-| TS-02 | Phase 11 | Pending |
-| TS-03 | Phase 11 | Pending |
+| TS-01 | Phase 11 | Complete |
+| TS-02 | Phase 11 | Complete |
+| TS-03 | Phase 11 | Complete |
 | TEST-01 | Phase 12 | Complete |
 | INSTALL-01 | Phase 13 | Complete |
 

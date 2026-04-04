@@ -15,6 +15,7 @@
 - [x] **Phase 11: 入口点** - 实现 statusline.ts 三种运行模式（render / --update / --debug-events），集成所有 core 模块 (completed 2026-04-03)
 - [x] **Phase 12: Jest 测试套件** - 迁移全部 110+ pytest 测试至 Jest，覆盖率 ≥80%，确认移植正确性 (completed 2026-04-03)
 - [x] **Phase 13: 安装切换** - 更新 install.sh 指向 TypeScript 构建产物，Python 源文件标记 @deprecated (completed 2026-04-03)
+- [ ] **Phase 14: Config 验证补全** - 修复 loadConfig() 添加 ConfigSchema 运行时验证，补全 CI test-node job npm test 步骤
 
 ---
 
@@ -106,6 +107,20 @@ Plans:
 - [x] 13-01-PLAN.md — Node.js install/uninstall scripts + settings.json patch + tests
 - [x] 13-02-PLAN.md — Python @deprecated annotations + manual install verification
 
+### Phase 14: Config 验证补全
+**Goal**: 修复 SETUP-02 — loadConfig() 添加 ConfigSchema 运行时验证；补全 CI test-node job 以运行 Jest 测试套件；更新 CI smoke test 指向 npm run setup
+**Depends on**: Phase 13 (v3.0 gap closure, per audit)
+**Requirements**: SETUP-02
+**Gap Closure**: Closes gaps identified in v3.0 milestone audit (v3.0-MILESTONE-AUDIT.md)
+**Success Criteria** (what must be TRUE):
+  1. `loadConfig()` 调用 `parseWithReadableError(ConfigSchema, ...)` 验证 config.json，无效 character 名称时 stderr 输出具体 Zod 错误而非静默 fallback
+  2. CI `test-node` job 包含 `npm test` 步骤，Jest 165 个测试在 Node.js 20/22 矩阵中均通过
+  3. CI smoke test 验证 `npm run setup` 安装流程（非 Python statusline.py 路径）
+**Plans**: 1 plan
+Plans:
+- [ ] 14-01-PLAN.md — ConfigSchema 验证 + CI Jest + CI smoke test 修复
+**UI hint**: no
+
 ---
 
 ## Progress
@@ -118,6 +133,7 @@ Plans:
 | 11. 入口点 | 0/1 | Complete    | 2026-04-03 |
 | 12. Jest 测试套件 | 3/3 | Complete    | 2026-04-03 |
 | 13. 安装切换 | 2/2 | Complete    | 2026-04-03 |
+| 14. Config 验证补全 | 0/1 | Not started | - |
 
 ---
 
@@ -127,7 +143,7 @@ Plans:
 |-------------|-------|-----------|
 | SETUP-01 | Phase 08 | 构建管线基础，第一步验证 |
 | CI-02 | Phase 08 | CI 扩展与脚手架同步完成 |
-| SETUP-02 | Phase 09 | 类型锚点，core 模块依赖 |
+| SETUP-02 | Phase 14 | 审计发现 loadConfig() 跳过 Zod 验证，Phase 14 gap closure |
 | CORE-01 | Phase 10 | display.ts 最简单，先移植 |
 | CORE-02 | Phase 10 | character.ts 次之 |
 | CORE-03 | Phase 10 | gitContext.ts 引入异步 |
