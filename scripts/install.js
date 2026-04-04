@@ -69,7 +69,7 @@ function copyFiles() {
   // Write default config.json if not exists
   const configPath = path.join(INSTALL_DIR, 'config.json')
   if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }, null, 2))
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova', version: '3.0.0' }, null, 2))
     ok('Created default config (Nova)')
   } else {
     info('Config already exists, skipping')
