@@ -450,10 +450,10 @@ describe('language integration — config.language passed to loadCharacter', () 
     expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'zh')
   })
 
-  it('renderMode: passes language=undefined when config has no language field', () => {
+  it('renderMode: passes language=undefined when config has no language field and LANG unset', () => {
     fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
     const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
-    renderMode()
+    renderMode('', { CODE_CHEER_BASE_DIR: tmpDir, CODE_CHEER_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
     expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), undefined)
   })
 
@@ -475,11 +475,11 @@ describe('language integration — config.language passed to loadCharacter', () 
     expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), 'zh')
   })
 
-  it('updateMode: passes language=undefined when config has no language field', async () => {
+  it('updateMode: passes language=undefined when config has no language field and LANG unset', async () => {
     currentImpl = async () => { throw new Error('not a git repo') }
     fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
     const spy = jest.spyOn(require('../src/core/character'), 'loadCharacter')
-    await updateMode('{}')
+    await updateMode('{}', { CODE_CHEER_BASE_DIR: tmpDir, CODE_CHEER_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
     expect(spy).toHaveBeenCalledWith(expect.any(String), expect.any(String), undefined)
   })
 })
@@ -515,7 +515,7 @@ describe('loadConfig', () => {
     const configPath = path.join(tmpDir, 'config.json')
     fs.writeFileSync(configPath, JSON.stringify({ character: 'novaa' }))
 
-    const result = loadConfig(configPath)
+    const result = loadConfig(configPath, {})
 
     expect(stderrSpy).toHaveBeenCalled()
     const stderrOutput = (stderrSpy.mock.calls as Array<Array<string | Uint8Array>>)
@@ -526,9 +526,78 @@ describe('loadConfig', () => {
     expect(result).toEqual({ character: 'nova' })
   })
 
-  it('falls back to nova when config.json does not exist', () => {
-    const result = loadConfig('/nonexistent/config.json')
+  it('falls back to nova when config.json does not exist and LANG unset', () => {
+    const result = loadConfig('/nonexistent/config.json', {})
     expect(result).toEqual({ character: 'nova' })
     expect(stderrSpy).not.toHaveBeenCalled()
+  })
+
+  // T6: locale auto-detection ──────────────────────────────────────────────────
+
+  it('T6: infers language=zh when config has no language and LANG contains zh', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
+    const result = loadConfig(configPath, { LANG: 'zh_CN.UTF-8' })
+    expect(result.language).toBe('zh')
+  })
+
+  it('T6: infers language=en when config has no language and LANG is set but not zh', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
+    const result = loadConfig(configPath, { LANG: 'en_US.UTF-8' })
+    expect(result.language).toBe('en')
+  })
+
+  it('T6: keeps language=undefined when config has no language and LANG is unset', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
+    const result = loadConfig(configPath, {})
+    expect(result.language).toBeUndefined()
+  })
+
+  it('T6: infers language=en when config.json does not exist and LANG is en', () => {
+    const result = loadConfig('/nonexistent/config.json', { LANG: 'en_US.UTF-8' })
+    expect(result.language).toBe('en')
+    expect(result.character).toBe('nova')
+  })
+
+  it('T6: infers language=zh when config.json does not exist and LANG is zh', () => {
+    const result = loadConfig('/nonexistent/config.json', { LANG: 'zh_CN.UTF-8' })
+    expect(result.language).toBe('zh')
+  })
+
+  it('T6: explicit config language overrides LANG inference', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova', language: 'zh' }))
+    const result = loadConfig(configPath, { LANG: 'en_US.UTF-8' })
+    expect(result.language).toBe('zh')
+  })
+
+  // T10: invalid language warning ──────────────────────────────────────────────
+
+  it('T10: outputs stderr warning for unknown language value', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova', language: 'french' }))
+    const result = loadConfig(configPath, {})
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('unknown language "french"'))
+    expect(result.language).toBeUndefined()
+  })
+
+  it('T10: no stderr warning for null language', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova', language: null }))
+    stderrSpy.mockClear()
+    loadConfig(configPath, {})
+    const calls = (stderrSpy.mock.calls as Array<Array<string>>).map((c) => String(c[0]))
+    expect(calls.some((s) => s.includes('unknown language'))).toBe(false)
+  })
+
+  it('T10: no stderr warning for empty string language', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova', language: '' }))
+    stderrSpy.mockClear()
+    loadConfig(configPath, {})
+    const calls = (stderrSpy.mock.calls as Array<Array<string>>).map((c) => String(c[0]))
+    expect(calls.some((s) => s.includes('unknown language'))).toBe(false)
   })
 })
