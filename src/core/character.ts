@@ -25,9 +25,11 @@ function resolveVocabPath(dir: string, name: string, lang?: 'zh' | 'en'): string
     if (fs.existsSync(enPath)) {
       return enPath
     }
-    // Fallback to zh vocab with warning
+    // Fallback to zh vocab with warning (only warn if zh actually exists — avoids misleading output)
     const zhPath = path.join(dir, `${name}.json`)
-    process.stderr.write(`[code-cheer] English vocab not found for '${name}', falling back to zh\n`)
+    if (fs.existsSync(zhPath)) {
+      process.stderr.write(`[code-cheer] English vocab not found for '${name}', falling back to zh\n`)
+    }
     return zhPath
   }
   return path.join(dir, `${name}.json`)
