@@ -121,7 +121,7 @@ install.sh registers two entries in `~/.claude/settings.json`:
 ## State files (runtime, not in repo)
 
 ```
-~/.claude/code-cheer/config.json   # {"character": "nova", "version": "3.0.1"}
+~/.claude/code-cheer/config.json   # {"character": "nova", "version": "3.1.0"}
 ~/.claude/code-cheer/state.json    # last message, tier, slot, timestamp
 ~/.claude/stats-cache.json         # token usage by day (written by Claude Code)
 ```
