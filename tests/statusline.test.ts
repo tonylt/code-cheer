@@ -44,10 +44,10 @@ describe('statusline', () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv }
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-test-'))
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-cheer-test-'))
     statsPath = path.join(tmpDir, 'stats-cache.json')
-    process.env.CODE_PAL_BASE_DIR = tmpDir
-    process.env.CODE_PAL_STATS_PATH = statsPath
+    process.env.CODE_CHEER_BASE_DIR = tmpDir
+    process.env.CODE_CHEER_STATS_PATH = statsPath
     // Default mock: non-git dir
     currentImpl = null
   })
@@ -318,15 +318,15 @@ describe('saveState EXDEV fallback', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-exdev-test-'))
-    process.env.CODE_PAL_BASE_DIR = tmpDir
-    process.env.CODE_PAL_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
+    process.env.CODE_CHEER_BASE_DIR = tmpDir
+    process.env.CODE_CHEER_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
     currentImpl = null
   })
 
   afterEach(() => {
     // jest.config.ts has restoreMocks: true — spies are restored automatically
-    delete process.env.CODE_PAL_BASE_DIR
-    delete process.env.CODE_PAL_STATS_PATH
+    delete process.env.CODE_CHEER_BASE_DIR
+    delete process.env.CODE_CHEER_STATS_PATH
     // Use original fs ref for cleanup (spies restored before afterEach by restoreMocks)
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
@@ -378,16 +378,16 @@ describe('character three-level fallback', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-pal-char-fallback-test-'))
-    process.env.CODE_PAL_BASE_DIR = tmpDir
-    process.env.CODE_PAL_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
+    process.env.CODE_CHEER_BASE_DIR = tmpDir
+    process.env.CODE_CHEER_STATS_PATH = path.join(tmpDir, 'stats-cache.json')
     fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: 'nova' }))
     currentImpl = null
   })
 
   afterEach(() => {
     jest.restoreAllMocks()
-    delete process.env.CODE_PAL_BASE_DIR
-    delete process.env.CODE_PAL_STATS_PATH
+    delete process.env.CODE_CHEER_BASE_DIR
+    delete process.env.CODE_CHEER_STATS_PATH
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
@@ -397,7 +397,7 @@ describe('character three-level fallback', () => {
       throw new Error('character not found')
     })
 
-    const result = renderMode('', { CODE_PAL_BASE_DIR: tmpDir, CODE_PAL_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
+    const result = renderMode('', { CODE_CHEER_BASE_DIR: tmpDir, CODE_CHEER_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
     expect(result).toContain('Nova')
     expect(result).toContain('加油')
   })
@@ -408,7 +408,7 @@ describe('character three-level fallback', () => {
     })
 
     await expect(
-      updateMode('{}', { CODE_PAL_BASE_DIR: tmpDir, CODE_PAL_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
+      updateMode('{}', { CODE_CHEER_BASE_DIR: tmpDir, CODE_CHEER_STATS_PATH: path.join(tmpDir, 'stats-cache.json') })
     ).resolves.toBeUndefined()
   })
 })

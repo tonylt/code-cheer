@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="$HOME/.claude/code-pal"
+INSTALL_DIR="$HOME/.claude/code-cheer"
 SETTINGS="$HOME/.claude/settings.json"
 COMMANDS_DIR="$HOME/.claude/commands"
 SCRIPT_PATH="$INSTALL_DIR/statusline.py"
@@ -33,7 +33,7 @@ die()   { echo "✗ $*" >&2; exit 1; }
 
 # ── uninstall ─────────────────────────────────────────────────────────────────
 if [[ "${1:-}" == "--uninstall" ]]; then
-  echo "Uninstalling code-pal…"
+  echo "Uninstalling code-cheer…"
 
   if [[ -f "$SETTINGS" ]]; then
     "$PYTHON3_BIN" - "$SETTINGS" "$SCRIPT_PATH" <<'PYEOF'
@@ -43,7 +43,7 @@ with open(path) as f:
     data = json.load(f)
 shutil.copy2(path, path + ".bak")
 # Restore previous statusLine from backup, or remove if we owned it
-backup_file = os.path.expanduser("~/.claude/code-pal/statusline-backup.json")
+backup_file = os.path.expanduser("~/.claude/code-cheer/statusline-backup.json")
 if os.path.exists(backup_file):
     with open(backup_file, "r") as bf:
         backup = json.load(bf)
@@ -91,7 +91,7 @@ PYEOF
 fi
 
 # ── install ───────────────────────────────────────────────────────────────────
-echo "Installing code-pal…"
+echo "Installing code-cheer…"
 echo ""
 
 # 1. Check Python 3.10+ (already resolved above) and git
@@ -140,18 +140,18 @@ if os.path.exists(settings_path):
 else:
     data = {}
 
-# statusLine - backup existing and set code-pal
-backup_file = os.path.expanduser("~/.claude/code-pal/statusline-backup.json")
+# statusLine - backup existing and set code-cheer
+backup_file = os.path.expanduser("~/.claude/code-cheer/statusline-backup.json")
 if "statusLine" in data and data["statusLine"]:
     # 备份现有配置
     with open(backup_file, "w") as bf:
         json.dump({"statusLine": data["statusLine"]}, bf, indent=2)
     print(f"⚠ Existing statusLine backed up to: {backup_file}")
-    print(f"  code-pal requires exclusive statusLine access to function")
+    print(f"  code-cheer requires exclusive statusLine access to function")
     print(f"  Previous config will be restored on uninstall")
 
 data["statusLine"] = {"type": "command", "command": status_cmd}
-print(f"✓ Set code-pal statusLine")
+print(f"✓ Set code-cheer statusLine")
 
 # hooks.Stop
 hooks = data.setdefault("hooks", {})

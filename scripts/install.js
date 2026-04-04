@@ -1,6 +1,6 @@
 'use strict'
 // scripts/install.js
-// Node.js install script for code-pal v3.0 TypeScript build.
+// Node.js install script for code-cheer v3.0 TypeScript build.
 // Usage: npm run setup
 // Exports patchSettings for testing.
 
@@ -10,7 +10,7 @@ const os = require('os')
 const { spawnSync } = require('child_process')
 
 const REPO_DIR = path.join(__dirname, '..')
-const INSTALL_DIR = path.join(os.homedir(), '.claude', 'code-pal')
+const INSTALL_DIR = path.join(os.homedir(), '.claude', 'code-cheer')
 const SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -46,6 +46,40 @@ function runBuild() {
   }
 }
 
+// ── migrateFromLegacy ────────────────────────────────────────────────────────
+// Copies config.json + state.json from old code-pal dir to new code-cheer dir.
+// Accepts optional overrides for testing.
+// opts: { oldDir, newDir }
+function migrateFromLegacy(opts) {
+  const oldDir = (opts && opts.oldDir) || path.join(os.homedir(), '.claude', 'code-pal')
+  const newDir = (opts && opts.newDir) || INSTALL_DIR
+
+  // Skip if old dir doesn't exist
+  if (!fs.existsSync(oldDir)) return
+
+  // D-02: new dir already exists — skip migration (don't overwrite)
+  if (fs.existsSync(newDir)) {
+    info('~/.claude/code-cheer/ already exists — skipping migration')
+    return
+  }
+
+  // Create new dir and copy state files
+  fs.mkdirSync(newDir, { recursive: true })
+  const filesToMigrate = ['config.json', 'state.json']
+  let migrated = 0
+  for (const f of filesToMigrate) {
+    const src = path.join(oldDir, f)
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(newDir, f))
+      migrated++
+    }
+  }
+  if (migrated > 0) {
+    ok('Migrated ' + migrated + ' file(s) from ~/.claude/code-pal/')
+    info('Old directory preserved at ~/.claude/code-pal/ — remove manually when ready')
+  }
+}
+
 // ── copyFiles ─────────────────────────────────────────────────────────────────
 function copyFiles() {
   fs.mkdirSync(INSTALL_DIR, { recursive: true })
@@ -75,17 +109,21 @@ function copyFiles() {
     info('Config already exists, skipping')
   }
 
-  // Always reset state.json (clears stale message/tier on upgrade)
+  // Initialize state.json only if not exists (preserves migrated or existing state)
   const statePath = path.join(INSTALL_DIR, 'state.json')
-  fs.writeFileSync(
-    statePath,
-    JSON.stringify(
-      { message: '', last_updated: '', last_rate_tier: 'normal', last_slot: null },
-      null,
-      2
+  if (!fs.existsSync(statePath)) {
+    fs.writeFileSync(
+      statePath,
+      JSON.stringify(
+        { message: '', last_updated: '', last_rate_tier: 'normal', last_slot: null },
+        null,
+        2
+      )
     )
-  )
-  ok('Initialized state')
+    ok('Initialized state')
+  } else {
+    info('State already exists, skipping')
+  }
 }
 
 // ── patchSettings ─────────────────────────────────────────────────────────────
@@ -106,7 +144,7 @@ function patchSettings(nodeBin, opts) {
     try {
       data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
     } catch {
-      process.stderr.write('[code-pal] settings.json is malformed — starting fresh\n')
+      process.stderr.write('[code-cheer] settings.json is malformed — starting fresh\n')
     }
   } else {
     // Ensure parent directory exists
@@ -124,7 +162,7 @@ function patchSettings(nodeBin, opts) {
     fs.mkdirSync(installDir, { recursive: true })
     fs.writeFileSync(backupFile, JSON.stringify({ statusLine: data.statusLine }, null, 2))
     warn('Existing statusLine backed up to: ' + backupFile)
-    info('code-pal requires exclusive statusLine access to function')
+    info('code-cheer requires exclusive statusLine access to function')
     info('Previous config will be restored on uninstall')
   }
 
@@ -158,7 +196,7 @@ function patchSettings(nodeBin, opts) {
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2))
   fs.renameSync(tmp, settingsPath)
 
-  ok('Set code-pal statusLine')
+  ok('Set code-cheer statusLine')
   ok('Patched Stop hook')
 }
 
@@ -175,7 +213,7 @@ function installCheer() {
 
 // ── main ──────────────────────────────────────────────────────────────────────
 function main() {
-  console.log('Installing code-pal…')
+  console.log('Installing code-cheer…')
   console.log()
 
   checkDeps()
@@ -183,6 +221,7 @@ function main() {
   ok('git found')
 
   runBuild()
+  migrateFromLegacy()
   copyFiles()
   patchSettings(process.execPath)
   installCheer()
@@ -195,7 +234,7 @@ function main() {
 }
 
 // ── exports (for testing) ─────────────────────────────────────────────────────
-module.exports = { patchSettings }
+module.exports = { patchSettings, migrateFromLegacy }
 
 if (require.main === module) {
   main()

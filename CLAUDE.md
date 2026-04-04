@@ -4,9 +4,9 @@ This file provides guidance to Claude Code when working in this repository.
 
 ## Project
 
-**code-pal** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
+**code-cheer** — Claude Code statusline companion. Anime-style characters show encouragement + token usage in the status bar after each response.
 
-Installs to `~/.claude/code-pal/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
+Installs to `~/.claude/code-cheer/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
 
 ## v3.0 Migration (in progress)
 
@@ -86,30 +86,31 @@ commands/
 install.sh              Python legacy installer (still functional, @deprecated)
 jest.config.ts          Jest configuration (ts-jest, 80% line coverage threshold)
 tests/                  test suite
-  *.test.ts             Jest TypeScript tests (167 tests)
+  *.test.ts             Jest TypeScript tests (176 tests)
   test_*.py             pytest Python tests (126 tests, legacy)
 ```
 
 ## Key files
 
-- `core/trigger.py` — message selection priority logic; edit here to change when/how messages update
-- `core/display.py` — output format for the statusline string
+- `src/core/trigger.ts` — message selection priority logic; edit here to change when/how messages update
+- `src/core/display.ts` — output format for the statusline string
 - `vocab/*.json` — all character dialogue; safe to edit without touching code
-- `install.sh` — both install and uninstall paths; patches `~/.claude/settings.json` non-destructively
+- `scripts/install.js` — install path; patches `~/.claude/settings.json` non-destructively
+- `scripts/uninstall.js` — uninstall path; restores `~/.claude/settings.json`
 
 ## Hook wiring
 
-install.sh registers two entries in `~/.claude/settings.json`:
+scripts/install.js registers two entries in `~/.claude/settings.json`:
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "python3 ~/.claude/code-pal/statusline.py"
+    "command": "node ~/.claude/code-cheer/dist/statusline.js"
   },
   "hooks": {
     "Stop": [{
-      "hooks": [{"type": "command", "command": "python3 ~/.claude/code-pal/statusline.py --update"}]
+      "hooks": [{"type": "command", "command": "node ~/.claude/code-cheer/dist/statusline.js --update"}]
     }]
   }
 }
@@ -121,8 +122,8 @@ install.sh registers two entries in `~/.claude/settings.json`:
 ## State files (runtime, not in repo)
 
 ```
-~/.claude/code-pal/config.json   # {"character": "nova", "version": "3.0.1"}
-~/.claude/code-pal/state.json    # last message, tier, slot, timestamp
+~/.claude/code-cheer/config.json   # {"character": "nova", "version": "3.0.1"}
+~/.claude/code-cheer/state.json    # last message, tier, slot, timestamp
 ~/.claude/stats-cache.json         # token usage by day (written by Claude Code)
 ```
 
@@ -130,7 +131,7 @@ install.sh registers two entries in `~/.claude/settings.json`:
 
 1. Create `vocab/<name>.json` following the structure of an existing vocab file
 2. Add the character to `commands/cheer.md` (options list + reply text)
-3. Add a test in `tests/test_character.py`
+3. Add a test in `tests/character.test.ts`
 
 ## Pitfalls
 

@@ -1,6 +1,6 @@
 [English](./README.md)
 
-# code-pal
+# code-cheer
 
 **Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
 
@@ -14,7 +14,7 @@
 
 ```
 (=^･ω･^=) Mochi: 跑完这个就去休息… 才不是
-sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
+sonnet-4-6 | code-cheer | 47k tokens | [████░░░░░░] 32%
 ```
 
 每次 Claude 回复结束后，状态栏自动刷新：第一行角色台词，第二行显示模型、项目名、token 用量和上下文进度条。
@@ -33,13 +33,15 @@ sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
 ## 安装
 
 ```bash
-git clone https://github.com/tonylt/code-pal.git
-cd code-pal
+git clone https://github.com/tonylt/code-cheer.git
+cd code-cheer
 npm install
 npm run setup
 ```
 
 重启 Claude Code，状态栏立即生效。
+
+> **从 code-pal 迁移？** 执行 `npm run setup` 会自动将配置从 `~/.claude/code-pal/` 迁移至 `~/.claude/code-cheer/`。
 
 ---
 
@@ -76,7 +78,7 @@ Claude response ends (Stop hook)
 node dist/statusline.js --update
   → reads token stats from stats-cache.json
   → selects message by: usage tier > time slot > random
-  → writes to ~/.claude/code-pal/state.json
+  → writes to ~/.claude/code-cheer/state.json
         ↓
 Statusline polls node dist/statusline.js
   → reads state.json → renders to status bar
@@ -99,11 +101,11 @@ Statusline polls node dist/statusline.js
 编辑角色的 JSON 文件即可添加自己的台词：
 
 ```bash
-~/.claude/code-pal/vocab/nova.json
-~/.claude/code-pal/vocab/luna.json
-~/.claude/code-pal/vocab/mochi.json
-~/.claude/code-pal/vocab/iris.json
-~/.claude/code-pal/vocab/leijun.json
+~/.claude/code-cheer/vocab/nova.json
+~/.claude/code-cheer/vocab/luna.json
+~/.claude/code-cheer/vocab/mochi.json
+~/.claude/code-cheer/vocab/iris.json
+~/.claude/code-cheer/vocab/leijun.json
 ```
 
 每个文件包含以下触发类别：`post_tool`（工具后）、`time`（时段：morning/afternoon/evening/midnight）、`usage`（用量告警：warning/critical）、`random`（随机兜底）。
@@ -123,7 +125,7 @@ npm run unsetup
 ## 文件结构
 
 ```
-code-pal/
+code-cheer/
 ├── src/
 │   ├── statusline.ts   # 状态栏入口
 │   └── core/
@@ -144,7 +146,7 @@ code-pal/
 │   └── leijun.json
 ├── commands/
 │   └── cheer.md        # /cheer 斜杠命令
-└── tests/              # Jest 测试套件（167 个测试）
+└── tests/              # Jest 测试套件（176 个测试）
 ```
 
 ---
@@ -155,7 +157,7 @@ code-pal/
 npm test
 ```
 
-167 个测试，6 个套件（character、display、gitContext、trigger、statusline、install）。
+176 个测试，6 个套件（character、display、gitContext、trigger、statusline、install）。
 
 ---
 
@@ -178,7 +180,7 @@ npm test
 `cat ~/.claude/settings.json | grep statusLine`
 
 **找不到 `node` 命令或版本不符？**
-code-pal 需要 Node.js 18+。运行 `node --version` 确认版本。可通过 [nodejs.org](https://nodejs.org) 或 nvm/fnm 安装。
+code-cheer 需要 Node.js 18+。运行 `node --version` 确认版本。可通过 [nodejs.org](https://nodejs.org) 或 nvm/fnm 安装。
 
 **`npm run setup` 报错？**
 在仓库根目录下运行。确认 `~/.claude/` 目录存在（Claude Code 首次运行时自动创建）。
@@ -187,10 +189,13 @@ code-pal 需要 Node.js 18+。运行 `node --version` 确认版本。可通过 [
 确认 hook 已注册：`cat ~/.claude/settings.json | grep -A5 Stop`。如缺失，重新运行 `npm run setup`，然后重启 Claude Code。
 
 **Claude Code 版本不符？**
-code-pal 需要 Claude Code v2.1.80 或更高版本。检查当前版本并按需更新。
+code-cheer 需要 Claude Code v2.1.80 或更高版本。检查当前版本并按需更新。
 
 **其他工具已占用 statusLine？**
-code-pal 需要独占 statusLine 配置才能工作。安装时会自动备份现有配置到 `~/.claude/code-pal/statusline-backup.json`，卸载时恢复。如需切换不同工具，请先卸载当前工具再安装另一个。
+code-cheer 需要独占 statusLine 配置才能工作。安装时会自动备份现有配置到 `~/.claude/code-cheer/statusline-backup.json`，卸载时恢复。如需切换不同工具，请先卸载当前工具再安装另一个。
+
+**从 code-pal（旧目录）迁移？**
+安装目录已从 `~/.claude/code-pal/` 更改为 `~/.claude/code-cheer/`。执行 `npm run setup` 会自动处理迁移。安装完成后可安全删除旧目录 `~/.claude/code-pal/`。
 
 ---
 

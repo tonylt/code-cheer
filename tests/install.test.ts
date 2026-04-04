@@ -164,6 +164,77 @@ describe('patchSettings', () => {
   })
 })
 
+// ─── migrateFromLegacy ────────────────────────────────────────────────────────
+
+describe('migrateFromLegacy', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { migrateFromLegacy } = require('../scripts/install.js') as {
+    migrateFromLegacy: (opts: { oldDir: string; newDir: string }) => void
+  }
+
+  it('copies config.json and state.json when old dir exists and new dir does not', () => {
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'migrate-test-'))
+    const oldDir = path.join(tmpBase, 'code-pal')
+    const newDir = path.join(tmpBase, 'code-cheer')
+    fs.mkdirSync(oldDir)
+    fs.writeFileSync(path.join(oldDir, 'config.json'), '{"character":"luna"}')
+    fs.writeFileSync(path.join(oldDir, 'state.json'), '{"message":"hello"}')
+
+    migrateFromLegacy({ oldDir, newDir })
+
+    expect(fs.existsSync(path.join(newDir, 'config.json'))).toBe(true)
+    expect(JSON.parse(fs.readFileSync(path.join(newDir, 'config.json'), 'utf8'))).toEqual({ character: 'luna' })
+    expect(fs.existsSync(path.join(newDir, 'state.json'))).toBe(true)
+    expect(JSON.parse(fs.readFileSync(path.join(newDir, 'state.json'), 'utf8'))).toEqual({ message: 'hello' })
+
+    fs.rmSync(tmpBase, { recursive: true })
+  })
+
+  it('skips migration when new dir already exists (D-02)', () => {
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'migrate-test-'))
+    const oldDir = path.join(tmpBase, 'code-pal')
+    const newDir = path.join(tmpBase, 'code-cheer')
+    fs.mkdirSync(oldDir)
+    fs.writeFileSync(path.join(oldDir, 'config.json'), '{"character":"luna"}')
+    fs.mkdirSync(newDir)
+    fs.writeFileSync(path.join(newDir, 'config.json'), '{"character":"nova"}')
+
+    migrateFromLegacy({ oldDir, newDir })
+
+    // nova config should be preserved, not overwritten by luna
+    expect(JSON.parse(fs.readFileSync(path.join(newDir, 'config.json'), 'utf8'))).toEqual({ character: 'nova' })
+
+    fs.rmSync(tmpBase, { recursive: true })
+  })
+
+  it('skips silently when old dir does not exist', () => {
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'migrate-test-'))
+    const oldDir = path.join(tmpBase, 'nonexistent')
+    const newDir = path.join(tmpBase, 'code-cheer')
+
+    expect(() => migrateFromLegacy({ oldDir, newDir })).not.toThrow()
+    expect(fs.existsSync(newDir)).toBe(false)
+
+    fs.rmSync(tmpBase, { recursive: true })
+  })
+
+  it('copies only files that exist in old dir (partial migration)', () => {
+    const tmpBase = fs.mkdtempSync(path.join(os.tmpdir(), 'migrate-test-'))
+    const oldDir = path.join(tmpBase, 'code-pal')
+    const newDir = path.join(tmpBase, 'code-cheer')
+    fs.mkdirSync(oldDir)
+    fs.writeFileSync(path.join(oldDir, 'config.json'), '{"character":"iris"}')
+    // No state.json in old dir
+
+    migrateFromLegacy({ oldDir, newDir })
+
+    expect(fs.existsSync(path.join(newDir, 'config.json'))).toBe(true)
+    expect(fs.existsSync(path.join(newDir, 'state.json'))).toBe(false)
+
+    fs.rmSync(tmpBase, { recursive: true })
+  })
+})
+
 // ─── unpatchSettings ──────────────────────────────────────────────────────────
 
 describe('unpatchSettings', () => {
@@ -182,9 +253,9 @@ describe('unpatchSettings', () => {
 
   it('removes statusLine containing statusline.js', () => {
     const existing = {
-      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js` },
+      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js` },
       hooks: {
-        Stop: [{ hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js --update` }] }],
+        Stop: [{ hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js --update` }] }],
       },
     }
     const settingsPath = writeSettings(tmpDir, existing)
@@ -213,7 +284,7 @@ describe('unpatchSettings', () => {
     fs.writeFileSync(backupPath, JSON.stringify({ statusLine: thirdParty }, null, 2))
 
     const existing = {
-      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js` },
+      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js` },
       hooks: { Stop: [] },
     }
     const settingsPath = writeSettings(tmpDir, existing)
@@ -227,11 +298,11 @@ describe('unpatchSettings', () => {
 
   it('preserves non-statusline Stop hooks', () => {
     const existing = {
-      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js` },
+      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js` },
       hooks: {
         PostToolUse: [{ matcher: '**', hooks: [{ type: 'command', command: 'prettier' }] }],
         Stop: [
-          { hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js --update` }] },
+          { hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js --update` }] },
           { hooks: [{ type: 'command', command: 'some-other-stop-hook' }] },
         ],
       },
@@ -250,10 +321,10 @@ describe('unpatchSettings', () => {
 
   it('cleans up empty hooks.Stop and hooks object after removal', () => {
     const existing = {
-      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js` },
+      statusLine: { type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js` },
       hooks: {
         Stop: [
-          { hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-pal/dist/statusline.js --update` }] },
+          { hooks: [{ type: 'command', command: `${FAKE_NODE} ~/.claude/code-cheer/dist/statusline.js --update` }] },
         ],
       },
     }
