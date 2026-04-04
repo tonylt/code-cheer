@@ -271,10 +271,10 @@ async function runUpdateCore(
   const vocabDir = path.join(__dirname, '../vocab')
   let character: VocabData
   try {
-    character = loadCharacter(config.character ?? 'nova', vocabDir)
+    character = loadCharacter(config.character ?? 'nova', vocabDir, config.language)
   } catch {
     try {
-      character = loadCharacter('nova', vocabDir)
+      character = loadCharacter('nova', vocabDir, config.language)
     } catch {
       throw new Error('character_load_failed')
     }
@@ -360,10 +360,10 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   const vocabDir = path.join(__dirname, '../vocab')
   let character: VocabData
   try {
-    character = loadCharacter(config.character ?? 'nova', vocabDir)
+    character = loadCharacter(config.character ?? 'nova', vocabDir, config.language)
   } catch {
     try {
-      character = loadCharacter('nova', vocabDir)
+      character = loadCharacter('nova', vocabDir, config.language)
     } catch {
       return HARDCODED_FALLBACK
     }
