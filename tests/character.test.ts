@@ -73,6 +73,60 @@ describe('loadCharacter', () => {
   })
 })
 
+// ─── loadCharacter language (lang param) ────────────────────────────────────────
+
+describe('loadCharacter lang param', () => {
+  const realVocabDir = path.join(__dirname, '..', 'vocab')
+
+  it('loads english vocab when lang=en for all 5 characters', () => {
+    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+    for (const name of names) {
+      const char = loadCharacter(name, realVocabDir, 'en')
+      expect(char.meta.name).toBeTruthy()
+      expect(char.triggers).toBeDefined()
+    }
+  })
+
+  it('loads nova.en.json content (english style field)', () => {
+    const char = loadCharacter('nova', realVocabDir, 'en')
+    expect(char.meta.style).toContain('high-energy')
+  })
+
+  it('fallbacks to zh vocab when .en.json missing, writes stderr warning', () => {
+    const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true)
+    try {
+      // vocabDir only has testfb.json, no testfb.en.json
+      fs.writeFileSync(path.join(vocabDir, 'testfb.json'), JSON.stringify(VALID_VOCAB))
+      const char = loadCharacter('testfb', vocabDir, 'en')
+      expect(char.meta.name).toBe('TestChar')
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining("English vocab not found for 'testfb'")
+      )
+    } finally {
+      stderrSpy.mockRestore()
+    }
+  })
+
+  it('loads zh vocab by default (no lang arg)', () => {
+    const char = loadCharacter('nova', realVocabDir)
+    // zh vocab style field contains Chinese characters
+    expect(char.meta.style).toMatch(/[\u4e00-\u9fff]/)
+  })
+
+  it('loads zh vocab when lang=zh explicitly', () => {
+    const char = loadCharacter('nova', realVocabDir, 'zh')
+    expect(char.meta.style).toMatch(/[\u4e00-\u9fff]/)
+  })
+
+  it('en and zh vocab both pass schema validation (VocabData structure)', () => {
+    const enChar = loadCharacter('nova', realVocabDir, 'en')
+    const zhChar = loadCharacter('nova', realVocabDir, 'zh')
+    // Both should have identical structural keys
+    expect(Object.keys(enChar.triggers ?? {})).toEqual(expect.arrayContaining(['random', 'post_tool', 'time', 'usage']))
+    expect(Object.keys(zhChar.triggers ?? {})).toEqual(expect.arrayContaining(['random', 'post_tool', 'time', 'usage']))
+  })
+})
+
 // ─── getGitEventMessage ────────────────────────────────────────────────────────
 
 describe('getGitEventMessage', () => {
