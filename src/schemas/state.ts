@@ -22,13 +22,13 @@ function validationError(label: string, detail: string): Error {
   return new Error(`Invalid ${label}: ${detail}`)
 }
 
-// D-07: null/undefined returns default, valid data parsed, invalid throws
+// D-07: null/undefined/non-object returns default, valid data parsed
 export function parseState(raw: unknown): StateType {
   if (raw === null || raw === undefined) {
     return { ...DEFAULT_STATE }
   }
   if (typeof raw !== 'object') {
-    throw validationError('state.json', 'expected object')
+    return { ...DEFAULT_STATE }
   }
   const obj = raw as Record<string, unknown>
   return {
