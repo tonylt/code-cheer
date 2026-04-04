@@ -1,3 +1,4 @@
+# @deprecated: use src/ TypeScript version
 # core/display.py
 from datetime import datetime, timezone
 

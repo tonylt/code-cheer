@@ -1,15 +1,23 @@
 {
   "name": "code-pal",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Claude Code statusline companion",
   "private": true,
   "scripts": {
     "build": "esbuild src/statusline.ts --bundle --platform=node --format=cjs --outfile=dist/statusline.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "setup": "node scripts/install.js",
+    "unsetup": "node scripts/uninstall.js"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^25.0.0",
     "esbuild": "^0.28.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
     "typescript": "^6.0.0",
     "zod": "^4.3.6"
   }
