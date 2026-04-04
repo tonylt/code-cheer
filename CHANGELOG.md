@@ -1,6 +1,15 @@
 # Changelog
 
-All notable changes to code-pal are documented here.
+All notable changes to code-cheer (formerly code-pal) are documented here.
+
+## [3.1.0] - 2026-04-04
+
+### Changed
+
+- **Project renamed**: code-pal → code-cheer. Installation directory changes from `~/.claude/code-pal/` to `~/.claude/code-cheer/`
+- **Environment variables renamed**: `CODE_PAL_BASE_DIR` → `CODE_CHEER_BASE_DIR`, `CODE_PAL_STATS_PATH` → `CODE_CHEER_STATS_PATH`
+- **Error log prefix**: all stderr messages now use `[code-cheer]` prefix
+- **package.json name**: `code-pal` → `code-cheer`
 
 ## [3.0.1] - 2026-04-04
 
@@ -40,7 +49,7 @@ All notable changes to code-pal are documented here.
 
 ### Fixed
 
-- `uninstall.js` now removes the entire `~/.claude/code-pal/` directory (previously only removed `dist/`), ensuring CI smoke test passes
+- `uninstall.js` now removes the entire `~/.claude/code-cheer/` directory (previously only removed `dist/`), ensuring CI smoke test passes
 - `install.js` copies `package.json` to install directory as required by CI smoke test
 - `unsetup` script removes the Python legacy `statusLine` entry from `settings.json`
 - `patchSettings` atomic write uses `writeFileSync(tmp) + renameSync` to prevent half-written settings on crash

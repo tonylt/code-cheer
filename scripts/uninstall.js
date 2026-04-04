@@ -1,6 +1,6 @@
 'use strict'
 // scripts/uninstall.js
-// Node.js uninstall script for code-pal v3.0.
+// Node.js uninstall script for code-cheer v3.0.
 // Usage: npm run unsetup
 // Exports unpatchSettings for testing.
 
@@ -8,7 +8,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-const INSTALL_DIR = path.join(os.homedir(), '.claude', 'code-pal')
+const INSTALL_DIR = path.join(os.homedir(), '.claude', 'code-cheer')
 const SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json')
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ function unpatchSettings(opts) {
   try {
     data = JSON.parse(fs.readFileSync(settingsPath, 'utf8'))
   } catch {
-    process.stderr.write('[code-pal] settings.json is malformed — skipping unpatch\n')
+    process.stderr.write('[code-cheer] settings.json is malformed — skipping unpatch\n')
     return
   }
   fs.copyFileSync(settingsPath, settingsPath + '.bak')
@@ -92,7 +92,7 @@ function unpatchSettings(opts) {
 
 // ── main ──────────────────────────────────────────────────────────────────────
 function main() {
-  console.log('Uninstalling code-pal…')
+  console.log('Uninstalling code-cheer…')
   console.log()
 
   unpatchSettings()

@@ -17,12 +17,12 @@ const HARDCODED_FALLBACK = '(*>ω<) Nova: 加油！今天也要好好编程！\n
 
 function resolvePaths(env?: NodeJS.ProcessEnv) {
   const e = env ?? process.env
-  const baseDir = e.CODE_PAL_BASE_DIR ?? path.join(os.homedir(), '.claude', 'code-pal')
+  const baseDir = e.CODE_CHEER_BASE_DIR ?? path.join(os.homedir(), '.claude', 'code-cheer')
   return {
     baseDir,
     configPath: path.join(baseDir, 'config.json'),
     statePath: path.join(baseDir, 'state.json'),
-    statsPath: e.CODE_PAL_STATS_PATH ?? path.join(os.homedir(), '.claude', 'stats-cache.json'),
+    statsPath: e.CODE_CHEER_STATS_PATH ?? path.join(os.homedir(), '.claude', 'stats-cache.json'),
   }
 }
 
@@ -35,7 +35,7 @@ export function loadConfig(configPath: string): ConfigType {
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code
     if (code !== 'ENOENT') {
-      process.stderr.write(`[code-pal] config.json error — using defaults\n`)
+      process.stderr.write(`[code-cheer] config.json error — using defaults\n`)
     }
     return { character: 'nova' }
   }
@@ -456,7 +456,7 @@ async function main(): Promise<void> {
 
 if (require.main === module) {
   main().catch((err: unknown) => {
-    process.stderr.write(`[code-pal] error: ${String(err)}\n`)
+    process.stderr.write(`[code-cheer] error: ${String(err)}\n`)
     process.exit(1)
   })
 }

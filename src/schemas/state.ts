@@ -18,7 +18,7 @@ export const DEFAULT_STATE: StateType = {
 }
 
 function validationError(label: string, detail: string): Error {
-  process.stderr.write(`[code-pal] ${label} schema validation failed:\n✖ ${detail}\n`)
+  process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ ${detail}\n`)
   return new Error(`Invalid ${label}: ${detail}`)
 }
 

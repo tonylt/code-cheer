@@ -1,4 +1,4 @@
-# Roadmap: code-pal
+# Roadmap: code-cheer
 
 **Milestone:** v3.0 — TypeScript 重写
 **Created:** 2026-04-03
