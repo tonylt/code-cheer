@@ -4,6 +4,8 @@
 
 # code-cheer
 
+<p align="center"><img src="assets/banner.svg" alt="code-cheer" width="100%"></p>
+
 **Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
 
 code-cheer **响应你的编程行为**，而不是被动摆设。它感知你今天的首次提交、里程碑推送、深夜编码、上下文窗口即将用完——并以角色专属的方式反应。
