@@ -136,10 +136,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 | 260404-v33 | 在两个 README 中添加 Configuration/配置 节，记录 language 字段（zh/en，默认 zh）及 .en.json vocab 引用 | 2026-04-04 | 585b862 | [260404-v33-t8-readme-md-readme-zh-md-language](./quick/260404-v33-t8-readme-md-readme-zh-md-language/) |
 | 260405-85j | ASCII install banner（printBanner + ANSI颜色 + 语言感知台词）+ SVG hero banner 生成脚本 | 2026-04-05 | 245a45e | [260405-85j-ascii-install-banner-readme-banner-svg](./quick/260405-85j-ascii-install-banner-readme-banner-svg/) |
 | 260405-8cw | 在 README.md 和 README.zh.md 顶部添加 banner 图片引用 | 2026-04-05 | 8e95eda | [260405-8cw-readme-md-readme-zh-md-banner](./quick/260405-8cw-readme-md-readme-zh-md-banner/) |
+| 260405-8no | 修复 loadConfig LANG 推断向后兼容回归：非 zh locale 不再自动推断 language='en'，恢复中文默认行为 | 2026-04-05 | d4bb54a | [260405-8no-fix-lang-inference-backward-compat-regre](./quick/260405-8no-fix-lang-inference-backward-compat-regre/) |
 
 ## Session Continuity
 
-Last activity: 2026-04-05 - Completed quick task 260405-8cw: 在 README.md 和 README.zh.md 顶部添加 banner 图片引用
-Last session: 2026-04-05T05:56:00Z
-Stopped at: Completed quick/260405-8cw-PLAN.md — README.md and README.zh.md banner image
+Last activity: 2026-04-05 - Completed quick task 260405-8no: 修复 loadConfig LANG 推断向后兼容回归
+Last session: 2026-04-05T00:00:00Z
+Stopped at: Completed quick/260405-8no-PLAN.md — fix LANG inference backward compat regression
 Resume with: `/gsd:execute-phase 8`
