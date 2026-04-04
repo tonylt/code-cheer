@@ -12,41 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
-          cache-dependency-path: requirements-dev.txt
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Smoke test install.sh
-        run: |
-          bash install.sh
-          test -f "$HOME/.claude/code-cheer/statusline.py" || (echo "statusline.py missing" && exit 1)
-          test -f "$HOME/.claude/code-cheer/config.json"   || (echo "config.json missing" && exit 1)
-          test -f "$HOME/.claude/settings.json"             || (echo "settings.json missing" && exit 1)
-          grep -q "statusLine" "$HOME/.claude/settings.json" || (echo "statusLine not wired" && exit 1)
-          bash install.sh --uninstall
-          test ! -d "$HOME/.claude/code-cheer" || (echo "uninstall left files behind" && exit 1)
-
-      - name: Run tests
-        run: python3 -m pytest tests/
-
-  test-node:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
         node-version: ["20", "22"]
 
     steps:

@@ -8,9 +8,9 @@ This file provides guidance to Claude Code when working in this repository.
 
 Installs to `~/.claude/code-cheer/`. Hooks into Claude Code via `settings.json` (Stop hook + statusLine command).
 
-## v3.0 Migration (in progress)
+## v3.0 Migration
 
-Python → TypeScript/Node.js migration. Python files remain `@deprecated` until full cutover.
+TypeScript/Node.js rewrite complete. All source is in `src/`, bundled via `esbuild` to `dist/statusline.js`.
 
 - **Build**: `esbuild` bundles `src/` → `dist/statusline.js` (single CJS file, ~40ms cold start)
 - **Typecheck**: `tsc --noEmit` (esbuild skips type checking)
@@ -30,41 +30,18 @@ npm run typecheck
 # Run TypeScript tests (Jest)
 npm test
 
-# Run tests (Python, legacy)
-python3 -m pytest tests/
-
-# Run a specific test file
-python3 -m pytest tests/test_trigger.py -v
-
-# Manual statusline test (reads state.json, prints render output)
-python3 statusline.py
-
-# Force a message update (simulates Stop hook)
-python3 statusline.py --update
-
-# Install (Node.js path — v3.0)
+# Install
 npm run setup
 
-# Uninstall (Node.js path — v3.0)
+# Uninstall
 npm run unsetup
-
-# Install (Python legacy path)
-./install.sh
-
-# Uninstall (Python legacy path)
-./install.sh --uninstall
 ```
 
 ## Architecture
 
 ```
-statusline.py           Python entry point (legacy, @deprecated)
-core/                   Python modules (legacy, @deprecated)
-  character.py          load + validate vocab JSON
-  trigger.py            message selection logic
-  display.py            format output string
-src/                    TypeScript source (v3.0)
-  statusline.ts         TS entry point (renderMode/updateMode/debugMode)
+src/                    TypeScript source
+  statusline.ts         entry point (renderMode/updateMode/debugMode)
   core/
     character.ts        vocab loading + validation
     display.ts          statusline formatting
@@ -72,7 +49,7 @@ src/                    TypeScript source (v3.0)
     gitContext.ts       git subprocess context (parallel with Promise.allSettled)
   schemas/              Zod schemas (config, state, vocab)
 dist/                   esbuild bundle output (gitignored)
-scripts/                Node.js install/uninstall pipeline (v3.0)
+scripts/                Node.js install/uninstall pipeline
   install.js            patchSettings — wires statusline into settings.json
   uninstall.js          unpatchSettings — restores settings.json
 vocab/
@@ -80,14 +57,12 @@ vocab/
   luna.json
   mochi.json
   iris.json
-  leijun.json           Lei Jun character
+  leijun.json           Lei Jun character (hidden easter egg)
 commands/
   cheer.md              /cheer slash command (Claude Code custom command)
-install.sh              Python legacy installer (still functional, @deprecated)
 jest.config.ts          Jest configuration (ts-jest, 80% line coverage threshold)
 tests/                  test suite
   *.test.ts             Jest TypeScript tests (176 tests)
-  test_*.py             pytest Python tests (126 tests, legacy)
 ```
 
 ## Key files
@@ -138,7 +113,7 @@ scripts/install.js registers two entries in `~/.claude/settings.json`:
 - Production must use `node dist/statusline.js` (~40ms), never `npx tsx` (~1.5s)
 - Git subprocesses: use `Promise.allSettled`, check `.status === 'fulfilled'` individually
 - TypeScript strict: `if (x)` is false when x=0; use `!== undefined` for existence checks
-- install.sh uses `$(which node)` absolute path for nvm/fnm compatibility
+- `process.execPath` for node absolute path — more reliable than `which node` in nvm/fnm environments
 
 ## Skill routing
 
