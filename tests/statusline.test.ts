@@ -573,6 +573,20 @@ describe('loadConfig', () => {
     expect(result.language).toBe('zh')
   })
 
+  it('T6: infers language=en when LANG=C.UTF-8 (POSIX/Docker locale)', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
+    const result = loadConfig(configPath, { LANG: 'C.UTF-8' })
+    expect(result.language).toBe('en')
+  })
+
+  it('T6: infers language=en when LANG=C (minimal POSIX locale)', () => {
+    const configPath = path.join(tmpDir, 'config.json')
+    fs.writeFileSync(configPath, JSON.stringify({ character: 'nova' }))
+    const result = loadConfig(configPath, { LANG: 'C' })
+    expect(result.language).toBe('en')
+  })
+
   // T10: invalid language warning ──────────────────────────────────────────────
 
   it('T10: outputs stderr warning for unknown language value', () => {
