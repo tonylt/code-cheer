@@ -5,7 +5,7 @@
 **Claude Code 状态栏应援助手 —— 二次元角色陪你写代码，实时显示鼓励语和 token 用量。**
 
 - Git 事件感知 — 首次提交、提交里程碑（5/10/20 次）、深夜提交、大 diff 等自动触发角色专属台词
-- 4 个动漫角色 — Nova、Luna、Mochi、Iris，各具独特性格，随时用 `/cheer` 切换
+- 5 个动漫角色 — Nova、Luna、Mochi、Iris、雷军，各具独特性格，随时用 `/cheer` 切换
 - 实时状态栏 — 模型名、当前项目目录、token 用量、上下文进度条一行看清
 
 ---
@@ -23,7 +23,8 @@ sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
 
 ## 环境要求
 
-- **Python 3.10+**（macOS/Linux 已内置）
+- **Node.js 18+**（检查：`node --version`）
+- **npm**（随 Node.js 一起安装）
 - **git**
 - **Claude Code v2.1.80+**
 
@@ -34,7 +35,8 @@ sonnet-4-6 | code-pal | 47k tokens | [████░░░░░░] 32%
 ```bash
 git clone https://github.com/tonylt/code-pal.git
 cd code-pal
-./install.sh
+npm install
+npm run setup
 ```
 
 重启 Claude Code，状态栏立即生效。
@@ -49,6 +51,7 @@ cd code-pal
 /cheer luna
 /cheer mochi
 /cheer iris
+/cheer leijun
 ```
 
 ---
@@ -61,6 +64,7 @@ cd code-pal
 | **Luna 月野** | `(´• ω •\`)` | 温柔治愈，陪伴系 |
 | **Mochi 年糕** | `(=^･ω･^=)` | 软萌奶凶，傲娇猫系 |
 | **Iris 晴** | `(￣ω￣)` | 女王御姐，冷静挑衅 |
+| **雷军** | `(ง •_•)ง` | "Are you OK" 能量 |
 
 ---
 
@@ -69,12 +73,12 @@ cd code-pal
 ```
 Claude response ends (Stop hook)
         ↓
-statusline.py --update
+node dist/statusline.js --update
   → reads token stats from stats-cache.json
   → selects message by: usage tier > time slot > random
   → writes to ~/.claude/code-pal/state.json
         ↓
-Statusline polls statusline.py
+Statusline polls node dist/statusline.js
   → reads state.json → renders to status bar
 ```
 
@@ -99,6 +103,7 @@ Statusline polls statusline.py
 ~/.claude/code-pal/vocab/luna.json
 ~/.claude/code-pal/vocab/mochi.json
 ~/.claude/code-pal/vocab/iris.json
+~/.claude/code-pal/vocab/leijun.json
 ```
 
 每个文件包含以下触发类别：`post_tool`（工具后）、`time`（时段：morning/afternoon/evening/midnight）、`usage`（用量告警：warning/critical）、`random`（随机兜底）。
@@ -108,7 +113,7 @@ Statusline polls statusline.py
 ## 卸载
 
 ```bash
-./install.sh --uninstall
+npm run unsetup
 ```
 
 删除所有文件并清理 `~/.claude/settings.json`。如果你之前配置了其他 statusLine，卸载时会自动恢复。
@@ -119,20 +124,27 @@ Statusline polls statusline.py
 
 ```
 code-pal/
-├── install.sh          # 安装脚本
-├── statusline.py       # 状态栏入口
-├── core/
-│   ├── character.py    # 加载角色配置
-│   ├── trigger.py      # 台词选择逻辑
-│   └── display.py      # 渲染输出
+├── src/
+│   ├── statusline.ts   # 状态栏入口
+│   └── core/
+│       ├── character.ts  # vocab 加载
+│       ├── trigger.ts    # 台词选择逻辑
+│       ├── display.ts    # 渲染输出
+│       └── gitContext.ts # git 上下文
+├── scripts/
+│   ├── install.js      # npm run setup
+│   └── uninstall.js    # npm run unsetup
+├── dist/
+│   └── statusline.js   # esbuild 打包产物（gitignored）
 ├── vocab/
 │   ├── nova.json
 │   ├── luna.json
 │   ├── mochi.json
-│   └── iris.json
+│   ├── iris.json
+│   └── leijun.json
 ├── commands/
 │   └── cheer.md        # /cheer 斜杠命令
-└── tests/              # 单元测试
+└── tests/              # Jest 测试套件（167 个测试）
 ```
 
 ---
@@ -140,10 +152,10 @@ code-pal/
 ## 测试
 
 ```bash
-python3 -m pytest tests/
+npm test
 ```
 
-所有测试应无错误通过。
+167 个测试，6 个套件（character、display、gitContext、trigger、statusline、install）。
 
 ---
 
@@ -162,17 +174,17 @@ python3 -m pytest tests/
 ## 常见问题
 
 **状态栏没有显示？**
-确认 install.sh 运行无报错，然后重启 Claude Code。验证配置是否写入：
+确认 `npm run setup` 运行无报错，然后重启 Claude Code。验证配置是否写入：
 `cat ~/.claude/settings.json | grep statusLine`
 
-**找不到 `python3` 命令或版本不符？**
-code-pal 需要 Python 3.10+。运行 `python3 --version` 确认版本。如未安装或版本过低，使用包管理器安装（macOS: `brew install python3`，Ubuntu: `sudo apt install python3.10`）。
+**找不到 `node` 命令或版本不符？**
+code-pal 需要 Node.js 18+。运行 `node --version` 确认版本。可通过 [nodejs.org](https://nodejs.org) 或 nvm/fnm 安装。
 
-**install.sh 报错？**
-确保脚本有执行权限：`chmod +x install.sh`。在仓库根目录下运行。确认 `~/.claude/` 目录存在（Claude Code 首次运行时自动创建）。
+**`npm run setup` 报错？**
+在仓库根目录下运行。确认 `~/.claude/` 目录存在（Claude Code 首次运行时自动创建）。
 
 **Stop hook 未触发？**
-确认 hook 已注册：`cat ~/.claude/settings.json | grep -A5 Stop`。如缺失，重新运行 `./install.sh`，然后重启 Claude Code。
+确认 hook 已注册：`cat ~/.claude/settings.json | grep -A5 Stop`。如缺失，重新运行 `npm run setup`，然后重启 Claude Code。
 
 **Claude Code 版本不符？**
 code-pal 需要 Claude Code v2.1.80 或更高版本。检查当前版本并按需更新。

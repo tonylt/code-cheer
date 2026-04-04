@@ -5,7 +5,7 @@
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
 - Git-aware reactions — first commit of the day, commit milestones (5/10/20), late-night commits, big diffs, and more trigger character-specific lines
-- 4 anime characters — Nova, Luna, Mochi, Iris, each with a distinct personality. Switch anytime with `/cheer`
+- 5 anime characters — Nova, Luna, Mochi, Iris, Lei Jun, each with a distinct personality. Switch anytime with `/cheer`
 - Live stats — model, project folder, token count, and a context window progress bar at a glance
 
 ---
@@ -23,7 +23,8 @@ The statusline updates after each Claude response: character message on line 1, 
 
 ## Prerequisites
 
-- **Python 3.10+** (pre-installed on macOS/Linux)
+- **Node.js 18+** (check: `node --version`)
+- **npm** (bundled with Node.js)
 - **git**
 - **Claude Code v2.1.80+**
 
@@ -34,7 +35,8 @@ The statusline updates after each Claude response: character message on line 1, 
 ```bash
 git clone https://github.com/tonylt/code-pal.git
 cd code-pal
-./install.sh
+npm install
+npm run setup
 ```
 
 Restart Claude Code. The statusline activates immediately.
@@ -49,6 +51,7 @@ Restart Claude Code. The statusline activates immediately.
 /cheer luna
 /cheer mochi
 /cheer iris
+/cheer leijun
 ```
 
 ---
@@ -61,6 +64,7 @@ Restart Claude Code. The statusline activates immediately.
 | **Luna 月野** | `(´• ω •\`)` | Gentle and comforting |
 | **Mochi 年糕** | `(=^･ω･^=)` | Tsundere cat |
 | **Iris 晴** | `(￣ω￣)` | Cool and teasing |
+| **Lei Jun 雷军** | `(ง •_•)ง` | "Are you OK" energy |
 
 ---
 
@@ -69,12 +73,12 @@ Restart Claude Code. The statusline activates immediately.
 ```
 Claude response ends (Stop hook)
         ↓
-statusline.py --update
+node dist/statusline.js --update
   → reads token stats from stats-cache.json
   → selects message by: usage tier > time slot > random
   → writes to ~/.claude/code-pal/state.json
         ↓
-Statusline polls statusline.py
+Statusline polls node dist/statusline.js
   → reads state.json → renders to status bar
 ```
 
@@ -99,6 +103,7 @@ Edit any character's JSON file to add your own lines:
 ~/.claude/code-pal/vocab/luna.json
 ~/.claude/code-pal/vocab/mochi.json
 ~/.claude/code-pal/vocab/iris.json
+~/.claude/code-pal/vocab/leijun.json
 ```
 
 Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/evening/midnight), `usage` (warning/critical), and `random`.
@@ -108,7 +113,7 @@ Each file contains trigger categories: `post_tool`, `time` (morning/afternoon/ev
 ## Uninstall
 
 ```bash
-./install.sh --uninstall
+npm run unsetup
 ```
 
 Removes all files and cleans up `~/.claude/settings.json`. If you had a previous statusLine configured, it will be restored automatically.
@@ -119,20 +124,27 @@ Removes all files and cleans up `~/.claude/settings.json`. If you had a previous
 
 ```
 code-pal/
-├── install.sh          # installer
-├── statusline.py       # main entry point
-├── core/
-│   ├── character.py    # load character config
-│   ├── trigger.py      # message selection logic
-│   └── display.py      # render output
+├── src/
+│   ├── statusline.ts   # main entry point
+│   └── core/
+│       ├── character.ts  # vocab loading
+│       ├── trigger.ts    # message selection
+│       ├── display.ts    # render output
+│       └── gitContext.ts # git subprocess context
+├── scripts/
+│   ├── install.js      # npm run setup
+│   └── uninstall.js    # npm run unsetup
+├── dist/
+│   └── statusline.js   # esbuild bundle (gitignored, built by npm run build)
 ├── vocab/
 │   ├── nova.json
 │   ├── luna.json
 │   ├── mochi.json
-│   └── iris.json
+│   ├── iris.json
+│   └── leijun.json
 ├── commands/
 │   └── cheer.md        # /cheer slash command
-└── tests/              # unit tests
+└── tests/              # Jest test suite (167 tests)
 ```
 
 ---
@@ -140,10 +152,10 @@ code-pal/
 ## Tests
 
 ```bash
-python3 -m pytest tests/
+npm test
 ```
 
-All tests should pass with no errors.
+167 tests across 6 suites (character, display, gitContext, trigger, statusline, install).
 
 ---
 
@@ -162,17 +174,17 @@ See [Tests](#tests) above before submitting.
 ## Troubleshooting
 
 **Statusline not showing?**
-Check that install.sh completed without errors. Restart Claude Code. Verify the entry exists:
+Check that `npm run setup` completed without errors. Restart Claude Code. Verify the entry exists:
 `cat ~/.claude/settings.json | grep statusLine`
 
-**`python3` command not found or wrong version?**
-code-pal requires Python 3.10+. Verify with `python3 --version`. If missing or outdated, install via your package manager (e.g., `brew install python3` on macOS, `sudo apt install python3.10` on Ubuntu).
+**`node` command not found or wrong version?**
+code-pal requires Node.js 18+. Verify with `node --version`. Install via [nodejs.org](https://nodejs.org) or a version manager like nvm/fnm.
 
-**install.sh errors?**
-Make sure the script is executable: `chmod +x install.sh`. Run from the repo root directory. Check that `~/.claude/` directory exists (created by Claude Code on first run).
+**`npm run setup` errors?**
+Run from the repo root directory. Check that `~/.claude/` directory exists (created by Claude Code on first run).
 
 **Stop hook not triggering?**
-Verify the hook is registered: `cat ~/.claude/settings.json | grep -A5 Stop`. If missing, re-run `./install.sh`. Restart Claude Code after install.
+Verify the hook is registered: `cat ~/.claude/settings.json | grep -A5 Stop`. If missing, re-run `npm run setup`. Restart Claude Code after install.
 
 **Claude Code version mismatch?**
 code-pal requires Claude Code v2.1.80 or later. Check your version and update if needed.
