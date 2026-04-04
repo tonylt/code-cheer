@@ -21,8 +21,8 @@ const svgContent = `<svg xmlns="http://www.w3.org/2000/svg"
      width="1280" height="240" viewBox="0 0 1280 240"
      font-family="'Courier New', 'Lucida Console', monospace">
 
-  <!-- Background -->
-  <rect width="1280" height="240" fill="#111111"/>
+  <!-- Background — warm dark per DESIGN.md (#1a1410, not cold #111111) -->
+  <rect width="1280" height="240" fill="#1a1410"/>
 
   <!-- Left — Nova kaomoji -->
   <text x="60" y="130"
@@ -36,33 +36,37 @@ const svgContent = `<svg xmlns="http://www.w3.org/2000/svg"
         fill="#f4a900"
         font-weight="bold">code-cheer</text>
 
-  <!-- Centre — subtitle -->
+  <!-- Centre — subtitle — warm muted per DESIGN.md (#9a8f7a) -->
   <text x="360" y="130"
         font-size="14"
-        fill="#666666">reactive anime companion for Claude Code</text>
+        fill="#9a8f7a">reactive anime companion for Claude Code</text>
 
-  <!-- Centre — feature line -->
+  <!-- Centre — feature line — warm muted per DESIGN.md (#9a8f7a) -->
   <text x="360" y="160"
         font-size="12"
-        fill="#555555">* watches your commits * token usage * late-night sessions</text>
+        fill="#9a8f7a">* watches your commits * token usage * late-night sessions</text>
 
   <!-- Right — character selector -->
   <text x="980" y="90"
         font-size="11"
-        fill="#888888">characters</text>
+        fill="#9a8f7a">characters</text>
   <text x="980" y="110"
         font-size="11"
         fill="#f4a900"
         font-weight="bold">v nova</text>
+  <!-- Unselected characters: own color at 55% opacity (DESIGN.md character system) -->
   <text x="980" y="128"
         font-size="11"
-        fill="#555555">o luna</text>
+        fill="#e05c7a"
+        fill-opacity="0.55">o luna</text>
   <text x="980" y="146"
         font-size="11"
-        fill="#555555">o mochi</text>
+        fill="#a8d8a8"
+        fill-opacity="0.55">o mochi</text>
   <text x="980" y="164"
         font-size="11"
-        fill="#555555">o iris</text>
+        fill="#7ab8f5"
+        fill-opacity="0.55">o iris</text>
 
 </svg>
 `
