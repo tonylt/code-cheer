@@ -19,6 +19,11 @@ export function parseConfig(raw: unknown, label: string): ConfigType {
     throw new Error(`Invalid ${label}: bad character value`)
   }
   const version = typeof obj.version === 'string' ? obj.version : undefined
+  if (typeof obj.language === 'string' && obj.language !== '' && obj.language !== 'en' && obj.language !== 'zh') {
+    process.stderr.write(
+      `[code-cheer] ${label}: unknown language "${obj.language}", expected "zh" | "en" — falling back to default\n`
+    )
+  }
   const language = obj.language === 'en' ? 'en' : obj.language === 'zh' ? 'zh' : undefined
   return {
     character: obj.character as ConfigType['character'],
