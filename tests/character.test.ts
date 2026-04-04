@@ -127,6 +127,49 @@ describe('loadCharacter lang param', () => {
   })
 })
 
+// ─── vocab drift — en/zh key parity ────────────────────────────────────────────
+
+function flatKeys(obj: unknown, prefix = ''): string[] {
+  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
+    return prefix ? [prefix] : []
+  }
+  const result: string[] = []
+  for (const k of Object.keys(obj as Record<string, unknown>)) {
+    const fullKey = prefix ? `${prefix}.${k}` : k
+    result.push(fullKey)
+    result.push(...flatKeys((obj as Record<string, unknown>)[k], fullKey))
+  }
+  return result
+}
+
+describe('vocab drift — en/zh key parity', () => {
+  const projectVocabDir = path.join(__dirname, '..', 'vocab')
+
+  it('all .en.json files have a matching base .json', () => {
+    const enFiles = fs.readdirSync(projectVocabDir).filter((f) => f.endsWith('.en.json'))
+    expect(enFiles.length).toBeGreaterThanOrEqual(5)
+    for (const enFile of enFiles) {
+      const baseName = enFile.replace('.en.json', '.json')
+      expect(fs.existsSync(path.join(projectVocabDir, baseName))).toBe(true)
+    }
+  })
+
+  it('en and zh key structure matches for all 5 characters', () => {
+    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+    for (const name of names) {
+      const zhData = JSON.parse(
+        fs.readFileSync(path.join(projectVocabDir, `${name}.json`), 'utf-8')
+      ) as unknown
+      const enData = JSON.parse(
+        fs.readFileSync(path.join(projectVocabDir, `${name}.en.json`), 'utf-8')
+      ) as unknown
+      const zhKeys = flatKeys(zhData).sort()
+      const enKeys = flatKeys(enData).sort()
+      expect(enKeys).toEqual(zhKeys)
+    }
+  })
+})
+
 // ─── getGitEventMessage ────────────────────────────────────────────────────────
 
 describe('getGitEventMessage', () => {
