@@ -61,6 +61,26 @@ npm run setup
 
 ---
 
+## 配置
+
+编辑 `~/.claude/code-cheer/config.json` 自定义行为：
+
+```json
+{
+  "character": "nova",
+  "language": "en"
+}
+```
+
+| 字段 | 可选值 | 默认值 | 说明 |
+|------|--------|--------|------|
+| `character` | `nova`、`luna`、`mochi`、`iris` | `nova` | 当前角色 |
+| `language` | `"zh"`、`"en"` | `"zh"` | 台词语言 — 中文或英文 |
+
+每个角色同时拥有中文（`vocab/nova.json`）和英文（`vocab/nova.en.json`）台词文件。设置 `"language": "en"` 可将所有角色台词切换为英文。
+
+---
+
 ## 角色一览
 
 | 角色 | 表情符 | 风格 |
@@ -103,10 +123,14 @@ Statusline polls node dist/statusline.js
 编辑角色的 JSON 文件即可添加自己的台词：
 
 ```bash
-~/.claude/code-cheer/vocab/nova.json
+~/.claude/code-cheer/vocab/nova.json      # 中文（默认）
+~/.claude/code-cheer/vocab/nova.en.json   # 英文
 ~/.claude/code-cheer/vocab/luna.json
+~/.claude/code-cheer/vocab/luna.en.json
 ~/.claude/code-cheer/vocab/mochi.json
+~/.claude/code-cheer/vocab/mochi.en.json
 ~/.claude/code-cheer/vocab/iris.json
+~/.claude/code-cheer/vocab/iris.en.json
 ```
 
 每个文件包含以下触发类别：`post_tool`（工具后）、`time`（时段：morning/afternoon/evening/midnight）、`usage`（用量告警：warning/critical）、`random`（随机兜底）。
@@ -140,10 +164,14 @@ code-cheer/
 ├── dist/
 │   └── statusline.js   # esbuild 打包产物（gitignored）
 ├── vocab/
-│   ├── nova.json
+│   ├── nova.json        # 中文台词
+│   ├── nova.en.json     # 英文台词
 │   ├── luna.json
+│   ├── luna.en.json
 │   ├── mochi.json
-│   └── iris.json
+│   ├── mochi.en.json
+│   ├── iris.json
+│   └── iris.en.json
 ├── commands/
 │   └── cheer.md        # /cheer 斜杠命令
 └── tests/              # Jest 测试套件（167 个测试）
