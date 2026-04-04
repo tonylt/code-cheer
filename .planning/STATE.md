@@ -131,10 +131,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 | 260404-lxi | 从 README.md 删除所有 leijun 引用，leijun 成为隐藏彩蛋角色 | 2026-04-04 | 8030381 | [260404-lxi-readme-md-leijun](./quick/260404-lxi-readme-md-leijun/) |
 | 260404-q3r | 删除所有 Python 遗留文件（14个文件），更新 CI/gitignore/CLAUDE.md 为纯 Node.js | 2026-04-04 | 1d6c2a6 | [260404-q3r-cleanup-python-version-files](./quick/260404-q3r-cleanup-python-version-files/) |
 | 260404-qv1 | 在 README.md 和 README.zh.md 顶部添加 GitHub Actions CI status badge | 2026-04-04 | df3ba55 | [260404-qv1-add-ci-status-badge-for-this-repo](./quick/260404-qv1-add-ci-status-badge-for-this-repo/) |
+| 260404-suh | 为 5 个角色添加英文 vocab（.en.json）+ config language 字段 + character.ts lang-aware 加载 | 2026-04-04 | 6534eb8 | [260404-suh-vocab](./quick/260404-suh-vocab/) |
 
 ## Session Continuity
 
-Last activity: 2026-04-04 - Completed quick task 260404-qv1: 在两个 README 文件顶部添加 CI status badge
-Last session: 2026-04-04T11:00:00Z
-Stopped at: Completed quick/260404-qv1-PLAN.md — CI badge
+Last activity: 2026-04-04 - Completed quick task 260404-suh: 英文 vocab + language 切换支持
+Last session: 2026-04-04T12:58:50Z
+Stopped at: Completed quick/260404-suh-PLAN.md — English vocab + language switch
 Resume with: `/gsd:execute-phase 8`
