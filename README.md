@@ -4,6 +4,8 @@
 
 # code-cheer
 
+<p align="center"><img src="assets/banner.svg" alt="code-cheer" width="100%"></p>
+
 **A Claude Code statusline companion — anime-style characters that cheer you on while you code.**
 
 code-cheer is **reactive**, not decorative. Unlike passive companions, it watches your coding activity — first commit of the day, milestone pushes, late-night sessions, near-full context window — and responds in character.
