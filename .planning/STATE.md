@@ -134,10 +134,11 @@ Progress: [██████████] 100% (13/13 plans complete)
 | 260404-qv1 | 在 README.md 和 README.zh.md 顶部添加 GitHub Actions CI status badge | 2026-04-04 | df3ba55 | [260404-qv1-add-ci-status-badge-for-this-repo](./quick/260404-qv1-add-ci-status-badge-for-this-repo/) |
 | 260404-suh | 为 5 个角色添加英文 vocab（.en.json）+ config language 字段 + character.ts lang-aware 加载 | 2026-04-04 | 6534eb8 | [260404-suh-vocab](./quick/260404-suh-vocab/) |
 | 260404-v33 | 在两个 README 中添加 Configuration/配置 节，记录 language 字段（zh/en，默认 zh）及 .en.json vocab 引用 | 2026-04-04 | 585b862 | [260404-v33-t8-readme-md-readme-zh-md-language](./quick/260404-v33-t8-readme-md-readme-zh-md-language/) |
+| 260405-85j | ASCII install banner（printBanner + ANSI颜色 + 语言感知台词）+ SVG hero banner 生成脚本 | 2026-04-05 | 245a45e | [260405-85j-ascii-install-banner-readme-banner-svg](./quick/260405-85j-ascii-install-banner-readme-banner-svg/) |
 
 ## Session Continuity
 
-Last activity: 2026-04-04 - Completed quick task 260404-v33: 在两个 README 中添加 language 字段文档
-Last session: 2026-04-04T13:05:00Z
-Stopped at: Completed quick/260404-v33-PLAN.md — README language config docs
+Last activity: 2026-04-05 - Completed quick task 260405-85j: ASCII install banner + README banner SVG
+Last session: 2026-04-05T00:00:00Z
+Stopped at: Completed quick/260405-85j-PLAN.md — ASCII install banner + gen-banner.js
 Resume with: `/gsd:execute-phase 8`
