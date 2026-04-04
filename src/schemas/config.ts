@@ -1,6 +1,6 @@
 export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'leijun'] as const
 
-export type ConfigType = { character: typeof CHARACTER_NAMES[number] }
+export type ConfigType = { character: typeof CHARACTER_NAMES[number]; version?: string }
 
 export function parseConfig(raw: unknown, label: string): ConfigType {
   if (!raw || typeof raw !== 'object') {
@@ -14,5 +14,6 @@ export function parseConfig(raw: unknown, label: string): ConfigType {
     )
     throw new Error(`Invalid ${label}: bad character value`)
   }
-  return { character: obj.character as ConfigType['character'] }
+  const version = typeof obj.version === 'string' ? obj.version : undefined
+  return { character: obj.character as ConfigType['character'], ...(version !== undefined && { version }) }
 }
