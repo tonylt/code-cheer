@@ -86,20 +86,21 @@ commands/
 install.sh              Python legacy installer (still functional, @deprecated)
 jest.config.ts          Jest configuration (ts-jest, 80% line coverage threshold)
 tests/                  test suite
-  *.test.ts             Jest TypeScript tests (167 tests)
+  *.test.ts             Jest TypeScript tests (176 tests)
   test_*.py             pytest Python tests (126 tests, legacy)
 ```
 
 ## Key files
 
-- `core/trigger.py` — message selection priority logic; edit here to change when/how messages update
-- `core/display.py` — output format for the statusline string
+- `src/core/trigger.ts` — message selection priority logic; edit here to change when/how messages update
+- `src/core/display.ts` — output format for the statusline string
 - `vocab/*.json` — all character dialogue; safe to edit without touching code
-- `install.sh` — both install and uninstall paths; patches `~/.claude/settings.json` non-destructively
+- `scripts/install.js` — install path; patches `~/.claude/settings.json` non-destructively
+- `scripts/uninstall.js` — uninstall path; restores `~/.claude/settings.json`
 
 ## Hook wiring
 
-install.sh registers two entries in `~/.claude/settings.json`:
+scripts/install.js registers two entries in `~/.claude/settings.json`:
 
 ```json
 {
@@ -130,7 +131,7 @@ install.sh registers two entries in `~/.claude/settings.json`:
 
 1. Create `vocab/<name>.json` following the structure of an existing vocab file
 2. Add the character to `commands/cheer.md` (options list + reply text)
-3. Add a test in `tests/test_character.py`
+3. Add a test in `tests/character.test.ts`
 
 ## Pitfalls
 

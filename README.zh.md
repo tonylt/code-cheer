@@ -146,7 +146,7 @@ code-cheer/
 │   └── leijun.json
 ├── commands/
 │   └── cheer.md        # /cheer 斜杠命令
-└── tests/              # Jest 测试套件（167 个测试）
+└── tests/              # Jest 测试套件（176 个测试）
 ```
 
 ---
@@ -157,7 +157,7 @@ code-cheer/
 npm test
 ```
 
-167 个测试，6 个套件（character、display、gitContext、trigger、statusline、install）。
+176 个测试，6 个套件（character、display、gitContext、trigger、statusline、install）。
 
 ---
 

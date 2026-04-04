@@ -142,7 +142,7 @@ code-cheer/
 │   └── iris.json
 ├── commands/
 │   └── cheer.md        # /cheer slash command
-└── tests/              # Jest test suite (167 tests)
+└── tests/              # Jest test suite (176 tests)
 ```
 
 ---
@@ -153,7 +153,7 @@ code-cheer/
 npm test
 ```
 
-167 tests across 6 suites (character, display, gitContext, trigger, statusline, install).
+176 tests across 6 suites (character, display, gitContext, trigger, statusline, install).
 
 ---
 
