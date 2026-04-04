@@ -1,0 +1,52 @@
+name: New Character Proposal
+description: Propose a new anime character for code-cheer
+labels: ["character"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a character idea? Fill in the details below. If the proposal looks good,
+        you're welcome to submit a PR — see [CONTRIBUTING.md](../CONTRIBUTING.md) for the full guide.
+
+  - type: input
+    id: name
+    attributes:
+      label: Character name
+      description: Display name (and optional nickname)
+      placeholder: "e.g. Kai 風 (英: Wind)"
+    validations:
+      required: true
+
+  - type: input
+    id: ascii
+    attributes:
+      label: ASCII face
+      description: The emoji/ASCII art used in the statusline
+      placeholder: "e.g. (^_^)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: personality
+    attributes:
+      label: Personality / style
+      description: Describe the character's tone, energy level, and what makes them distinct from Nova/Luna/Mochi/Iris.
+      placeholder: "e.g. calm and philosophical, speaks in short haiku-like lines, never uses exclamation marks"
+    validations:
+      required: true
+
+  - type: textarea
+    id: vocab_sample
+    attributes:
+      label: Sample vocab JSON (optional but helpful)
+      description: Paste a partial vocab JSON showing a few sample lines. See CONTRIBUTING.md for the full schema.
+      render: json
+      placeholder: |
+        {
+          "meta": { "name": "Kai", "ascii": "(^_^)", "style": "chill", "color": "96" },
+          "triggers": {
+            "random": ["One commit, one step.", "Breathe. Then build."]
+          }
+        }
+    validations:
+      required: false
