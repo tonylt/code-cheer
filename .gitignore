@@ -220,3 +220,4 @@ node_modules/
 npm-debug.log*
 coverage/
 .gstack/
+.planning/
