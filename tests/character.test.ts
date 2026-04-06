@@ -79,7 +79,7 @@ describe('loadCharacter lang param', () => {
   const realVocabDir = path.join(__dirname, '..', 'vocab')
 
   it('loads english vocab when lang=en for all 5 characters', () => {
-    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+    const names = ['nova', 'luna', 'mochi', 'iris', 'rex']
     for (const name of names) {
       const char = loadCharacter(name, realVocabDir, 'en')
       expect(char.meta.name).toBeTruthy()
@@ -155,7 +155,7 @@ describe('vocab drift — en/zh key parity', () => {
   })
 
   it('en and zh key structure matches for all 5 characters', () => {
-    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+    const names = ['nova', 'luna', 'mochi', 'iris', 'rex']
     for (const name of names) {
       const zhData = JSON.parse(
         fs.readFileSync(path.join(projectVocabDir, `${name}.json`), 'utf-8')

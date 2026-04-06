@@ -1,4 +1,4 @@
-export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'leijun'] as const
+export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'rex'] as const
 
 export type ConfigType = {
   character: typeof CHARACTER_NAMES[number]
