@@ -224,9 +224,6 @@ code-cheer requires Claude Code v2.1.80 or later. Check your version and update 
 **Another tool already uses statusLine?**
 code-cheer requires exclusive access to the statusLine setting. On install, it backs up any existing statusLine config to `~/.claude/code-cheer/statusline-backup.json`. Uninstalling restores your previous config. If you want to switch between tools, uninstall one before installing the other.
 
-**Migrating from code-pal (old directory)?**
-The installation directory changed from `~/.claude/code-pal/` to `~/.claude/code-cheer/`. Running `npm run setup` handles this automatically. You can safely delete the old `~/.claude/code-pal/` directory after setup completes.
-
 ---
 
 ## License
