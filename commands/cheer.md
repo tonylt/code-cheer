@@ -1,7 +1,9 @@
-# 切换 code-cheer 应援角色（nova / luna / mochi / iris）
+# 切换 code-cheer 应援角色（nova / luna / mochi / iris / rex）
 # v3.0+: install with `npm run setup` (TypeScript version)
 # Writes version field to config.json; displays git commit stats from state.json if commits_today > 0
 ARGUMENT="$ARGUMENTS"
+
+If ARGUMENT is "xiaomi", treat it as "rex".
 
 If ARGUMENT is empty, use AskUserQuestion with these 4 options:
 - label "Nova"    description "(*>ω<) 元气满满，运动系啦啦队"
@@ -9,7 +11,9 @@ If ARGUMENT is empty, use AskUserQuestion with these 4 options:
 - label "Mochi"   description "(=^･ω･^=) 软萌奶凶，傲娇猫系"
 - label "Iris"    description "(￣ω￣) 女王御姐，冷静挑衅"
 
-If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi / iris"
+The tool will automatically append an "Other" option. If the user selects Other and types "rex" or "xiaomi", treat it as rex.
+
+If ARGUMENT is not a valid character, reply: "可用角色：nova / luna / mochi / iris / rex"
 
 Once a character is chosen (NAME = lowercase chosen name):
 
@@ -32,3 +36,4 @@ Then reply:
 - luna:   已切换到 Luna～ (´• ω •`) 我会一直陪着你哦～
 - mochi:  哼… Mochi 来了啦 (=^･ω･^=) 才不是很期待呢
 - iris:   (￣ω￣) 换我了。希望你不会让我失望。
+- rex:   同学！(^▽^ゞ Rex 来了！Are U OK？！今天我们一起创造历史！

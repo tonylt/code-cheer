@@ -80,6 +80,7 @@ vocab/
   luna.json
   mochi.json
   iris.json
+  rex.json              Rex character (热血CEO风)
 commands/
   cheer.md              /cheer slash command (Claude Code custom command)
 install.sh              Python legacy installer (still functional, @deprecated)

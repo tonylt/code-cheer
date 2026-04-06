@@ -72,10 +72,10 @@ Open `src/schemas/config.ts` and add your character's name to the `CHARACTER_NAM
 
 ```typescript
 // Before
-export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris'] as const
+export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'rex'] as const
 
 // After (example adding 'kai')
-export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'kai'] as const
+export const CHARACTER_NAMES = ['nova', 'luna', 'mochi', 'iris', 'rex', 'kai'] as const
 ```
 
 Use the lowercase filename (without `.json`) as the identifier.
