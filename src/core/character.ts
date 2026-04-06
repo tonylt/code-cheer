@@ -38,7 +38,7 @@ function resolveVocabPath(dir: string, name: string, lang?: 'zh' | 'en'): string
 /**
  * Load and validate a character vocab JSON.
  *
- * @param name - Character name (e.g. 'nova', 'luna', 'mochi', 'iris', 'leijun')
+ * @param name - Character name (e.g. 'nova', 'luna', 'mochi', 'iris')
  * @param vocabDir - Optional override for vocab directory path.
  *   Defaults to path.join(__dirname, '../vocab') (D-01, D-02).
  *   Pass a custom path in tests to inject fixture data.

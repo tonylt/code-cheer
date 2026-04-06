@@ -80,7 +80,6 @@ vocab/
   luna.json
   mochi.json
   iris.json
-  leijun.json           Lei Jun character
 commands/
   cheer.md              /cheer slash command (Claude Code custom command)
 install.sh              Python legacy installer (still functional, @deprecated)

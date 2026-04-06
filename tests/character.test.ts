@@ -78,8 +78,8 @@ describe('loadCharacter', () => {
 describe('loadCharacter lang param', () => {
   const realVocabDir = path.join(__dirname, '..', 'vocab')
 
-  it('loads english vocab when lang=en for all 5 characters', () => {
-    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+  it('loads english vocab when lang=en for all 4 characters', () => {
+    const names = ['nova', 'luna', 'mochi', 'iris']
     for (const name of names) {
       const char = loadCharacter(name, realVocabDir, 'en')
       expect(char.meta.name).toBeTruthy()
@@ -147,15 +147,15 @@ describe('vocab drift — en/zh key parity', () => {
 
   it('all .en.json files have a matching base .json', () => {
     const enFiles = fs.readdirSync(projectVocabDir).filter((f) => f.endsWith('.en.json'))
-    expect(enFiles.length).toBeGreaterThanOrEqual(5)
+    expect(enFiles.length).toBeGreaterThanOrEqual(4)
     for (const enFile of enFiles) {
       const baseName = enFile.replace('.en.json', '.json')
       expect(fs.existsSync(path.join(projectVocabDir, baseName))).toBe(true)
     }
   })
 
-  it('en and zh key structure matches for all 5 characters', () => {
-    const names = ['nova', 'luna', 'mochi', 'iris', 'leijun']
+  it('en and zh key structure matches for all 4 characters', () => {
+    const names = ['nova', 'luna', 'mochi', 'iris']
     for (const name of names) {
       const zhData = JSON.parse(
         fs.readFileSync(path.join(projectVocabDir, `${name}.json`), 'utf-8')
