@@ -5,7 +5,8 @@ import { render } from './core/display'
 import { loadCharacter } from './core/character'
 import { loadGitContext } from './core/gitContext'
 import type { GitContextResult } from './core/gitContext'
-import { resolveMessage, detectGitEvents, getTimeSlot } from './core/trigger'
+import { resolveMessage, detectGitEvents, getTimeSlot, cacheExpired, formatMemoryTitles } from './core/trigger'
+import { loadMemoryContext } from './core/memory'
 import { parseState, DEFAULT_STATE, parseConfig } from './schemas'
 import type { VocabData, StateType, ConfigType } from './schemas'
 
@@ -135,6 +136,10 @@ function saveState(
     lastRepo?: string | undefined
     commitsToday?: number
     sessionStart?: string
+    // Phase 16 additions:
+    memoryCount?: number
+    memoryTitles?: string[]
+    lastMemoryRecall?: string
   }
 ): void {
   fs.mkdirSync(baseDir, { recursive: true })
@@ -148,6 +153,9 @@ function saveState(
   if (options?.lastRepo !== undefined) state.last_repo = options.lastRepo
   if (options?.commitsToday !== undefined) state.commits_today = options.commitsToday
   if (options?.sessionStart !== undefined) state.session_start = options.sessionStart
+  if (options?.memoryCount !== undefined) state.memory_count = options.memoryCount
+  if (options?.memoryTitles !== undefined) state.memory_titles = options.memoryTitles
+  if (options?.lastMemoryRecall !== undefined) state.last_memory_recall = options.lastMemoryRecall
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
   try {
     fs.renameSync(statePath + '.tmp', statePath)
@@ -215,7 +223,10 @@ function readStdinString(): Promise<string> {
     process.stdin.setEncoding('utf-8')
     process.stdin.on('data', (chunk: string) => { data += chunk })
     process.stdin.on('end', () => { resolve(data) })
-    setTimeout(() => resolve(data), 50)
+    setTimeout(() => {
+      process.stdin.unref()
+      resolve(data)
+    }, 50)
   })
 }
 
@@ -233,6 +244,8 @@ interface UpdateCoreResult {
   newCommitsToday: number
   baseDir: string
   statePath: string
+  memoryCount: number
+  memoryTitles: string[]
 }
 
 async function runUpdateCore(
@@ -259,6 +272,10 @@ async function runUpdateCore(
   applyTokenFallback(stats, ccData)
 
   const gitContext = await loadGitContext(process.cwd())
+
+  // Phase 16: load memory context (per D-04, only in --update mode)
+  const memoryCtx = loadMemoryContext(gitContext.repo_path, os.homedir())
+
   const triggeredEvents = detectGitEvents(
     gitContext as unknown as Record<string, unknown>,
     state,
@@ -292,6 +309,27 @@ async function runUpdateCore(
   const slot = getTimeSlot()
   const { message, tier } = resolveMessage(character, state, stats, ccData, true, triggeredEvents)
 
+  // Phase 16: memory_recall override (per D-04, D-05, D-08)
+  // memory_recall 触发逻辑完全在此处实现，不在 resolveMessage 中。
+  // 优先级低于 post_tool（resolveMessage 已选出 post_tool/git_events 消息后，
+  // 仅当无 git_events 时才考虑 memory_recall 覆盖）。
+  let finalMessage = message
+  let newLastMemoryRecall: string | undefined = state.last_memory_recall
+  if (
+    cacheExpired(state.last_updated, 60) &&
+    memoryCtx.memory_count > 0 &&
+    cacheExpired(state.last_memory_recall, 60)
+  ) {
+    const recallTemplates = character.memory_recall ?? []
+    if (recallTemplates.length > 0 && triggeredEvents.length === 0) {
+      // Only override if no git_events triggered (memory_recall < post_tool + git_events per D-08)
+      const template = recallTemplates[Math.floor(Math.random() * recallTemplates.length)]
+      const titlesStr = formatMemoryTitles(memoryCtx.memory_titles)
+      finalMessage = template.replace('{titles}', titlesStr)
+      newLastMemoryRecall = new Date().toISOString()
+    }
+  }
+
   // Compute git state for persistence
   // Reset on repo change OR new day (prevents cross-day event dedup leakage)
   const currentRepo = gitContext.repo_path
@@ -310,12 +348,15 @@ async function runUpdateCore(
   const newCommitsToday = gitContext.commits_today ?? 0
 
   // Persist state (atomic write)
-  if (message !== state.message || tier !== state.last_rate_tier) {
-    saveState(statePath, baseDir, message, tier, slot, {
+  if (finalMessage !== state.message || tier !== state.last_rate_tier) {
+    saveState(statePath, baseDir, finalMessage, tier, slot, {
       lastGitEvents: newLastGitEvents,
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
+      memoryCount: memoryCtx.memory_count,
+      memoryTitles: memoryCtx.memory_titles,
+      lastMemoryRecall: newLastMemoryRecall,
     })
   } else {
     saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
@@ -323,11 +364,14 @@ async function runUpdateCore(
       lastRepo: newLastRepo ?? undefined,
       commitsToday: newCommitsToday,
       sessionStart: sessionStartVal,
+      memoryCount: memoryCtx.memory_count,
+      memoryTitles: memoryCtx.memory_titles,
+      lastMemoryRecall: newLastMemoryRecall,
     })
   }
 
   return {
-    message,
+    message: finalMessage,
     tier,
     slot,
     gitContext,
@@ -338,6 +382,8 @@ async function runUpdateCore(
     newCommitsToday,
     baseDir,
     statePath,
+    memoryCount: memoryCtx.memory_count,
+    memoryTitles: memoryCtx.memory_titles,
   }
 }
 
@@ -379,6 +425,11 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   }
 
   const { message } = resolveMessage(character, state, stats, ccData, false, null)
+
+  // Phase 16: inject memory_count from state into stats for display (per D-06)
+  if (state.memory_count !== undefined) {
+    stats['memory_count'] = state.memory_count
+  }
 
   return render(character, message, ccData, stats)
 }
@@ -464,8 +515,10 @@ async function main(): Promise<void> {
 }
 
 if (require.main === module) {
-  main().catch((err: unknown) => {
-    process.stderr.write(`[code-cheer] error: ${String(err)}\n`)
-    process.exit(1)
-  })
+  main()
+    .then(() => process.exit(0))
+    .catch((err: unknown) => {
+      process.stderr.write(`[code-cheer] error: ${String(err)}\n`)
+      process.exit(1)
+    })
 }

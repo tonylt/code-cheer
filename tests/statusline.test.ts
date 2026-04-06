@@ -484,6 +484,181 @@ describe('language integration — config.language passed to loadCharacter', () 
   })
 })
 
+// ─── memory integration ───────────────────────────────────────────────────────
+
+describe('memory integration', () => {
+  let tmpDir: string
+  let statsPath: string
+  const originalEnv = process.env
+
+  beforeEach(() => {
+    process.env = { ...originalEnv }
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-cheer-mem-test-'))
+    statsPath = path.join(tmpDir, 'stats-cache.json')
+    process.env.CODE_CHEER_BASE_DIR = tmpDir
+    process.env.CODE_CHEER_STATS_PATH = statsPath
+    currentImpl = async () => { throw new Error('not a git repo') }
+  })
+
+  afterEach(() => {
+    process.env = originalEnv
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  function writeConfig(char: string = 'nova') {
+    fs.writeFileSync(path.join(tmpDir, 'config.json'), JSON.stringify({ character: char }))
+  }
+
+  function writeState(overrides: Record<string, unknown> = {}) {
+    const state = {
+      message: 'test message',
+      last_rate_tier: 'normal',
+      last_slot: 'afternoon',
+      last_updated: new Date().toISOString(),
+      ...overrides,
+    }
+    fs.writeFileSync(path.join(tmpDir, 'state.json'), JSON.stringify(state))
+  }
+
+  function readState(): Record<string, unknown> {
+    return JSON.parse(fs.readFileSync(path.join(tmpDir, 'state.json'), 'utf-8'))
+  }
+
+  // updateMode writes memory_count and memory_titles to state
+  test('updateMode writes memory_count and memory_titles to state.json', async () => {
+    writeConfig()
+    await updateMode('{}')
+    const state = readState()
+    // memory_count should be present (0 when no MEMORY.md exists in test env)
+    expect(state).toHaveProperty('memory_count')
+    expect(typeof state.memory_count).toBe('number')
+    expect(state).toHaveProperty('memory_titles')
+    expect(Array.isArray(state.memory_titles)).toBe(true)
+  })
+
+  // renderMode shows memory_count when state has memory_count=3
+  test('renderMode shows "3 mem" in line2 when state.json has memory_count=3', () => {
+    writeConfig()
+    writeState({ memory_count: 3 })
+    const result = renderMode()
+    const line2 = result.split('\n')[1]
+    expect(line2).toContain('3 mem')
+  })
+
+  // memory_recall trigger: 60+ min + memory_count>0 + no last_memory_recall => triggers
+  test('memory_recall fires when 60+ min elapsed, memory_count>0, no last_memory_recall', async () => {
+    writeConfig()
+    // Create a MEMORY.md file in the expected location
+    // In test env, gitRoot is null (not a git repo), so memory_count=0 from loadMemoryContext.
+    // We need to mock loadMemoryContext to return memory_count>0.
+    const memMod = require('../src/core/memory')
+    const memorySpy = jest.spyOn(memMod, 'loadMemoryContext').mockReturnValue({
+      memory_count: 2,
+      memory_titles: ['Design System', 'Architecture'],
+    })
+
+    // State: last_updated 90 min ago, no last_memory_recall
+    const ninetyMinAgo = new Date(Date.now() - 90 * 60 * 1000).toISOString()
+    writeState({ last_updated: ninetyMinAgo })
+
+    await updateMode('{}')
+    const state = readState()
+
+    // last_memory_recall should now be set
+    expect(state.last_memory_recall).toBeDefined()
+    memorySpy.mockRestore()
+  })
+
+  // memory_recall does NOT fire when memory_count=0
+  test('memory_recall does NOT fire when memory_count=0', async () => {
+    writeConfig()
+    const memMod = require('../src/core/memory')
+    const memorySpy = jest.spyOn(memMod, 'loadMemoryContext').mockReturnValue({
+      memory_count: 0,
+      memory_titles: [],
+    })
+
+    const ninetyMinAgo = new Date(Date.now() - 90 * 60 * 1000).toISOString()
+    writeState({ last_updated: ninetyMinAgo })
+
+    await updateMode('{}')
+    const state = readState()
+    // last_memory_recall should not be set (or undefined)
+    expect(state.last_memory_recall).toBeUndefined()
+    memorySpy.mockRestore()
+  })
+
+  // memory_recall does NOT fire when last_updated < 60 min ago
+  test('memory_recall does NOT fire when last_updated is recent (< 60 min)', async () => {
+    writeConfig()
+    const memMod = require('../src/core/memory')
+    const memorySpy = jest.spyOn(memMod, 'loadMemoryContext').mockReturnValue({
+      memory_count: 2,
+      memory_titles: ['Design System', 'Architecture'],
+    })
+
+    // State: last_updated 10 min ago
+    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+    writeState({ last_updated: tenMinAgo })
+
+    await updateMode('{}')
+    const state = readState()
+    expect(state.last_memory_recall).toBeUndefined()
+    memorySpy.mockRestore()
+  })
+
+  // memory_recall防重: last_memory_recall within 60 min => does NOT fire again
+  test('memory_recall does NOT fire when last_memory_recall is within 60 min (防重)', async () => {
+    writeConfig()
+    const memMod = require('../src/core/memory')
+    const memorySpy = jest.spyOn(memMod, 'loadMemoryContext').mockReturnValue({
+      memory_count: 2,
+      memory_titles: ['Design System', 'Architecture'],
+    })
+
+    const ninetyMinAgo = new Date(Date.now() - 90 * 60 * 1000).toISOString()
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+    writeState({ last_updated: ninetyMinAgo, last_memory_recall: thirtyMinAgo })
+
+    await updateMode('{}')
+    const state = readState()
+    // last_memory_recall should remain the original value (not updated)
+    expect(state.last_memory_recall).toBe(thirtyMinAgo)
+    memorySpy.mockRestore()
+  })
+
+  // memory_recall does NOT fire when triggeredEvents is non-empty (git_events priority)
+  test('memory_recall does NOT fire when git events triggered (git_events > memory_recall per D-08)', async () => {
+    // Mock git context to trigger first_commit_today (1 commit line = commits_today=1)
+    currentImpl = async (_file: string, args: string[]) => {
+      // git log --oneline --since=midnight → 1 commit line
+      if (args.includes('log') && args.includes('--oneline')) return { stdout: 'abc1234 commit msg\n', stderr: '' }
+      // git rev-parse --show-toplevel → repo path
+      if (args.includes('rev-parse')) return { stdout: '/repo/test\n', stderr: '' }
+      // git diff --stat HEAD → no diff
+      if (args.includes('diff')) return { stdout: '', stderr: '' }
+      // git log --format=%ai --since=midnight
+      return { stdout: '', stderr: '' }
+    }
+
+    writeConfig()
+    const memMod = require('../src/core/memory')
+    const memorySpy = jest.spyOn(memMod, 'loadMemoryContext').mockReturnValue({
+      memory_count: 2,
+      memory_titles: ['Design System', 'Architecture'],
+    })
+
+    const ninetyMinAgo = new Date(Date.now() - 90 * 60 * 1000).toISOString()
+    writeState({ last_updated: ninetyMinAgo })
+
+    await updateMode('{}')
+    const state = readState()
+    // last_memory_recall should NOT be set because git_events fired (first_commit_today triggered)
+    expect(state.last_memory_recall).toBeUndefined()
+    memorySpy.mockRestore()
+  })
+})
+
 // ─── parseState edge cases ────────────────────────────────────────────────────
 
 describe('parseState edge cases', () => {
@@ -615,3 +790,4 @@ describe('loadConfig', () => {
     expect(calls.some((s) => s.includes('unknown language'))).toBe(false)
   })
 })
+

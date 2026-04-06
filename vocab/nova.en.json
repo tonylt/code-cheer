@@ -288,5 +288,10 @@
       "So many commits today!! You completely surpassed yourself!! GO!!",
       "High-output day unlocked!! Today's you is your all-time best!!"
     ]
-  }
+  },
+  "memory_recall": [
+    "Welcome back!! Last time you left: {titles}",
+    "You're back!! Picking up from: {titles}",
+    "Let's go!! Your previous context: {titles}"
+  ]
 }

@@ -35,6 +35,7 @@ export type VocabData = {
     }
   }
   git_events?: Partial<Record<GitEventKey, string[]>>
+  memory_recall?: string[]
 }
 
 // Validate an array field: must be string[] if present
@@ -101,5 +102,6 @@ export function parseVocab(raw: unknown, label: string): VocabData {
     },
     triggers,
     git_events,
+    memory_recall: optStrArr(obj['memory_recall']),
   }
 }
