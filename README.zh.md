@@ -224,8 +224,6 @@ code-cheer 需要 Claude Code v2.1.80 或更高版本。检查当前版本并按
 **其他工具已占用 statusLine？**
 code-cheer 需要独占 statusLine 配置才能工作。安装时会自动备份现有配置到 `~/.claude/code-cheer/statusline-backup.json`，卸载时恢复。如需切换不同工具，请先卸载当前工具再安装另一个。
 
-**从 code-pal（旧目录）迁移？**
-安装目录已从 `~/.claude/code-pal/` 更改为 `~/.claude/code-cheer/`。执行 `npm run setup` 会自动处理迁移。安装完成后可安全删除旧目录 `~/.claude/code-pal/`。
 
 ---
 
