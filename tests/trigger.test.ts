@@ -6,6 +6,7 @@ import {
   cacheExpired,
   detectGitEvents,
   resolveMessage,
+  formatMemoryTitles,
 } from '../src/core/trigger'
 import type { VocabData, StateType, ConfigType } from '../src/schemas'
 import { DEFAULT_STATE } from '../src/schemas'
@@ -699,5 +700,28 @@ describe('resolveMessage', () => {
     const state = makeState({ message: 'other' })
     const result = resolveMessage(CHAR, state, {}, {}, true, ['milestone_5'])
     expect(['m5_1', 'm5_2']).toContain(result.message)
+  })
+})
+
+// ─── formatMemoryTitles ───────────────────────────────────────────────────────
+
+describe('formatMemoryTitles', () => {
+  it('joins titles with ·  separator', () => {
+    expect(formatMemoryTitles(['A', 'B', 'C'])).toBe('A · B · C')
+  })
+
+  it('returns empty string for empty array', () => {
+    expect(formatMemoryTitles([])).toBe('')
+  })
+
+  it('shows ellipsis count when titles exceed maxCount (default 5)', () => {
+    const result = formatMemoryTitles(['A', 'B', 'C', 'D', 'E', 'F'])
+    expect(result).toBe('A · B · C · D · E …(1 条)')
+  })
+
+  it('shows all titles without ellipsis when exactly 5 items', () => {
+    const result = formatMemoryTitles(['A', 'B', 'C', 'D', 'E'])
+    expect(result).toBe('A · B · C · D · E')
+    expect(result).not.toContain('…')
   })
 })

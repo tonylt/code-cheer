@@ -4,6 +4,7 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/tests/*.test.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/.claude/'],
   collectCoverageFrom: ['src/**/*.ts'],
   coverageThreshold: {
     global: {

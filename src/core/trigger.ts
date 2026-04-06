@@ -228,3 +228,20 @@ export function resolveMessage(
   const randomOptions = triggers.random ?? []
   return { message: pickDifferent(randomOptions, state.message ?? ''), tier }
 }
+
+// ─── Memory title formatter ───────────────────────────────────────────────────
+
+/**
+ * Format memory titles into a display string with · separator.
+ * Shows at most maxCount titles; appends ellipsis count if titles exceed maxCount.
+ * Pure formatting utility — no trigger logic (per Plan 02 design decision).
+ */
+export function formatMemoryTitles(titles: string[], maxCount: number = 5): string {
+  if (titles.length === 0) return ''
+  const shown = titles.slice(0, maxCount)
+  const joined = shown.join(' · ')
+  if (titles.length > maxCount) {
+    return `${joined} …(${titles.length - maxCount} 条)`
+  }
+  return joined
+}

@@ -287,5 +287,10 @@
       "Many commits today. Mochi is logging this in the hall of fame. Privately.",
       "High-output day. Mochi has decided to be slightly proud. Just today."
     ]
-  }
+  },
+  "memory_recall": [
+    "You're back~ last time you had: {titles}",
+    "Yay you're here~ picking up from: {titles}",
+    "Let's keep going~ your stuff from before: {titles}"
+  ]
 }

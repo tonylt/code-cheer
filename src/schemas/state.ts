@@ -8,6 +8,9 @@ export type StateType = {
   commits_today?: number
   session_start?: string
   last_updated?: string
+  memory_count?: number
+  memory_titles?: string[]
+  last_memory_recall?: string
 }
 
 // D-07: default state for when file doesn't exist
@@ -42,5 +45,10 @@ export function parseState(raw: unknown): StateType {
     commits_today:  typeof obj.commits_today  === 'number' ? obj.commits_today  : undefined,
     session_start:  typeof obj.session_start  === 'string' ? obj.session_start  : undefined,
     last_updated:   typeof obj.last_updated   === 'string' ? obj.last_updated   : undefined,
+    memory_count:   typeof obj.memory_count   === 'number' ? obj.memory_count   : undefined,
+    memory_titles:  Array.isArray(obj.memory_titles)
+      ? (obj.memory_titles as unknown[]).filter((x): x is string => typeof x === 'string')
+      : undefined,
+    last_memory_recall: typeof obj.last_memory_recall === 'string' ? obj.last_memory_recall : undefined,
   }
 }

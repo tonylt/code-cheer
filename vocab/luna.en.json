@@ -287,5 +287,10 @@
       "So many commits today~ You've truly given everything~",
       "High-output day~ You've gone above and beyond~"
     ]
-  }
+  },
+  "memory_recall": [
+    "Welcome back... you left off with: {titles}",
+    "Nice to see you again... last time: {titles}",
+    "Let's continue... your previous work: {titles}"
+  ]
 }

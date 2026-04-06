@@ -126,6 +126,11 @@ export function render(
     parts.push(truncCwd)
   }
   parts.push(`${tokens} tokens`)
+  // Memory count indicator (per D-06)
+  const memoryCount = typeof stats['memory_count'] === 'number' ? stats['memory_count'] as number : undefined
+  if (memoryCount !== undefined && memoryCount > 0) {
+    parts.push(`${memoryCount} mem`)
+  }
   if (ctxPct !== undefined) {
     const pctFloor = Math.floor(ctxPct)
     const bar = _ctxBar(pctFloor)

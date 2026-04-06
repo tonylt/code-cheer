@@ -245,3 +245,25 @@ describe('render', () => {
     expect(line2).not.toContain('82.7%')
   })
 })
+
+// ─── memory count display ─────────────────────────────────────────────────────
+
+describe('memory count display', () => {
+  it('line2 contains "3 mem" when memory_count=3', () => {
+    const output = render(CHAR, 'msg', {}, { memory_count: 3 })
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('3 mem')
+  })
+
+  it('line2 does NOT contain "mem" when memory_count=0', () => {
+    const output = render(CHAR, 'msg', {}, { memory_count: 0 })
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('mem')
+  })
+
+  it('line2 does NOT contain "mem" when memory_count is undefined', () => {
+    const output = render(CHAR, 'msg', {}, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('mem')
+  })
+})

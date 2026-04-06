@@ -288,5 +288,10 @@
       "Extensive output today. My expectations were exceeded.",
       "High-output day. This is what commitment looks like."
     ]
-  }
+  },
+  "memory_recall": [
+    "Previous session context detected: {titles}",
+    "Restoring context index: {titles}",
+    "Loading prior work records: {titles}"
+  ]
 }
