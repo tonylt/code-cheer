@@ -23,7 +23,7 @@ export function loadWeatherCache(baseDir: string): WeatherData | null {
     const nowSecs = Math.floor(Date.now() / 1000)
     if (typeof data.fetchedAt !== 'number' || !Number.isFinite(data.fetchedAt)) return null
     if (nowSecs - data.fetchedAt >= WEATHER_TTL_SECS) return null
-    if (typeof data.city !== 'string' || typeof data.tempC !== 'number' || typeof data.icon !== 'string') return null
+    if (typeof data.city !== 'string' || typeof data.tempC !== 'number' || !Number.isFinite(data.tempC) || typeof data.icon !== 'string') return null
     return data
   } catch {
     return null
