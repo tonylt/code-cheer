@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { loadWeatherCache, weatherCodeToEmoji } from '../src/core/weather'
+import { loadWeatherCache, weatherCodeToEmoji, fetchAndCacheWeather } from '../src/core/weather'
 
 describe('loadWeatherCache', () => {
   let tmpDir: string
@@ -71,4 +71,54 @@ describe('weatherCodeToEmoji', () => {
   it('338 → ❄️', () => expect(weatherCodeToEmoji(338)).toBe('❄️'))
   it('200 → ⛈', () => expect(weatherCodeToEmoji(200)).toBe('⛈'))
   it('999 (unknown) → 🌡', () => expect(weatherCodeToEmoji(999)).toBe('🌡'))
+})
+
+describe('fetchAndCacheWeather', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'weather-fetch-'))
+  })
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true })
+  })
+
+  it('writes cache with correct shape when city provided', async () => {
+    const mockFetch = async (url: string) => {
+      if (url.includes('ipapi')) return JSON.stringify({ city: 'Shanghai' })
+      return JSON.stringify({
+        current_condition: [{ temp_C: '22', weatherCode: '113' }],
+      })
+    }
+    await fetchAndCacheWeather(tmpDir, 'Beijing', mockFetch)
+    const result = loadWeatherCache(tmpDir)
+    expect(result).not.toBeNull()
+    expect(result!.city).toBe('Beijing')
+    expect(result!.tempC).toBe(22)
+    expect(result!.icon).toBe('☀️')
+  })
+
+  it('falls back to IP geolocation when no city provided', async () => {
+    const mockFetch = async (url: string) => {
+      if (url.includes('ipapi')) return JSON.stringify({ city: 'Shanghai' })
+      return JSON.stringify({
+        current_condition: [{ temp_C: '25', weatherCode: '116' }],
+      })
+    }
+    await fetchAndCacheWeather(tmpDir, undefined, mockFetch)
+    const result = loadWeatherCache(tmpDir)
+    expect(result!.city).toBe('Shanghai')
+    expect(result!.icon).toBe('⛅')
+  })
+
+  it('does not throw when fetcher fails', async () => {
+    const mockFetch = async (_url: string): Promise<string> => { throw new Error('network error') }
+    await expect(fetchAndCacheWeather(tmpDir, 'Tokyo', mockFetch)).resolves.not.toThrow()
+  })
+
+  it('does not write cache on network failure', async () => {
+    const mockFetch = async (_url: string): Promise<string> => { throw new Error('network error') }
+    await fetchAndCacheWeather(tmpDir, 'Tokyo', mockFetch)
+    expect(loadWeatherCache(tmpDir)).toBeNull()
+  })
 })
