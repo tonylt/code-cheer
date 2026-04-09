@@ -197,13 +197,10 @@ describe('render', () => {
     expect(line2).toContain('my-project')
   })
 
-  it('shows progress bar when context_window.used_percentage provided', () => {
+  it('shows ctx block when context_window.used_percentage provided', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 55 } }, {})
     const line2 = output.split('\n')[1]
     expect(line2).toContain('ctx 55%')
-    // battery bar: filled and empty cells with ANSI color change between them
-    expect(line2).toMatch(/█+/)
-    expect(line2).toMatch(/░+/)
   })
 
   it('line1 contains ANSI escape when color is set', () => {
@@ -251,30 +248,29 @@ describe('render', () => {
     expect(line2).not.toContain('y'.repeat(21))
   })
 
-  it('ctx block uses warn bg (94) at 80% context', () => {
+  it('ctx block uses warn bg (25) at 80% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;130m')
+    expect(line2).toContain('\x1b[48;5;25m')
     expect(line2).toContain('ctx 80%')
   })
 
-  it('ctx block uses danger bg (52) at 95% context', () => {
+  it('ctx block uses danger bg (18) at 95% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;124m')
+    expect(line2).toContain('\x1b[48;5;18m')
     expect(line2).toContain('ctx 95%')
   })
 
-  it('ctx block uses ok bg (22) at 79% context', () => {
+  it('ctx block uses ok bg (24) at 79% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;28m')
-    expect(line2).not.toContain('\x1b[48;5;130m')
-    expect(line2).not.toContain('\x1b[48;5;124m')
+    expect(line2).toContain('\x1b[48;5;24m')
+    expect(line2).not.toContain('\x1b[48;5;25m')
     expect(line2).toContain('ctx 79%')
   })
 
-  it('progress bar displays floor of decimal percentage', () => {
+  it('ctx block displays floor of decimal percentage', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 82.7 } }, {})
     const line2 = output.split('\n')[1]
     expect(line2).toContain('82%')
@@ -308,7 +304,7 @@ describe('render', () => {
     jest.useRealTimers()
   })
 
-  it('5h quota block uses warn bg (94) at 70%', () => {
+  it('5h quota block uses warn bg (136) at 70%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -316,10 +312,10 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;130m')
+    expect(line2).toContain('\x1b[48;5;136m')
   })
 
-  it('5h quota block uses danger bg (52) at 90%', () => {
+  it('5h quota block uses danger bg (56) at 90%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -327,7 +323,7 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;124m')
+    expect(line2).toContain('\x1b[48;5;56m')
   })
 
   it('omits 5h segment entirely when no rate_limits provided', () => {
@@ -373,41 +369,6 @@ describe('render', () => {
     )
     const line2 = output.split('\n')[1]
     expect(line2).not.toContain('wk ')
-  })
-
-  // ─── Battery bar shared behavior ──────────────────────────────────────────
-  it('bars use green fg (38;5;46) for border + fill', () => {
-    const output = render(
-      CHAR,
-      'msg',
-      { context_window: { used_percentage: 50 } },
-      {}
-    )
-    const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[38;5;255m')
-  })
-
-  it('bars use dim fg (38;5;240) for empty cells', () => {
-    const output = render(
-      CHAR,
-      'msg',
-      { context_window: { used_percentage: 50 } },
-      {}
-    )
-    const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[38;5;243m')
-  })
-
-  it('bars have bracket border [ ]', () => {
-    const output = render(
-      CHAR,
-      'msg',
-      { context_window: { used_percentage: 50 } },
-      {}
-    )
-    const line2 = output.split('\n')[1]
-    expect(line2).toMatch(/\[█+/)
-    expect(line2).toMatch(/░+.*?\]/)
   })
 
   it('uses bg color blocks (no · or | separators)', () => {
@@ -457,5 +418,49 @@ describe('memory count display', () => {
     const output = render(CHAR, 'msg', {}, {})
     const line2 = output.split('\n')[1]
     expect(line2).not.toContain('mem')
+  })
+})
+
+// ─── weather block ────────────────────────────────────────────────────────────
+
+describe('weather block', () => {
+  it('renders icon and temperature when stats.weather is provided', () => {
+    const output = render(CHAR, 'msg', {}, {
+      weather: { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: Math.floor(Date.now() / 1000) }
+    })
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('⛅ 18°C')
+  })
+
+  it('weather block uses bg 60 (slate)', () => {
+    const output = render(CHAR, 'msg', {}, {
+      weather: { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: Math.floor(Date.now() / 1000) }
+    })
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[48;5;60m')
+  })
+
+  it('omits weather block when stats.weather is null', () => {
+    const output = render(CHAR, 'msg', {}, { weather: null })
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('°C')
+  })
+
+  it('omits weather block when stats.weather is absent', () => {
+    const output = render(CHAR, 'msg', {}, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('°C')
+  })
+
+  it('weather block appears after mem block', () => {
+    const output = render(CHAR, 'msg', {}, {
+      memory_count: 3,
+      weather: { city: 'Beijing', tempC: 22, icon: '☀️', fetchedAt: Math.floor(Date.now() / 1000) }
+    })
+    const line2 = output.split('\n')[1]
+    const memIdx = line2.indexOf('3 mem')
+    const weatherIdx = line2.indexOf('22°C')
+    expect(memIdx).toBeGreaterThan(-1)
+    expect(weatherIdx).toBeGreaterThan(memIdx)
   })
 })

@@ -74,62 +74,47 @@ export function formatResets(resetsAt: number | string | null | undefined): stri
   return `${minutes}m`
 }
 
-// ─── Battery-style progress bar ──────────────────────────────────────────────
-
-const ANSI_BAR_FILL = '\x1b[38;5;255m'  // bright white (fill + border)
-const ANSI_BAR_EMPTY = '\x1b[38;5;243m' // medium gray (empty cells — visible on any bg)
-
-/**
- * Render a battery-style progress bar with white border + fill, gray empty cells.
- * Contrasts cleanly on all background colors.
- * Caller MUST re-emit its block fg color after this string to avoid color bleed.
- */
-function batteryBar(pct: number, width: number = 8): string {
-  const safe = Math.max(0, Math.min(100, pct))
-  const filled = Math.round((safe / 100) * width)
-  return (
-    `${ANSI_BAR_FILL}[` +
-    '█'.repeat(filled) +
-    `${ANSI_BAR_EMPTY}${'░'.repeat(width - filled)}` +
-    `${ANSI_BAR_FILL}]`
-  )
-}
-
 // ─── ANSI block rendering (256-color backgrounds) ────────────────────────────
 
 const ANSI_RESET = '\x1b[0m'
 
-/** 256-color palette — white text on tinted-dark backgrounds (semi-transparent feel). */
+/** Palette entry for color blocks. */
+type PlainPalette = { bg: number; fg: number }
+
+/** 256-color palette — white text on tinted-dark backgrounds. */
 const PALETTE = {
-  model:       { bg: 18,  fg: 255 }, // dark blue tint / white
-  cwd:         { bg: 236, fg: 255 }, // subtle gray / white
-  tokens:      { bg: 94,  fg: 255 }, // dark amber / white
-  ok:          { bg: 28,  fg: 255 }, // dark green / white
-  warn:        { bg: 130, fg: 255 }, // warm orange / white
-  danger:      { bg: 124, fg: 255 }, // dark red / white
-  mem:         { bg: 30,  fg: 255 }, // dark teal / white
+  model:      { bg: 18,  fg: 255 } as PlainPalette,
+  cwd:        { bg: 236, fg: 255 } as PlainPalette,
+  tokens:     { bg: 94,  fg: 255 } as PlainPalette,
+  usageOk:    { bg: 64,  fg: 255 } as PlainPalette,
+  usageWarn:  { bg: 136, fg: 255 } as PlainPalette,
+  usageDanger:{ bg: 56,  fg: 255 } as PlainPalette,
+  ctxOk:      { bg: 24,  fg: 255 } as PlainPalette,
+  ctxWarn:    { bg: 25,  fg: 255 } as PlainPalette,
+  ctxDanger:  { bg: 18,  fg: 255 } as PlainPalette,
+  mem:        { bg: 30,  fg: 255 } as PlainPalette,
+  weather:    { bg: 60,  fg: 255 } as PlainPalette,
 } as const
 
 /** Render text inside a padded background color block. */
-function block(text: string, palette: { bg: number; fg: number }): string {
+function block(text: string, palette: PlainPalette): string {
   return `\x1b[48;5;${palette.bg}m\x1b[38;5;${palette.fg}m ${text} ${ANSI_RESET}`
 }
 
-/** Re-emit the block's fg color (use after a batteryBar inside a block). */
-function blockFg(palette: { bg: number; fg: number }): string {
-  return `\x1b[38;5;${palette.fg}m`
+/** Pick usage ok/warn/danger palette from percentage + thresholds. */
+function usagePalette(pct: number | undefined, warnAt: number, dangerAt: number): PlainPalette {
+  if (pct === undefined) return PALETTE.usageOk
+  if (pct >= dangerAt) return PALETTE.usageDanger
+  if (pct >= warnAt) return PALETTE.usageWarn
+  return PALETTE.usageOk
 }
 
-/** Pick ok/warn/danger palette from percentage + thresholds. */
-function severityPalette(
-  pct: number | undefined,
-  warnAt: number,
-  dangerAt: number
-): { bg: number; fg: number } {
-  if (pct === undefined) return PALETTE.ok
-  if (pct >= dangerAt) return PALETTE.danger
-  if (pct >= warnAt) return PALETTE.warn
-  return PALETTE.ok
+/** Pick ctx ok/warn/danger palette from percentage + thresholds. */
+function ctxPalette(pct: number | undefined, warnAt: number, dangerAt: number): PlainPalette {
+  if (pct === undefined) return PALETTE.ctxOk
+  if (pct >= dangerAt) return PALETTE.ctxDanger
+  if (pct >= warnAt) return PALETTE.ctxWarn
+  return PALETTE.ctxOk
 }
 
 // ─── Segment builders (each returns a ready-to-print block or null) ──────────
@@ -158,13 +143,9 @@ function buildRateLimitBlock(
 
   if (pct === undefined && resets === null) return null
 
-  const palette = severityPalette(pct, warnAt, dangerAt)
+  const palette = usagePalette(pct, warnAt, dangerAt)
   const parts: string[] = [label]
-  if (pct !== undefined) {
-    parts.push(`${Math.floor(pct)}%`)
-    // bar + restore block fg so following text inherits the palette color
-    parts.push(batteryBar(pct) + blockFg(palette))
-  }
+  if (pct !== undefined) parts.push(`${Math.floor(pct)}%`)
   if (resets !== null) parts.push(`↻${resets}`)
 
   return block(parts.join(' '), palette)
@@ -193,9 +174,18 @@ function buildCtxBlock(ccData: Record<string, unknown>): string | null {
   if (isNaN(pct)) return null
 
   const pctFloor = Math.floor(pct)
-  const palette = severityPalette(pctFloor, 80, 95)
-  const bar = batteryBar(pctFloor) + blockFg(palette)
-  return block(`ctx ${pctFloor}% ${bar}`, palette)
+  const palette = ctxPalette(pctFloor, 80, 95)
+  return block(`ctx ${pctFloor}%`, palette)
+}
+
+function buildWeatherBlock(stats: Record<string, unknown>): string | null {
+  const w = stats['weather']
+  if (w === null || w === undefined || typeof w !== 'object') return null
+  const weather = w as Record<string, unknown>
+  const tempC = weather['tempC']
+  const icon = weather['icon']
+  if (typeof tempC !== 'number' || typeof icon !== 'string') return null
+  return block(`${icon} ${tempC}°C`, PALETTE.weather)
 }
 
 // ─── Main render ──────────────────────────────────────────────────────────────
@@ -258,6 +248,9 @@ export function render(
   if (memoryCount !== undefined && memoryCount > 0) {
     parts.push(block(`${memoryCount} mem`, PALETTE.mem))
   }
+
+  const weatherSeg = buildWeatherBlock(stats)
+  if (weatherSeg !== null) parts.push(weatherSeg)
 
   const line2 = parts.join('')
   return `${line1}\n${line2}`
