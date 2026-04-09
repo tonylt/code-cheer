@@ -7,6 +7,7 @@ import { loadGitContext } from './core/gitContext'
 import type { GitContextResult } from './core/gitContext'
 import { resolveMessage, detectGitEvents, getTimeSlot, cacheExpired, formatMemoryTitles } from './core/trigger'
 import { loadMemoryContext } from './core/memory'
+import { fetchAndCacheWeather, loadWeatherCache } from './core/weather'
 import { parseState, DEFAULT_STATE, parseConfig } from './schemas'
 import type { VocabData, StateType, ConfigType } from './schemas'
 
@@ -271,7 +272,13 @@ async function runUpdateCore(
   // Token fallback: supplement from ccData when stats-cache has no today entry
   applyTokenFallback(stats, ccData)
 
-  const gitContext = await loadGitContext(process.cwd())
+  const [gitSettled] = await Promise.allSettled([
+    loadGitContext(process.cwd()),
+    fetchAndCacheWeather(baseDir, config.city),
+  ])
+  const gitContext = gitSettled.status === 'fulfilled'
+    ? gitSettled.value
+    : { repo_path: null, commits_today: 0, diff_lines: 0, last_git_events: [], branch: null, first_commit_time: null } as GitContextResult
 
   // Phase 16: load memory context (per D-04, only in --update mode)
   const memoryCtx = loadMemoryContext(gitContext.repo_path, os.homedir())
@@ -390,12 +397,14 @@ async function runUpdateCore(
 // ─── Exported mode functions ──────────────────────────────────────────────────
 
 export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string {
-  const { configPath, statePath, statsPath } = resolvePaths(env)
+  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
 
   const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
+  const weather = loadWeatherCache(baseDir)
+  stats['weather'] = weather ?? null
 
   // Parse stdin as ccData — mirrors Python: cc_data = read_stdin_json() in all modes
   let ccData: Record<string, unknown> = {}
