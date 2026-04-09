@@ -429,7 +429,7 @@ describe('weather block', () => {
       weather: { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: Math.floor(Date.now() / 1000) }
     })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('⛅ 18°C')
+    expect(line2).toContain('Beijing ⛅ 18°C')
   })
 
   it('weather block uses bg 60 (slate)', () => {

@@ -184,8 +184,10 @@ function buildWeatherBlock(stats: Record<string, unknown>): string | null {
   const weather = w as Record<string, unknown>
   const tempC = weather['tempC']
   const icon = weather['icon']
+  const city = weather['city']
   if (typeof tempC !== 'number' || typeof icon !== 'string') return null
-  return block(`${icon} ${tempC}°C`, PALETTE.weather)
+  const cityStr = typeof city === 'string' && city.length > 0 ? `${city} ` : ''
+  return block(`${cityStr}${icon} ${tempC}°C`, PALETTE.weather)
 }
 
 // ─── Main render ──────────────────────────────────────────────────────────────
