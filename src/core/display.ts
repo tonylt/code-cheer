@@ -1,36 +1,46 @@
 import type { VocabData } from '../schemas'
 
 /**
- * Format token count: 47768 → '47k', 500 → '500', None → 'N/A'.
- * Mirrors Python display.py format_tokens().
+ * Format token count with adaptive precision:
+ *  - n < 1000         → "500"
+ *  - 1000..9999       → "1k" / "1.2k" (one decimal when non-integer)
+ *  - 10_000..999_999  → "47k" (floor)
+ *  - 1_000_000+       → "1.2M" / "14M" (one decimal when < 10M)
+ *  - null/undef/NaN   → "N/A"
  */
 export function formatTokens(tokenCount: number | string | null | undefined): string {
   if (tokenCount === null || tokenCount === undefined || tokenCount === 'N/A') {
     return 'N/A'
   }
-  let n: number
-  try {
-    n = typeof tokenCount === 'number' ? tokenCount : parseInt(String(tokenCount), 10)
-    if (isNaN(n)) return 'N/A'
-  } catch {
-    return 'N/A'
+  const n = typeof tokenCount === 'number' ? tokenCount : parseInt(String(tokenCount), 10)
+  if (isNaN(n)) return 'N/A'
+
+  if (n < 1000) return String(n)
+
+  if (n < 10_000) {
+    const val = n / 1000
+    return val % 1 === 0 ? `${val}k` : `${val.toFixed(1)}k`
   }
-  if (n >= 1000) {
+
+  if (n < 1_000_000) {
     return `${Math.floor(n / 1000)}k`
   }
-  return String(n)
+
+  const m = n / 1_000_000
+  if (m < 10) {
+    return m % 1 === 0 ? `${m}M` : `${m.toFixed(1)}M`
+  }
+  return `${Math.floor(m)}M`
 }
 
 /**
  * Format Unix timestamp or ISO string into relative '3h20m' or '45m'.
  * Returns null if past or invalid.
- * Mirrors Python display.py format_resets().
  */
 export function formatResets(resetsAt: number | string | null | undefined): string | null {
   if (!resetsAt && resetsAt !== 0) return null
   let deltaSecs: number
   try {
-    // Unix timestamp (number or numeric string)
     const ts = typeof resetsAt === 'number' ? resetsAt : parseFloat(String(resetsAt))
     if (!isNaN(ts)) {
       const nowSecs = Date.now() / 1000
@@ -39,7 +49,6 @@ export function formatResets(resetsAt: number | string | null | undefined): stri
       throw new Error('not a number')
     }
   } catch {
-    // ISO string fallback
     try {
       const resetMs = new Date(String(resetsAt)).getTime()
       if (isNaN(resetMs)) return null
@@ -60,20 +69,88 @@ export function formatResets(resetsAt: number | string | null | undefined): stri
 }
 
 /**
- * Build a block-character progress bar for the given percentage.
- * Mirrors Python display.py _ctx_bar().
+ * Block-character progress bar for a percentage.
  */
 function _ctxBar(pct: number, width: number = 10): string {
   const filled = Math.max(0, Math.min(width, Math.round((pct / 100) * width)))
   return '█'.repeat(filled) + '░'.repeat(width - filled)
 }
 
+// ─── ANSI helpers ─────────────────────────────────────────────────────────────
+
+const ANSI_RED = '\x1b[91m'
+const ANSI_YELLOW = '\x1b[93m'
+const ANSI_RESET = '\x1b[0m'
+
+function colorize(text: string, code: string | null): string {
+  return code === null ? text : `${code}${text}${ANSI_RESET}`
+}
+
+/** Yellow ≥ yellowAt, Red ≥ redAt, else no color. */
+function pctColor(pct: number, yellowAt: number, redAt: number): string | null {
+  if (pct >= redAt) return ANSI_RED
+  if (pct >= yellowAt) return ANSI_YELLOW
+  return null
+}
+
+// ─── Segment builders ─────────────────────────────────────────────────────────
+
 /**
- * Format the 2-line statusline output (both lines left-aligned).
- * Mirrors Python display.py render().
+ * Build the 5h quota segment: "5h 38% ↻2h15m".
+ * Returns null if no quota data is present.
+ */
+function buildQuotaSegment(ccData: Record<string, unknown>): string | null {
+  const rateLimits = ccData['rate_limits']
+  if (rateLimits === null || typeof rateLimits !== 'object') return null
+  const fiveHour = (rateLimits as Record<string, unknown>)['five_hour']
+  if (fiveHour === null || typeof fiveHour !== 'object') return null
+
+  const fh = fiveHour as Record<string, unknown>
+  const rawPct = fh['used_percentage']
+  const pct = typeof rawPct === 'number' ? rawPct : undefined
+  const resets = formatResets(fh['resets_at'] as number | string | null | undefined)
+
+  if (pct === undefined && resets === null) return null
+
+  const parts: string[] = ['5h']
+  if (pct !== undefined) {
+    parts.push(`${Math.floor(pct)}%`)
+  }
+  if (resets !== null) {
+    parts.push(`↻${resets}`)
+  }
+
+  const text = parts.join(' ')
+  const color = pct !== undefined ? pctColor(pct, 70, 90) : null
+  return colorize(text, color)
+}
+
+/**
+ * Build the context window segment: "ctx 62% [██████░░░░]".
+ * Returns null if no context_window percentage is present.
+ */
+function buildCtxSegment(ccData: Record<string, unknown>): string | null {
+  const ctxWindow = ccData['context_window']
+  if (ctxWindow === null || typeof ctxWindow !== 'object') return null
+  const usedPct = (ctxWindow as Record<string, unknown>)['used_percentage']
+  if (usedPct === undefined || usedPct === null) return null
+  const pct = Number(usedPct)
+  if (isNaN(pct)) return null
+
+  const pctFloor = Math.floor(pct)
+  const bar = _ctxBar(pctFloor)
+  const text = `ctx ${pctFloor}% [${bar}]`
+  return colorize(text, pctColor(pctFloor, 80, 95))
+}
+
+// ─── Main render ──────────────────────────────────────────────────────────────
+
+/**
+ * Format the 2-line statusline output.
  *
- * Line 1: ascii + name + message (with optional ANSI color)
- * Line 2: model | cwdName | tokens tokens | [bar] pct%
+ * Line 1: ascii + name: message   (optionally ANSI-colored)
+ * Line 2: model · cwd · Nk tokens · 5h X% ↻YhZZm · ctx P% [bar] · N mem
+ *   — any segment whose data is missing is dropped.
  */
 export function render(
   character: VocabData,
@@ -81,7 +158,7 @@ export function render(
   ccData: Record<string, unknown>,
   stats: Record<string, unknown>
 ): string {
-  // Line 1 — D-09: ANSI color if non-empty, D-10: skip escape if empty
+  // ── Line 1 ──
   const asciiface = character.meta.ascii
   const name = character.meta.name
   const color = character.meta.color
@@ -89,7 +166,8 @@ export function render(
   const rawLine1 = `${asciiface} ${name}: ${truncMsg}`
   const line1 = color ? `\x1b[${color}m${rawLine1}\x1b[0m` : rawLine1
 
-  // Model extraction — handle string or object forms
+  // ── Line 2 ──
+  // Model
   const modelRaw = ccData['model']
   let model: string
   if (modelRaw !== null && typeof modelRaw === 'object') {
@@ -101,48 +179,27 @@ export function render(
     model = 'unknown'
   }
 
-
-  // Stats fields
   const cwdName = typeof stats['cwd_name'] === 'string' ? stats['cwd_name'] : ''
   const tokens = formatTokens(stats['today_tokens'] as number | string | null | undefined)
 
-  // Context window bar — P5 pitfall: check !== undefined not truthy (pct=0 is valid)
-  const ctxWindow = ccData['context_window']
-  let ctxPct: number | undefined
-  if (ctxWindow !== null && typeof ctxWindow === 'object') {
-    const ctxObj = ctxWindow as Record<string, unknown>
-    const usedPct = ctxObj['used_percentage']
-    if (usedPct !== undefined && usedPct !== null) {
-      ctxPct = Number(usedPct)
-      if (isNaN(ctxPct)) ctxPct = undefined
-    }
-  }
-
-  // Build line 2 parts — truncate long strings to keep line within ~80 cols
   const truncModel = model.length > 20 ? model.slice(0, 19) + '…' : model
   const truncCwd = cwdName.length > 20 ? cwdName.slice(0, 19) + '…' : cwdName
+
   const parts: string[] = [truncModel]
-  if (truncCwd) {
-    parts.push(truncCwd)
-  }
+  if (truncCwd) parts.push(truncCwd)
   parts.push(`${tokens} tokens`)
-  // Memory count indicator (per D-06)
+
+  const quotaSeg = buildQuotaSegment(ccData)
+  if (quotaSeg !== null) parts.push(quotaSeg)
+
+  const ctxSeg = buildCtxSegment(ccData)
+  if (ctxSeg !== null) parts.push(ctxSeg)
+
   const memoryCount = typeof stats['memory_count'] === 'number' ? stats['memory_count'] as number : undefined
   if (memoryCount !== undefined && memoryCount > 0) {
     parts.push(`${memoryCount} mem`)
   }
-  if (ctxPct !== undefined) {
-    const pctFloor = Math.floor(ctxPct)
-    const bar = _ctxBar(pctFloor)
-    const barStr = `[${bar}] ${pctFloor}%`
-    const coloredBar = pctFloor >= 95
-      ? `\x1b[91m${barStr}\x1b[0m`
-      : pctFloor >= 80
-        ? `\x1b[93m${barStr}\x1b[0m`
-        : barStr
-    parts.push(coloredBar)
-  }
 
-  const line2 = parts.join(' | ')
+  const line2 = parts.join(' · ')
   return `${line1}\n${line2}`
 }

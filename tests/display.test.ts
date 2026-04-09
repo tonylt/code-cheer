@@ -43,6 +43,26 @@ describe('formatTokens', () => {
   it('returns N/A for non-numeric string', () => {
     expect(formatTokens('not-a-number')).toBe('N/A')
   })
+
+  it('formats 1200 as 1.2k (small k gets one decimal)', () => {
+    expect(formatTokens(1200)).toBe('1.2k')
+  })
+
+  it('formats 9900 as 9.9k', () => {
+    expect(formatTokens(9900)).toBe('9.9k')
+  })
+
+  it('formats 1_000_000 as 1M', () => {
+    expect(formatTokens(1_000_000)).toBe('1M')
+  })
+
+  it('formats 2_400_000 as 2.4M', () => {
+    expect(formatTokens(2_400_000)).toBe('2.4M')
+  })
+
+  it('formats 14_000_000 as 14M (>=10M drops decimal)', () => {
+    expect(formatTokens(14_000_000)).toBe('14M')
+  })
 })
 
 // ─── formatResets ─────────────────────────────────────────────────────────────
@@ -166,7 +186,7 @@ describe('render', () => {
   it('shows progress bar when context_window.used_percentage provided', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 55 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('55%')
+    expect(line2).toContain('ctx 55%')
     // bar has 10 blocks: 55% -> 6 filled, 4 empty
     expect(line2).toMatch(/\[█+░+\]/)
   })
@@ -220,22 +240,23 @@ describe('render', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
     const line2 = output.split('\n')[1]
     expect(line2).toContain('\x1b[93m')
-    expect(line2).toContain('80%')
+    expect(line2).toContain('ctx 80%')
   })
 
   it('progress bar shows red ANSI color at 95% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
     const line2 = output.split('\n')[1]
     expect(line2).toContain('\x1b[91m')
-    expect(line2).toContain('95%')
+    expect(line2).toContain('ctx 95%')
   })
 
   it('progress bar has no color at 79% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
     const line2 = output.split('\n')[1]
+    // Color escapes only present if any colorized segment exists; here none.
     expect(line2).not.toContain('\x1b[91m')
     expect(line2).not.toContain('\x1b[93m')
-    expect(line2).toContain('79%')
+    expect(line2).toContain('ctx 79%')
   })
 
   it('progress bar displays floor of decimal percentage', () => {
@@ -243,6 +264,74 @@ describe('render', () => {
     const line2 = output.split('\n')[1]
     expect(line2).toContain('82%')
     expect(line2).not.toContain('82.7%')
+  })
+
+  // ─── 5h quota segment ─────────────────────────────────────────────────────
+  it('shows 5h quota percentage when rate_limits.five_hour.used_percentage provided', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { five_hour: { used_percentage: 38 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('5h 38%')
+  })
+
+  it('shows reset countdown from resets_at unix timestamp', () => {
+    jest.useFakeTimers()
+    const now = 1711094400
+    jest.setSystemTime(now * 1000)
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { five_hour: { used_percentage: 40, resets_at: now + 200 * 60 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('↻3h20m')
+    jest.useRealTimers()
+  })
+
+  it('5h quota segment colors yellow at 70%', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { five_hour: { used_percentage: 70 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[93m')
+  })
+
+  it('5h quota segment colors red at 90%', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { five_hour: { used_percentage: 90 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[91m')
+  })
+
+  it('omits 5h segment entirely when no rate_limits provided', () => {
+    const output = render(CHAR, 'msg', {}, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('5h')
+    expect(line2).not.toContain('↻')
+  })
+
+  it('uses · as separator between segments', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { model: 'Sonnet' },
+      { cwd_name: 'code-cheer', today_tokens: 47768 }
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain(' · ')
+    expect(line2).not.toContain(' | ')
   })
 })
 
