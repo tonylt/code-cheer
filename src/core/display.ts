@@ -99,15 +99,15 @@ function batteryBar(pct: number, width: number = 8): string {
 
 const ANSI_RESET = '\x1b[0m'
 
-/** 256-color palette — white text on vivid backgrounds. */
+/** 256-color palette — white text on tinted-dark backgrounds (semi-transparent feel). */
 const PALETTE = {
-  model:       { bg: 25,  fg: 255 }, // vivid blue / white
-  cwd:         { bg: 239, fg: 255 }, // medium gray / white
-  tokens:      { bg: 136, fg: 255 }, // gold / white
-  ok:          { bg: 34,  fg: 255 }, // vivid green / white
-  warn:        { bg: 172, fg: 255 }, // vivid orange / white
-  danger:      { bg: 160, fg: 255 }, // vivid red / white
-  mem:         { bg: 36,  fg: 255 }, // vivid teal / white
+  model:       { bg: 18,  fg: 255 }, // dark blue tint / white
+  cwd:         { bg: 236, fg: 255 }, // subtle gray / white
+  tokens:      { bg: 94,  fg: 255 }, // dark amber / white
+  ok:          { bg: 28,  fg: 255 }, // dark green / white
+  warn:        { bg: 130, fg: 255 }, // warm orange / white
+  danger:      { bg: 124, fg: 255 }, // dark red / white
+  mem:         { bg: 30,  fg: 255 }, // dark teal / white
 } as const
 
 /** Render text inside a padded background color block. */

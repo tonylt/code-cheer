@@ -254,23 +254,23 @@ describe('render', () => {
   it('ctx block uses warn bg (94) at 80% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;172m')
+    expect(line2).toContain('\x1b[48;5;130m')
     expect(line2).toContain('ctx 80%')
   })
 
   it('ctx block uses danger bg (52) at 95% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;160m')
+    expect(line2).toContain('\x1b[48;5;124m')
     expect(line2).toContain('ctx 95%')
   })
 
   it('ctx block uses ok bg (22) at 79% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;34m')
-    expect(line2).not.toContain('\x1b[48;5;172m')
-    expect(line2).not.toContain('\x1b[48;5;160m')
+    expect(line2).toContain('\x1b[48;5;28m')
+    expect(line2).not.toContain('\x1b[48;5;130m')
+    expect(line2).not.toContain('\x1b[48;5;124m')
     expect(line2).toContain('ctx 79%')
   })
 
@@ -316,7 +316,7 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;172m')
+    expect(line2).toContain('\x1b[48;5;130m')
   })
 
   it('5h quota block uses danger bg (52) at 90%', () => {
@@ -327,7 +327,7 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;160m')
+    expect(line2).toContain('\x1b[48;5;124m')
   })
 
   it('omits 5h segment entirely when no rate_limits provided', () => {
@@ -427,13 +427,13 @@ describe('render', () => {
   it('model segment uses bg 17 (navy) by default', () => {
     const output = render(CHAR, 'msg', { model: 'Sonnet' }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;25m')
+    expect(line2).toContain('\x1b[48;5;18m')
   })
 
   it('mem segment uses bg 23 (dark teal) when memory_count>0', () => {
     const output = render(CHAR, 'msg', {}, { memory_count: 3 })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;36m')
+    expect(line2).toContain('\x1b[48;5;30m')
     expect(line2).toContain('3 mem')
   })
 })
