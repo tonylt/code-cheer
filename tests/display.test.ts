@@ -122,6 +122,20 @@ describe('formatResets', () => {
     const future = now + 65 * 60
     expect(formatResets(future)).toBe('1h05m')
   })
+
+  it('formats ≥24h as XdYYh (weekly reset context)', () => {
+    const now = 1711094400
+    jest.setSystemTime(now * 1000)
+    // 5 days, 3 hours ahead
+    const future = now + (5 * 24 + 3) * 3600
+    expect(formatResets(future)).toBe('5d03h')
+  })
+
+  it('formats exactly 24h as 1d00h', () => {
+    const now = 1711094400
+    jest.setSystemTime(now * 1000)
+    expect(formatResets(now + 24 * 3600)).toBe('1d00h')
+  })
 })
 
 // ─── render ───────────────────────────────────────────────────────────────────
@@ -187,8 +201,9 @@ describe('render', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 55 } }, {})
     const line2 = output.split('\n')[1]
     expect(line2).toContain('ctx 55%')
-    // bar has 10 blocks: 55% -> 6 filled, 4 empty
-    expect(line2).toMatch(/\[█+░+\]/)
+    // battery bar: filled and empty cells with ANSI color change between them
+    expect(line2).toMatch(/█+/)
+    expect(line2).toMatch(/░+/)
   })
 
   it('line1 contains ANSI escape when color is set', () => {
@@ -236,26 +251,26 @@ describe('render', () => {
     expect(line2).not.toContain('y'.repeat(21))
   })
 
-  it('progress bar shows yellow ANSI color at 80% context', () => {
+  it('ctx block uses warn bg (94) at 80% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[93m')
+    expect(line2).toContain('\x1b[48;5;172m')
     expect(line2).toContain('ctx 80%')
   })
 
-  it('progress bar shows red ANSI color at 95% context', () => {
+  it('ctx block uses danger bg (52) at 95% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[91m')
+    expect(line2).toContain('\x1b[48;5;160m')
     expect(line2).toContain('ctx 95%')
   })
 
-  it('progress bar has no color at 79% context', () => {
+  it('ctx block uses ok bg (22) at 79% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
     const line2 = output.split('\n')[1]
-    // Color escapes only present if any colorized segment exists; here none.
-    expect(line2).not.toContain('\x1b[91m')
-    expect(line2).not.toContain('\x1b[93m')
+    expect(line2).toContain('\x1b[48;5;34m')
+    expect(line2).not.toContain('\x1b[48;5;172m')
+    expect(line2).not.toContain('\x1b[48;5;160m')
     expect(line2).toContain('ctx 79%')
   })
 
@@ -293,7 +308,7 @@ describe('render', () => {
     jest.useRealTimers()
   })
 
-  it('5h quota segment colors yellow at 70%', () => {
+  it('5h quota block uses warn bg (94) at 70%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -301,10 +316,10 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[93m')
+    expect(line2).toContain('\x1b[48;5;172m')
   })
 
-  it('5h quota segment colors red at 90%', () => {
+  it('5h quota block uses danger bg (52) at 90%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -312,7 +327,7 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[91m')
+    expect(line2).toContain('\x1b[48;5;160m')
   })
 
   it('omits 5h segment entirely when no rate_limits provided', () => {
@@ -322,7 +337,80 @@ describe('render', () => {
     expect(line2).not.toContain('↻')
   })
 
-  it('uses · as separator between segments', () => {
+  // ─── Weekly quota segment ─────────────────────────────────────────────────
+  it('shows weekly quota block when rate_limits.weekly provided', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { weekly: { used_percentage: 40 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('wk 40%')
+  })
+
+  it('weekly block uses days format for resets', () => {
+    jest.useFakeTimers()
+    const now = 1711094400
+    jest.setSystemTime(now * 1000)
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { weekly: { used_percentage: 40, resets_at: now + 5 * 24 * 3600 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('↻5d00h')
+    jest.useRealTimers()
+  })
+
+  it('weekly block omitted when missing', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { rate_limits: { five_hour: { used_percentage: 30 } } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).not.toContain('wk ')
+  })
+
+  // ─── Battery bar shared behavior ──────────────────────────────────────────
+  it('bars use green fg (38;5;46) for border + fill', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { context_window: { used_percentage: 50 } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[38;5;255m')
+  })
+
+  it('bars use dim fg (38;5;240) for empty cells', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { context_window: { used_percentage: 50 } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[38;5;243m')
+  })
+
+  it('bars have bracket border [ ]', () => {
+    const output = render(
+      CHAR,
+      'msg',
+      { context_window: { used_percentage: 50 } },
+      {}
+    )
+    const line2 = output.split('\n')[1]
+    expect(line2).toMatch(/\[█+/)
+    expect(line2).toMatch(/░+.*?\]/)
+  })
+
+  it('uses bg color blocks (no · or | separators)', () => {
     const output = render(
       CHAR,
       'msg',
@@ -330,8 +418,23 @@ describe('render', () => {
       { cwd_name: 'code-cheer', today_tokens: 47768 }
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain(' · ')
+    expect(line2).not.toContain(' · ')
     expect(line2).not.toContain(' | ')
+    // each segment is wrapped in a 256-color bg escape
+    expect(line2).toMatch(/\x1b\[48;5;\d+m/)
+  })
+
+  it('model segment uses bg 17 (navy) by default', () => {
+    const output = render(CHAR, 'msg', { model: 'Sonnet' }, {})
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[48;5;25m')
+  })
+
+  it('mem segment uses bg 23 (dark teal) when memory_count>0', () => {
+    const output = render(CHAR, 'msg', {}, { memory_count: 3 })
+    const line2 = output.split('\n')[1]
+    expect(line2).toContain('\x1b[48;5;36m')
+    expect(line2).toContain('3 mem')
   })
 })
 
