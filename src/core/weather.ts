@@ -28,3 +28,21 @@ export function loadWeatherCache(baseDir: string): WeatherData | null {
     return null
   }
 }
+
+const CODE_MAP: [number[], string][] = [
+  [[113], '☀️'],
+  [[116], '⛅'],
+  [[119, 122], '☁️'],
+  [[176, 263, 266, 293, 296, 299, 302], '🌦'],
+  [[305, 308, 311, 314], '🌧'],
+  [[317, 320, 323, 326, 329, 332, 335], '🌨'],
+  [[338, 395], '❄️'],
+  [[200, 386, 389, 392], '⛈'],
+]
+
+export function weatherCodeToEmoji(code: number): string {
+  for (const [codes, emoji] of CODE_MAP) {
+    if (codes.includes(code)) return emoji
+  }
+  return '🌡'
+}

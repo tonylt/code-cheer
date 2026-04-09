@@ -3,6 +3,8 @@ import * as os from 'os'
 import * as path from 'path'
 import { loadWeatherCache } from '../src/core/weather'
 
+import { weatherCodeToEmoji } from '../src/core/weather'
+
 describe('loadWeatherCache', () => {
   let tmpDir: string
 
@@ -58,4 +60,17 @@ describe('loadWeatherCache', () => {
     fs.writeFileSync(path.join(tmpDir, 'weather-cache.json'), JSON.stringify({}))
     expect(loadWeatherCache(tmpDir)).toBeNull()
   })
+})
+
+describe('weatherCodeToEmoji', () => {
+  it('113 → ☀️', () => expect(weatherCodeToEmoji(113)).toBe('☀️'))
+  it('116 → ⛅', () => expect(weatherCodeToEmoji(116)).toBe('⛅'))
+  it('119 → ☁️', () => expect(weatherCodeToEmoji(119)).toBe('☁️'))
+  it('122 → ☁️', () => expect(weatherCodeToEmoji(122)).toBe('☁️'))
+  it('176 → 🌦', () => expect(weatherCodeToEmoji(176)).toBe('🌦'))
+  it('305 → 🌧', () => expect(weatherCodeToEmoji(305)).toBe('🌧'))
+  it('320 → 🌨', () => expect(weatherCodeToEmoji(320)).toBe('🌨'))
+  it('338 → ❄️', () => expect(weatherCodeToEmoji(338)).toBe('❄️'))
+  it('200 → ⛈', () => expect(weatherCodeToEmoji(200)).toBe('⛈'))
+  it('999 (unknown) → 🌡', () => expect(weatherCodeToEmoji(999)).toBe('🌡'))
 })
