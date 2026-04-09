@@ -84,12 +84,9 @@ describe('fetchAndCacheWeather', () => {
   })
 
   it('writes cache with correct shape when city provided', async () => {
-    const mockFetch = async (url: string) => {
-      if (url.includes('ipapi')) return JSON.stringify({ city: 'Shanghai' })
-      return JSON.stringify({
-        current_condition: [{ temp_C: '22', weatherCode: '113' }],
-      })
-    }
+    const mockFetch = async (_url: string) => JSON.stringify({
+      current_condition: [{ temp_C: '22', weatherCode: '113' }],
+    })
     await fetchAndCacheWeather(tmpDir, 'Beijing', mockFetch)
     const result = loadWeatherCache(tmpDir)
     expect(result).not.toBeNull()
@@ -98,13 +95,11 @@ describe('fetchAndCacheWeather', () => {
     expect(result!.icon).toBe('☀️')
   })
 
-  it('falls back to IP geolocation when no city provided', async () => {
-    const mockFetch = async (url: string) => {
-      if (url.includes('ipapi')) return JSON.stringify({ city: 'Shanghai' })
-      return JSON.stringify({
-        current_condition: [{ temp_C: '25', weatherCode: '116' }],
-      })
-    }
+  it('uses wttr.in nearest_area for city when no city provided', async () => {
+    const mockFetch = async (_url: string) => JSON.stringify({
+      current_condition: [{ temp_C: '25', weatherCode: '116' }],
+      nearest_area: [{ areaName: [{ value: 'Shanghai' }] }],
+    })
     await fetchAndCacheWeather(tmpDir, undefined, mockFetch)
     const result = loadWeatherCache(tmpDir)
     expect(result!.city).toBe('Shanghai')

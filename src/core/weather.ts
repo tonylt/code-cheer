@@ -74,22 +74,23 @@ export async function fetchAndCacheWeather(
   _fetch: Fetcher = httpsGet
 ): Promise<void> {
   try {
-    let resolvedCity = city
-    if (!resolvedCity) {
-      const ipJson = JSON.parse(await _fetch('https://ipapi.co/json/')) as Record<string, unknown>
-      resolvedCity = typeof ipJson['city'] === 'string' ? ipJson['city'] : 'Unknown'
-    }
+    const url = city
+      ? `https://wttr.in/${encodeURIComponent(city)}?format=j1`
+      : 'https://wttr.in/?format=j1'
 
-    const wttrJson = JSON.parse(
-      await _fetch(`https://wttr.in/${encodeURIComponent(resolvedCity)}?format=j1`)
-    ) as Record<string, unknown>
+    const wttrJson = JSON.parse(await _fetch(url)) as Record<string, unknown>
+
+    // Resolve city name: use provided city or read from nearest_area geolocation
+    const resolvedCity = city ?? (
+      (wttrJson['nearest_area'] as Record<string, unknown>[])?.[0]?.['areaName'] as Record<string, unknown>[]
+    )?.[0]?.['value'] as string | undefined ?? 'Unknown'
 
     const cond = (wttrJson['current_condition'] as Record<string, unknown>[])[0]
     const tempC = parseInt(String(cond['temp_C']), 10)
     const icon = weatherCodeToEmoji(parseInt(String(cond['weatherCode']), 10))
 
     const data: WeatherData = {
-      city: resolvedCity,
+      city: resolvedCity ?? 'Unknown',
       tempC,
       icon,
       fetchedAt: Math.floor(Date.now() / 1000),
