@@ -1,9 +1,7 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { loadWeatherCache } from '../src/core/weather'
-
-import { weatherCodeToEmoji } from '../src/core/weather'
+import { loadWeatherCache, weatherCodeToEmoji } from '../src/core/weather'
 
 describe('loadWeatherCache', () => {
   let tmpDir: string
