@@ -47,4 +47,15 @@ describe('loadWeatherCache', () => {
     fs.writeFileSync(path.join(tmpDir, 'weather-cache.json'), 'not-json')
     expect(loadWeatherCache(tmpDir)).toBeNull()
   })
+
+  it('returns null when fetchedAt is not a number', () => {
+    const data = { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: null }
+    fs.writeFileSync(path.join(tmpDir, 'weather-cache.json'), JSON.stringify(data))
+    expect(loadWeatherCache(tmpDir)).toBeNull()
+  })
+
+  it('returns null when required fields are missing', () => {
+    fs.writeFileSync(path.join(tmpDir, 'weather-cache.json'), JSON.stringify({}))
+    expect(loadWeatherCache(tmpDir)).toBeNull()
+  })
 })
