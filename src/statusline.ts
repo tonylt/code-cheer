@@ -403,7 +403,7 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
   stats['cwd_name'] = path.basename(process.cwd())
-  const weather = loadWeatherCache(baseDir)
+  const weather = loadWeatherCache(baseDir, true)
   stats['weather'] = weather ?? null
 
   // Parse stdin as ccData — mirrors Python: cc_data = read_stdin_json() in all modes

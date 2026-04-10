@@ -13,16 +13,19 @@ export interface WeatherData {
 }
 
 /**
- * Load weather from cache file. Returns null if missing, stale (>= 30 min), or malformed.
+ * Load weather from cache file. Returns null if missing or malformed.
+ * Pass ignoreExpiry=true (renderMode) to show stale data rather than nothing.
  */
-export function loadWeatherCache(baseDir: string): WeatherData | null {
+export function loadWeatherCache(baseDir: string, ignoreExpiry = false): WeatherData | null {
   const cachePath = path.join(baseDir, CACHE_FILENAME)
   try {
     const raw = fs.readFileSync(cachePath, 'utf-8')
     const data = JSON.parse(raw) as WeatherData
-    const nowSecs = Math.floor(Date.now() / 1000)
     if (typeof data.fetchedAt !== 'number' || !Number.isFinite(data.fetchedAt)) return null
-    if (nowSecs - data.fetchedAt >= WEATHER_TTL_SECS) return null
+    if (!ignoreExpiry) {
+      const nowSecs = Math.floor(Date.now() / 1000)
+      if (nowSecs - data.fetchedAt >= WEATHER_TTL_SECS) return null
+    }
     if (typeof data.city !== 'string' || typeof data.tempC !== 'number' || !Number.isFinite(data.tempC) || typeof data.icon !== 'string') return null
     return data
   } catch {
