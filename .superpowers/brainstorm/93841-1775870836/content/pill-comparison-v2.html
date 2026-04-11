@@ -1,0 +1,113 @@
+<style>
+  body { font-family: 'Fira Code', monospace; }
+
+  .terminal {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .line1 { color: #7ec8e3; margin-bottom: 6px; }
+
+  /* A: rectangular blocks with gaps */
+  .style-rect span {
+    display: inline-block;
+    padding: 0px 8px;
+    color: #eee;
+    margin-right: 3px;
+  }
+
+  /* B: true CSS rounded pills */
+  .style-pill span {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 999px;
+    color: #eee;
+    margin-right: 3px;
+  }
+
+  /* C: left rounded only (nerd font in terminal) */
+  .style-nerd-preview span {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 6px 6px 6px 6px;
+    color: #eee;
+    margin-right: 3px;
+  }
+
+  .c-model   { background: #000087; }
+  .c-cwd     { background: #303030; }
+  .c-branch  { background: #3a3a3a; }
+  .c-tokens  { background: #875f00; }
+  .c-quota   { background: #5f8700; }
+  .c-ctx     { background: #005f87; }
+  .c-weather { background: #5f5f87; }
+
+  .note {
+    font-family: sans-serif;
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    padding-left: 4px;
+  }
+</style>
+
+<h2>胶囊形状对比</h2>
+<p class="subtitle">三种形状方案，从方到圆</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div class="style-rect">
+          <span class="c-model">claude-sonnet-4-6</span><span class="c-cwd">code-cheer</span><span class="c-branch">⎇ alex-new-feature</span><span class="c-tokens">1.2k tokens</span><span class="c-quota">5h 38%</span><span class="c-ctx">ctx 62%</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 目前的样子 — 方形色块，块间留空</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>方块 + 间距</h3>
+      <p>直角色块，块之间加 1 个字符间距。任何终端字体都支持，改动最小。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div class="style-pill">
+          <span class="c-model">claude-sonnet-4-6</span><span class="c-cwd">code-cheer</span><span class="c-branch">⎇ alex-new-feature</span><span class="c-tokens">1.2k tokens</span><span class="c-quota">5h 38%</span><span class="c-ctx">ctx 62%</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 完整圆弧胶囊效果（终端实现需要安装 FiraCode Nerd Font）</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>完整圆弧胶囊</h3>
+      <p>两端完整圆弧，用 Nerd Font 的 <code style="background:#333;padding:1px 4px;border-radius:3px"> </code> 字符实现。需安装 FiraCode Nerd Font。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div class="style-nerd-preview">
+          <span class="c-model">claude-sonnet-4-6</span><span class="c-cwd">code-cheer</span><span class="c-branch">⎇ alex-new-feature</span><span class="c-tokens">1.2k tokens</span><span class="c-quota">5h 38%</span><span class="c-ctx">ctx 62%</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 圆角矩形效果（CSS border-radius 近似，终端用小圆角字符实现）</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>圆角矩形</h3>
+      <p>四角轻微圆弧，比方块柔和，不需要 Nerd Font。用 ▏▕ 或上下圆角 Unicode 字符模拟。</p>
+    </div>
+  </div>
+
+</div>

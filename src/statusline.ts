@@ -141,6 +141,7 @@ function saveState(
     memoryCount?: number
     memoryTitles?: string[]
     lastMemoryRecall?: string
+    gitBranch?: string
   }
 ): void {
   fs.mkdirSync(baseDir, { recursive: true })
@@ -157,6 +158,7 @@ function saveState(
   if (options?.memoryCount !== undefined) state.memory_count = options.memoryCount
   if (options?.memoryTitles !== undefined) state.memory_titles = options.memoryTitles
   if (options?.lastMemoryRecall !== undefined) state.last_memory_recall = options.lastMemoryRecall
+  if (options?.gitBranch !== undefined) state.git_branch = options.gitBranch
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
   try {
     fs.renameSync(statePath + '.tmp', statePath)
@@ -258,7 +260,9 @@ async function runUpdateCore(
   const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
+  const _cwd = process.cwd()
+  const _home = process.env['HOME'] ?? ''
+  stats['cwd_name'] = _home && _cwd.startsWith(_home) ? '~' + _cwd.slice(_home.length) : _cwd
 
   // Parse stdin as JSON (empty string -> {})
   let ccData: Record<string, unknown> = {}
@@ -355,6 +359,7 @@ async function runUpdateCore(
   const newCommitsToday = gitContext.commits_today ?? 0
 
   // Persist state (atomic write)
+  const gitBranch = typeof gitContext.branch === 'string' ? gitContext.branch : undefined
   if (finalMessage !== state.message || tier !== state.last_rate_tier) {
     saveState(statePath, baseDir, finalMessage, tier, slot, {
       lastGitEvents: newLastGitEvents,
@@ -364,6 +369,7 @@ async function runUpdateCore(
       memoryCount: memoryCtx.memory_count,
       memoryTitles: memoryCtx.memory_titles,
       lastMemoryRecall: newLastMemoryRecall,
+      gitBranch,
     })
   } else {
     saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
@@ -374,6 +380,7 @@ async function runUpdateCore(
       memoryCount: memoryCtx.memory_count,
       memoryTitles: memoryCtx.memory_titles,
       lastMemoryRecall: newLastMemoryRecall,
+      gitBranch,
     })
   }
 
@@ -402,7 +409,9 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
+  const _cwd = process.cwd()
+  const _home = process.env['HOME'] ?? ''
+  stats['cwd_name'] = _home && _cwd.startsWith(_home) ? '~' + _cwd.slice(_home.length) : _cwd
   const weather = loadWeatherCache(baseDir, true)
   stats['weather'] = weather ?? null
 
@@ -438,6 +447,9 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   // Phase 16: inject memory_count from state into stats for display (per D-06)
   if (state.memory_count !== undefined) {
     stats['memory_count'] = state.memory_count
+  }
+  if (state.git_branch !== undefined) {
+    stats['git_branch'] = state.git_branch
   }
 
   return render(character, message, ccData, stats)

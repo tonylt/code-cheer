@@ -74,6 +74,30 @@ export function formatResets(resetsAt: number | string | null | undefined): stri
   return `${minutes}m`
 }
 
+/**
+ * Format a full cwd path for display, max 32 chars.
+ * Always preserves the last path segment (current dir name) in full.
+ * Tries to include as many parent segments as fit; falls back to "…/name".
+ */
+export function formatCwdPath(fullPath: string, maxLen = 32): string {
+  if (fullPath.length <= maxLen) return fullPath
+  const sep = '/'
+  const parts = fullPath.split(sep).filter(p => p.length > 0)
+  if (parts.length === 0) return fullPath.slice(-maxLen)
+  const last = parts[parts.length - 1]
+  // Build from the right, adding segments while they fit
+  let result = last
+  for (let i = parts.length - 2; i >= 0; i--) {
+    const candidate = parts[i] + sep + result
+    if (('…' + sep + candidate).length <= maxLen) {
+      result = candidate
+    } else {
+      break
+    }
+  }
+  return result === last ? '…' + sep + last : '…' + sep + result
+}
+
 // ─── ANSI block rendering (256-color backgrounds) ────────────────────────────
 
 const ANSI_RESET = '\x1b[0m'
@@ -81,24 +105,34 @@ const ANSI_RESET = '\x1b[0m'
 /** Palette entry for color blocks. */
 type PlainPalette = { bg: number; fg: number }
 
-/** 256-color palette — white text on tinted-dark backgrounds. */
+/** 256-color palette — Indigo scheme. White fg on deep purple/navy backgrounds. */
 const PALETTE = {
-  model:      { bg: 18,  fg: 255 } as PlainPalette,
-  cwd:        { bg: 236, fg: 255 } as PlainPalette,
-  tokens:     { bg: 94,  fg: 255 } as PlainPalette,
-  usageOk:    { bg: 64,  fg: 255 } as PlainPalette,
-  usageWarn:  { bg: 136, fg: 255 } as PlainPalette,
-  usageDanger:{ bg: 56,  fg: 255 } as PlainPalette,
-  ctxOk:      { bg: 24,  fg: 255 } as PlainPalette,
-  ctxWarn:    { bg: 25,  fg: 255 } as PlainPalette,
-  ctxDanger:  { bg: 18,  fg: 255 } as PlainPalette,
-  mem:        { bg: 30,  fg: 255 } as PlainPalette,
-  weather:    { bg: 60,  fg: 255 } as PlainPalette,
+  model:      { bg: 54,  fg: 255 } as PlainPalette,  // deep purple
+  cwd:        { bg: 237, fg: 255 } as PlainPalette,  // cool dark gray
+  branch:     { bg: 235, fg: 255 } as PlainPalette,  // near-black gray
+  tokens:     { bg: 58,  fg: 255 } as PlainPalette,  // dark amber
+  usageOk:    { bg: 22,  fg: 255 } as PlainPalette,  // dark green
+  usageWarn:  { bg: 94,  fg: 255 } as PlainPalette,  // dark orange
+  usageDanger:{ bg: 88,  fg: 255 } as PlainPalette,  // dark red
+  ctxOk:      { bg: 17,  fg: 255 } as PlainPalette,  // deep navy
+  ctxWarn:    { bg: 18,  fg: 255 } as PlainPalette,  // navy
+  ctxDanger:  { bg: 54,  fg: 255 } as PlainPalette,  // deep purple (matches model)
+  mem:        { bg: 53,  fg: 255 } as PlainPalette,  // dark magenta-purple
+  weather:    { bg: 17,  fg: 255 } as PlainPalette,  // deep navy
 } as const
 
-/** Render text inside a padded background color block. */
-function block(text: string, palette: PlainPalette): string {
-  return `\x1b[48;5;${palette.bg}m\x1b[38;5;${palette.fg}m ${text} ${ANSI_RESET}`
+/**
+ * Two-tone block: dim label on left, bold-white value on right. No gap after (flush).
+ * If label is empty, renders value only in bold white.
+ */
+function block(label: string, value: string, palette: PlainPalette): string {
+  const BG  = `\x1b[48;5;${palette.bg}m`
+  const DIM = `\x1b[38;5;244m`  // muted label
+  const WHT = `\x1b[38;5;255m`  // white value
+  if (!label) {
+    return `${BG}${WHT} ${value} ${ANSI_RESET}`
+  }
+  return `${BG}${DIM} ${label} ${WHT}${value} ${ANSI_RESET}`
 }
 
 /** Pick usage ok/warn/danger palette from percentage + thresholds. */
@@ -120,7 +154,7 @@ function ctxPalette(pct: number | undefined, warnAt: number, dangerAt: number): 
 // ─── Segment builders (each returns a ready-to-print block or null) ──────────
 
 /**
- * Build a rate-limit block like " 5h 38% [██░░░░░░] ↻2h15m ".
+ * Build a rate-limit block like " 5h 38% ↻2h15m ".
  * Used for both five_hour and weekly segments.
  * Returns null if the sub-object is missing or empty.
  */
@@ -144,11 +178,11 @@ function buildRateLimitBlock(
   if (pct === undefined && resets === null) return null
 
   const palette = usagePalette(pct, warnAt, dangerAt)
-  const parts: string[] = [label]
-  if (pct !== undefined) parts.push(`${Math.floor(pct)}%`)
-  if (resets !== null) parts.push(`↻${resets}`)
+  const valueParts: string[] = []
+  if (pct !== undefined) valueParts.push(`${Math.floor(pct)}%`)
+  if (resets !== null) valueParts.push(`↻${resets}`)
 
-  return block(parts.join(' '), palette)
+  return block(label, valueParts.join(' '), palette)
 }
 
 /** 5h quota block. */
@@ -162,7 +196,7 @@ function buildWeeklyBlock(ccData: Record<string, unknown>): string | null {
 }
 
 /**
- * Build the context window block with battery bar: " ctx 62% [██████░░] ".
+ * Build the context window block: " ctx 62% ".
  * Returns null if no context_window percentage is present.
  */
 function buildCtxBlock(ccData: Record<string, unknown>): string | null {
@@ -175,7 +209,7 @@ function buildCtxBlock(ccData: Record<string, unknown>): string | null {
 
   const pctFloor = Math.floor(pct)
   const palette = ctxPalette(pctFloor, 80, 95)
-  return block(`ctx ${pctFloor}%`, palette)
+  return block('ctx', `${pctFloor}%`, palette)
 }
 
 function buildWeatherBlock(stats: Record<string, unknown>): string | null {
@@ -186,8 +220,8 @@ function buildWeatherBlock(stats: Record<string, unknown>): string | null {
   const icon = weather['icon']
   const city = weather['city']
   if (typeof tempC !== 'number' || typeof icon !== 'string') return null
-  const cityStr = typeof city === 'string' && city.length > 0 ? `${city} ` : ''
-  return block(`${cityStr}${icon} ${tempC}°C`, PALETTE.weather)
+  const cityLabel = typeof city === 'string' && city.length > 0 ? city : ''
+  return block(cityLabel, `${icon} ${tempC}°C`, PALETTE.weather)
 }
 
 // ─── Main render ──────────────────────────────────────────────────────────────
@@ -227,15 +261,20 @@ export function render(
   }
 
   const cwdName = typeof stats['cwd_name'] === 'string' ? stats['cwd_name'] : ''
+  const gitBranch = typeof stats['git_branch'] === 'string' ? stats['git_branch'] : ''
   const tokens = formatTokens(stats['today_tokens'] as number | string | null | undefined)
 
   const truncModel = model.length > 20 ? model.slice(0, 19) + '…' : model
-  const truncCwd = cwdName.length > 20 ? cwdName.slice(0, 19) + '…' : cwdName
+  const truncCwd = formatCwdPath(cwdName)
+  const isMainBranch = gitBranch === 'main' || gitBranch === 'master'
+  const branchSymbol = isMainBranch ? '⌂' : '⎇'
+  const truncBranch = gitBranch.length > 20 ? gitBranch.slice(0, 19) + '…' : gitBranch
 
   const parts: string[] = []
-  parts.push(block(truncModel, PALETTE.model))
-  if (truncCwd) parts.push(block(truncCwd, PALETTE.cwd))
-  parts.push(block(`${tokens} tokens`, PALETTE.tokens))
+  parts.push(block('', truncModel, PALETTE.model))
+  if (truncCwd) parts.push(block('', truncCwd, PALETTE.cwd))
+  if (truncBranch) parts.push(block(branchSymbol, truncBranch, PALETTE.branch))
+  parts.push(block('tok', tokens, PALETTE.tokens))
 
   const quotaSeg = buildQuotaBlock(ccData)
   if (quotaSeg !== null) parts.push(quotaSeg)
@@ -248,7 +287,7 @@ export function render(
 
   const memoryCount = typeof stats['memory_count'] === 'number' ? stats['memory_count'] as number : undefined
   if (memoryCount !== undefined && memoryCount > 0) {
-    parts.push(block(`${memoryCount} mem`, PALETTE.mem))
+    parts.push(block('mem', String(memoryCount), PALETTE.mem))
   }
 
   const weatherSeg = buildWeatherBlock(stats)

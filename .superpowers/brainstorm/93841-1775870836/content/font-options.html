@@ -1,0 +1,111 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Fira+Code:wght@400;600&family=Source+Code+Pro:wght@400;600&display=swap');
+
+  .terminal {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 8px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .line1 { color: #7ec8e3; margin-bottom: 4px; }
+
+  .pill-seg {
+    display: inline-block;
+    padding: 1px 9px;
+    border-radius: 10px;
+    margin: 0 2px;
+    color: #eee;
+  }
+  .c-model   { background: #000087; }
+  .c-cwd     { background: #303030; }
+  .c-branch  { background: #3a3a3a; }
+  .c-tokens  { background: #875f00; }
+  .c-quota   { background: #5f8700; }
+  .c-ctx     { background: #005f87; }
+  .c-weather { background: #5f5f87; }
+
+  .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+  .font-fira      { font-family: 'Fira Code', monospace; }
+  .font-source    { font-family: 'Source Code Pro', monospace; }
+  .font-system    { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; }
+
+  .font-label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+  }
+  .cards { display: flex; flex-direction: column; gap: 16px; }
+  .card .card-body { padding: 12px 16px; }
+</style>
+
+<h2>字体方案</h2>
+<p class="subtitle">圆角胶囊设计 × 四款等宽字体，选你最顺眼的</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal font-jetbrains">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div>
+          <span class="pill-seg c-model">claude-sonnet-4-6</span><span class="pill-seg c-cwd">code-cheer</span><span class="pill-seg c-branch">⎇ alex-new-feature</span><span class="pill-seg c-tokens">1.2k tokens</span><span class="pill-seg c-quota">5h 38%</span><span class="pill-seg c-ctx">ctx 62%</span><span class="pill-seg c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>JetBrains Mono</h3>
+      <p>字形宽度适中，笔画清晰，色块里的文字显示非常舒服。开发者最常用，JetBrains IDE 默认字体。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal font-fira">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div>
+          <span class="pill-seg c-model">claude-sonnet-4-6</span><span class="pill-seg c-cwd">code-cheer</span><span class="pill-seg c-branch">⎇ alex-new-feature</span><span class="pill-seg c-tokens">1.2k tokens</span><span class="pill-seg c-quota">5h 38%</span><span class="pill-seg c-ctx">ctx 62%</span><span class="pill-seg c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>Fira Code</h3>
+      <p>字形偏圆润，和圆角胶囊搭配很协调。支持 ligatures（→ != >=），如果你用连字会非常加分。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal font-system">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div>
+          <span class="pill-seg c-model">claude-sonnet-4-6</span><span class="pill-seg c-cwd">code-cheer</span><span class="pill-seg c-branch">⎇ alex-new-feature</span><span class="pill-seg c-tokens">1.2k tokens</span><span class="pill-seg c-quota">5h 38%</span><span class="pill-seg c-ctx">ctx 62%</span><span class="pill-seg c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>SF Mono / Menlo</h3>
+      <p>macOS 系统自带，无需安装。SF Mono 字形紧凑、间距均匀，原生感最强，Retina 屏下渲染极清晰。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal font-source">
+        <div class="line1">(*>ω<) Rex: 同学，今天也要全力以赴！</div>
+        <div>
+          <span class="pill-seg c-model">claude-sonnet-4-6</span><span class="pill-seg c-cwd">code-cheer</span><span class="pill-seg c-branch">⎇ alex-new-feature</span><span class="pill-seg c-tokens">1.2k tokens</span><span class="pill-seg c-quota">5h 38%</span><span class="pill-seg c-ctx">ctx 62%</span><span class="pill-seg c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">D</span>Source Code Pro</h3>
+      <p>Adobe 出品，字形偏细长，信息密度高，statusline 里能塞更多内容。低调、专业，不抢视觉焦点。</p>
+    </div>
+  </div>
+
+</div>
