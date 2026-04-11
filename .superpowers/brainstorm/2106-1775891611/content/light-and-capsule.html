@@ -1,0 +1,223 @@
+<style>
+  body { font-family: 'SF Mono', 'Menlo', monospace; }
+
+  .terminal {
+    background: #f8f8f8;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .terminal.dark { background: #121212; }
+
+  /* line 1 — same accent bar style across all */
+  .line1-light { color: #4a2080; margin-bottom: 4px; font-size: 12px; }
+  .line1-dark  { color: #c084fc; margin-bottom: 4px; font-size: 12px; }
+
+  /* ── LIGHT SCHEMES ── */
+
+  /* Lavender: soft purple tones on near-white */
+  .lav .seg { display:inline-block; padding: 1px 8px; margin-right:2px; }
+  .lav .lbl { color: #8888aa; }
+  .lav .val { color: #222244; }
+  .lav .c-model   { background:#ddd8f0; }
+  .lav .c-cwd     { background:#e8e8ee; }
+  .lav .c-branch  { background:#eaeaf0; }
+  .lav .c-tokens  { background:#dde8dd; }
+  .lav .c-ok      { background:#c8e6c8; }
+  .lav .c-warn    { background:#f0e8cc; }
+  .lav .c-danger  { background:#f0d0d0; }
+  .lav .c-ctx     { background:#d0ddf0; }
+  .lav .c-weather { background:#ddd8f0; }
+
+  /* Stone: warm neutrals, muted ink */
+  .stn .seg { display:inline-block; padding: 1px 8px; margin-right:2px; }
+  .stn .lbl { color: #999888; }
+  .stn .val { color: #1a1a14; }
+  .stn .c-model   { background:#e8e4dc; }
+  .stn .c-cwd     { background:#eeece8; }
+  .stn .c-branch  { background:#f0efec; }
+  .stn .c-tokens  { background:#e8e0cc; }
+  .stn .c-ok      { background:#cce0cc; }
+  .stn .c-warn    { background:#ecddc0; }
+  .stn .c-danger  { background:#edd0cc; }
+  .stn .c-ctx     { background:#d8e4ec; }
+  .stn .c-weather { background:#e8e4dc; }
+
+  /* Mint: cool green-gray */
+  .mnt .seg { display:inline-block; padding: 1px 8px; margin-right:2px; }
+  .mnt .lbl { color: #889998; }
+  .mnt .val { color: #142020; }
+  .mnt .c-model   { background:#d4e8e4; }
+  .mnt .c-cwd     { background:#e6eeec; }
+  .mnt .c-branch  { background:#eaf0ef; }
+  .mnt .c-tokens  { background:#d8e8d0; }
+  .mnt .c-ok      { background:#c4e0c8; }
+  .mnt .c-warn    { background:#e8e0c0; }
+  .mnt .c-danger  { background:#e8d0cc; }
+  .mnt .c-ctx     { background:#cce0e8; }
+  .mnt .c-weather { background:#d4e8e4; }
+
+  /* ── CAPSULE SHAPES ── */
+
+  /* Shape 1: ◖◗ half-circle unicode (no font dependency) */
+  .cap1 .seg { display:inline-flex; align-items:center; margin-right:4px; font-size:14px; }
+  .cap1 .cl  { line-height:1; position:relative; top:0px; }
+  .cap1 .cr  { line-height:1; position:relative; top:0px; }
+  .cap1 .ct  { display:inline-block; padding:1px 5px; }
+  .cap1 .lbl { color: #808080; }
+  .cap1 .val { color: #ffffff; }
+  .cap1 .c-model   { color:#000087; } /* cap color = block bg */
+  .cap1 .c-cwd     { color:#262626; }
+  .cap1 .c-branch  { color:#1e1e1e; }
+  .cap1 .c-tokens  { color:#5f5f00; }
+  .cap1 .c-ok      { color:#005f00; }
+  .cap1 .c-ctx     { color:#00005f; }
+  .cap1 .c-weather { color:#00005f; }
+
+  .cap1 .bg-model   { background:#000087; }
+  .cap1 .bg-cwd     { background:#262626; }
+  .cap1 .bg-branch  { background:#1e1e1e; }
+  .cap1 .bg-tokens  { background:#5f5f00; }
+  .cap1 .bg-ok      { background:#005f00; }
+  .cap1 .bg-ctx     { background:#00005f; }
+  .cap1 .bg-weather { background:#00005f; }
+
+  /* Shape 2: ( text ) parentheses */
+  .cap2 .seg { display:inline-block; margin-right:4px; }
+  .cap2 .paren { color: #888; }
+  .cap2 .inner { display:inline-block; padding: 0 6px; }
+  .cap2 .lbl { color: #888888; }
+  .cap2 .val { color: #eeeeee; }
+  .cap2 .bg-model   { background:#000087; }
+  .cap2 .bg-cwd     { background:#262626; }
+  .cap2 .bg-branch  { background:#1e1e1e; }
+  .cap2 .bg-tokens  { background:#5f5f00; }
+  .cap2 .bg-ok      { background:#005f00; }
+  .cap2 .bg-ctx     { background:#00005f; }
+  .cap2 .bg-weather { background:#00005f; }
+
+  /* Shape 3: [text] brackets */
+  .cap3 .seg { display:inline-block; margin-right:4px; }
+  .cap3 .brk { color:#5f0087; font-weight:bold; }
+  .cap3 .inner { display:inline-block; padding: 0 4px; }
+  .cap3 .lbl { color: #888; }
+  .cap3 .val { color: #eee; }
+  .cap3 .bg-model   { background:#000087; }
+  .cap3 .bg-cwd     { background:#262626; }
+  .cap3 .bg-branch  { background:#1e1e1e; }
+  .cap3 .bg-tokens  { background:#5f5f00; }
+  .cap3 .bg-ok      { background:#005f00; }
+  .cap3 .bg-ctx     { background:#00005f; }
+  .cap3 .bg-weather { background:#00005f; }
+
+  h3.section { color:#aaa; font-size:11px; letter-spacing:1px; text-transform:uppercase; margin:24px 0 8px; font-family:sans-serif; }
+</style>
+
+<h2>两组方案</h2>
+<p class="subtitle">上：浅色背景配色 · 下：不依赖字体的胶囊形状</p>
+
+<h3 class="section">── 浅色背景配色 ──</h3>
+
+<div class="cards" style="margin-bottom:8px">
+
+  <div class="card" data-choice="light-a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1-light">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="lav">
+          <span class="seg c-model"><span class="lbl"></span><span class="val">claude-sonnet-4-6 </span></span><span class="seg c-cwd"><span class="val">~/code-cheer </span></span><span class="seg c-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature </span></span><span class="seg c-tokens"><span class="lbl">tok </span><span class="val">1.2k </span></span><span class="seg c-ok"><span class="lbl">5h </span><span class="val">38% </span></span><span class="seg c-ctx"><span class="lbl">ctx </span><span class="val">62% </span></span><span class="seg c-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>Lavender — 柔紫</h3>
+      <p>偏紫的浅色色调，与 Indigo 暗色方案同色系。适合浅色终端。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="light-b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1-light" style="color:#5a4830">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="stn">
+          <span class="seg c-model"><span class="val">claude-sonnet-4-6 </span></span><span class="seg c-cwd"><span class="val">~/code-cheer </span></span><span class="seg c-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature </span></span><span class="seg c-tokens"><span class="lbl">tok </span><span class="val">1.2k </span></span><span class="seg c-ok"><span class="lbl">5h </span><span class="val">38% </span></span><span class="seg c-ctx"><span class="lbl">ctx </span><span class="val">62% </span></span><span class="seg c-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>Stone — 暖米</h3>
+      <p>米色/奶油系暖色调，文字用深墨色。自然温暖，护眼。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="light-c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1-light" style="color:#1a4040">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="mnt">
+          <span class="seg c-model"><span class="val">claude-sonnet-4-6 </span></span><span class="seg c-cwd"><span class="val">~/code-cheer </span></span><span class="seg c-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature </span></span><span class="seg c-tokens"><span class="lbl">tok </span><span class="val">1.2k </span></span><span class="seg c-ok"><span class="lbl">5h </span><span class="val">38% </span></span><span class="seg c-ctx"><span class="lbl">ctx </span><span class="val">62% </span></span><span class="seg c-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>Mint — 冷绿</h3>
+      <p>冷灰绿色调，清爽专注。状态色用柔和的绿/黄/红区分。</p>
+    </div>
+  </div>
+
+</div>
+
+<h3 class="section">── 不依赖字体的胶囊形状 ──</h3>
+
+<div class="cards">
+
+  <div class="card" data-choice="shape-1" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal dark">
+        <div class="line1-dark">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="cap1">
+          <span class="seg c-model"><span class="cl c-model">◖</span><span class="ct bg-model"><span class="val">claude-sonnet-4-6</span></span><span class="cr c-model">◗</span></span><span class="seg c-cwd"><span class="cl c-cwd">◖</span><span class="ct bg-cwd"><span class="val">~/code-cheer</span></span><span class="cr c-cwd">◗</span></span><span class="seg c-branch"><span class="cl c-branch">◖</span><span class="ct bg-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature</span></span><span class="cr c-branch">◗</span></span><span class="seg c-ok"><span class="cl c-ok">◖</span><span class="ct bg-ok"><span class="lbl">5h </span><span class="val">38%</span></span><span class="cr c-ok">◗</span></span><span class="seg c-ctx"><span class="cl c-ctx">◖</span><span class="ct bg-ctx"><span class="lbl">ctx </span><span class="val">62%</span></span><span class="cr c-ctx">◗</span></span><span class="seg c-weather"><span class="cl c-weather">◖</span><span class="ct bg-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C</span></span><span class="cr c-weather">◗</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">1</span>◖ ◗ 半圆胶囊</h3>
+      <p>用 Unicode ◖◗（U+25D6/D7）作为两端圆弧，不需要 Nerd Font。标准 Unicode，任何字体都有。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="shape-2" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal dark">
+        <div class="line1-dark">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="cap2">
+          <span class="seg"><span class="paren">(</span><span class="inner bg-model"><span class="val">claude-sonnet-4-6</span></span><span class="paren">)</span></span><span class="seg"><span class="paren">(</span><span class="inner bg-cwd"><span class="val">~/code-cheer</span></span><span class="paren">)</span></span><span class="seg"><span class="paren">(</span><span class="inner bg-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature</span></span><span class="paren">)</span></span><span class="seg"><span class="paren">(</span><span class="inner bg-ok"><span class="lbl">5h </span><span class="val">38%</span></span><span class="paren">)</span></span><span class="seg"><span class="paren">(</span><span class="inner bg-ctx"><span class="lbl">ctx </span><span class="val">62%</span></span><span class="paren">)</span></span><span class="seg"><span class="paren">(</span><span class="inner bg-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C</span></span><span class="paren">)</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">2</span>( ) 括号胶囊</h3>
+      <p>普通括号作端点，色块只填充内部。括号用暗色，与色块产生视觉分离感。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="shape-3" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal dark">
+        <div class="line1-dark">▌ (￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="cap3">
+          <span class="seg"><span class="brk">[</span><span class="inner bg-model"><span class="val">claude-sonnet-4-6</span></span><span class="brk">]</span></span><span class="seg"><span class="brk">[</span><span class="inner bg-cwd"><span class="val">~/code-cheer</span></span><span class="brk">]</span></span><span class="seg"><span class="brk">[</span><span class="inner bg-branch"><span class="lbl">⎇ </span><span class="val">alex-new-feature</span></span><span class="brk">]</span></span><span class="seg"><span class="brk">[</span><span class="inner bg-ok"><span class="lbl">5h </span><span class="val">38%</span></span><span class="brk">]</span></span><span class="seg"><span class="brk">[</span><span class="inner bg-ctx"><span class="lbl">ctx </span><span class="val">62%</span></span><span class="brk">]</span></span><span class="seg"><span class="brk">[</span><span class="inner bg-weather"><span class="lbl">Beijing </span><span class="val">☀️ 22°C</span></span><span class="brk">]</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">3</span>[ ] 方括号</h3>
+      <p>紫色方括号包裹各色块，像代码数组语法。干净、tech感强，完全不依赖字体。</p>
+    </div>
+  </div>
+
+</div>

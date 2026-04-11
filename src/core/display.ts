@@ -98,41 +98,77 @@ export function formatCwdPath(fullPath: string, maxLen = 32): string {
   return result === last ? '…' + sep + last : '…' + sep + result
 }
 
+// ─── Terminal column-width helpers ───────────────────────────────────────────
+
+/**
+ * Approximate terminal column width of a string.
+ * Full-width CJK / katakana / hiragana chars count as 2 columns; all others as 1.
+ */
+export function termColWidth(s: string): number {
+  let w = 0
+  for (const ch of s) {
+    const cp = ch.codePointAt(0) ?? 0
+    if (
+      (cp >= 0x1100 && cp <= 0x115F) ||   // Hangul Jamo
+      (cp >= 0x2E80 && cp <= 0x303E) ||   // CJK Radicals / Kangxi
+      (cp >= 0x3041 && cp <= 0x33FF) ||   // Hiragana, Katakana, Bopomofo…
+      (cp >= 0x3400 && cp <= 0x4DBF) ||   // CJK Extension A
+      (cp >= 0x4E00 && cp <= 0x9FFF) ||   // CJK Unified Ideographs
+      (cp >= 0xA000 && cp <= 0xA4CF) ||   // Yi
+      (cp >= 0xAC00 && cp <= 0xD7AF) ||   // Hangul Syllables
+      (cp >= 0xF900 && cp <= 0xFAFF) ||   // CJK Compat Ideographs
+      (cp >= 0xFE10 && cp <= 0xFE6F) ||   // CJK Compat Forms
+      (cp >= 0xFF01 && cp <= 0xFF60) ||   // Fullwidth Latin / punctuation
+      (cp >= 0xFFE0 && cp <= 0xFFE6)      // Fullwidth currency signs
+    ) {
+      w += 2
+    } else {
+      w += 1
+    }
+  }
+  return w
+}
+
+/** Pad string to occupy exactly `cols` terminal columns (space-fill on the right). */
+function padToCols(s: string, cols: number): string {
+  const cur = termColWidth(s)
+  return cur >= cols ? s : s + ' '.repeat(cols - cur)
+}
+
 // ─── ANSI block rendering (256-color backgrounds) ────────────────────────────
 
 const ANSI_RESET = '\x1b[0m'
 
-/** Palette entry for color blocks. */
-type PlainPalette = { bg: number; fg: number }
+/** Palette entry for color blocks. lbl = label fg (defaults to 244); fg = value fg. */
+type PlainPalette = { bg: number; fg: number; lbl?: number }
 
-/** 256-color palette — Indigo scheme. White fg on deep purple/navy backgrounds. */
+/** 256-color palette — Tmux/airline style. Dark text on mid-tone saturated backgrounds. */
 const PALETTE = {
-  model:      { bg: 54,  fg: 255 } as PlainPalette,  // deep purple
-  cwd:        { bg: 237, fg: 255 } as PlainPalette,  // cool dark gray
-  branch:     { bg: 235, fg: 255 } as PlainPalette,  // near-black gray
-  tokens:     { bg: 58,  fg: 255 } as PlainPalette,  // dark amber
-  usageOk:    { bg: 22,  fg: 255 } as PlainPalette,  // dark green
-  usageWarn:  { bg: 94,  fg: 255 } as PlainPalette,  // dark orange
-  usageDanger:{ bg: 88,  fg: 255 } as PlainPalette,  // dark red
-  ctxOk:      { bg: 17,  fg: 255 } as PlainPalette,  // deep navy
-  ctxWarn:    { bg: 18,  fg: 255 } as PlainPalette,  // navy
-  ctxDanger:  { bg: 54,  fg: 255 } as PlainPalette,  // deep purple (matches model)
-  mem:        { bg: 53,  fg: 255 } as PlainPalette,  // dark magenta-purple
-  weather:    { bg: 17,  fg: 255 } as PlainPalette,  // deep navy
+  model:       { bg: 73,  fg: 234, lbl: 237 } as PlainPalette,  // #5fafaf teal
+  cwd:         { bg: 67,  fg: 234, lbl: 237 } as PlainPalette,  // #5f87af steel blue
+  branch:      { bg: 80,  fg: 234, lbl: 237 } as PlainPalette,  // #5fd7d7 bright teal
+  tokens:      { bg: 179, fg: 234, lbl: 237 } as PlainPalette,  // #d7af5f golden
+  usageOk:     { bg: 108, fg: 234, lbl: 237 } as PlainPalette,  // #87af87 sage green — stable
+  usageWarn:   { bg: 108, fg: 234, lbl: 237 } as PlainPalette,  // same
+  usageDanger: { bg: 108, fg: 234, lbl: 237 } as PlainPalette,  // same
+  ctxOk:       { bg: 110, fg: 234, lbl: 237 } as PlainPalette,  // #87afd7 sky blue — stable
+  ctxWarn:     { bg: 110, fg: 234, lbl: 237 } as PlainPalette,  // same
+  ctxDanger:   { bg: 110, fg: 234, lbl: 237 } as PlainPalette,  // same
+  mem:         { bg: 140, fg: 234, lbl: 237 } as PlainPalette,  // #af87d7 lavender
+  weather:     { bg: 173, fg: 234, lbl: 237 } as PlainPalette,  // #d7875f warm orange
 } as const
 
 /**
- * Two-tone block: dim label on left, bold-white value on right. No gap after (flush).
- * If label is empty, renders value only in bold white.
+ * Two-tone block: dim label on left, value on right. No gap after (flush).
+ * If label is empty, renders value only.
  */
 function block(label: string, value: string, palette: PlainPalette): string {
   const BG  = `\x1b[48;5;${palette.bg}m`
-  const DIM = `\x1b[38;5;244m`  // muted label
-  const WHT = `\x1b[38;5;255m`  // white value
+  const FG  = `\x1b[38;5;${palette.fg}m`  // uniform text color
   if (!label) {
-    return `${BG}${WHT} ${value} ${ANSI_RESET}`
+    return `${BG}${FG} ${value} ${ANSI_RESET}`
   }
-  return `${BG}${DIM} ${label} ${WHT}${value} ${ANSI_RESET}`
+  return `${BG}${FG} ${label} ${value} ${ANSI_RESET}`
 }
 
 /** Pick usage ok/warn/danger palette from percentage + thresholds. */
@@ -226,26 +262,41 @@ function buildWeatherBlock(stats: Record<string, unknown>): string | null {
 
 // ─── Main render ──────────────────────────────────────────────────────────────
 
+/** Strip ANSI escape sequences to measure visible character width. */
+function stripAnsi(s: string): string {
+  return s.replace(/\x1b\[[0-9;]*m/g, '')
+}
+
 /**
  * Format the 2-line statusline output.
  *
  * Line 1: ascii + name: message   (optionally ANSI-colored)
- * Line 2: model · cwd · Nk tokens · 5h X% ↻YhZZm · ctx P% [bar] · N mem
+ * Line 2: model · cwd · branch · tok · 5h · wk · ctx · mem · weather
  *   — any segment whose data is missing is dropped.
+ *   — segments are dropped right-to-left when maxWidth is set and line 2 would overflow.
  */
 export function render(
   character: VocabData,
   message: string,
   ccData: Record<string, unknown>,
-  stats: Record<string, unknown>
+  stats: Record<string, unknown>,
+  maxWidth?: number
 ): string {
-  // ── Line 1 ──
-  const asciiface = character.meta.ascii
+  // ── Line 1 — accent bar style ──
+  const asciiFrames = Array.isArray(character.meta.ascii) ? character.meta.ascii : [character.meta.ascii]
+  const maxFaceCols = Math.max(...asciiFrames.map(termColWidth))
+  const rawFace = asciiFrames[Math.floor(Date.now() / 600) % asciiFrames.length]
+  // Pad to max frame width so name/message never shifts between animation frames
+  const asciiface = padToCols(rawFace, maxFaceCols)
   const name = character.meta.name
-  const color = character.meta.color
   const truncMsg = message.length > 40 ? message.slice(0, 39) + '…' : message
-  const rawLine1 = `${asciiface} ${name}: ${truncMsg}`
-  const line1 = color ? `\x1b[${color}m${rawLine1}\x1b[0m` : rawLine1
+  //  near-black bg | teal ▌ bar | steel-blue ascii | bright-teal name | light-gray message
+  const L1_BG   = '\x1b[48;5;234m'  // #1c1c1c near-black background
+  const L1_BAR  = '\x1b[38;5;73m'   // #5fafaf teal — ▌ accent bar
+  const L1_ASC  = '\x1b[38;5;67m'   // #5f87af steel blue — ascii face
+  const L1_NAME = '\x1b[38;5;80m'   // #5fd7d7 bright teal — character name
+  const L1_MSG  = '\x1b[38;5;252m'  // light gray — message text
+  const line1 = `${L1_BG}${L1_BAR}▌${L1_ASC} ${asciiface} ${L1_NAME}${name}${L1_MSG}: ${truncMsg} ${ANSI_RESET}`
 
   // ── Line 2 ──
   // Model
@@ -274,7 +325,7 @@ export function render(
   parts.push(block('', truncModel, PALETTE.model))
   if (truncCwd) parts.push(block('', truncCwd, PALETTE.cwd))
   if (truncBranch) parts.push(block(branchSymbol, truncBranch, PALETTE.branch))
-  parts.push(block('tok', tokens, PALETTE.tokens))
+  parts.push(block('token', tokens, PALETTE.tokens))
 
   const quotaSeg = buildQuotaBlock(ccData)
   if (quotaSeg !== null) parts.push(quotaSeg)
@@ -293,6 +344,21 @@ export function render(
   const weatherSeg = buildWeatherBlock(stats)
   if (weatherSeg !== null) parts.push(weatherSeg)
 
-  const line2 = parts.join('')
+  // Fit line 2 to maxWidth: greedily include segments left-to-right, drop the rest
+  let line2: string
+  if (maxWidth && maxWidth > 0) {
+    let acc = ''
+    for (const part of parts) {
+      if (stripAnsi(acc + part).length <= maxWidth) {
+        acc += part
+      } else {
+        break
+      }
+    }
+    line2 = acc
+  } else {
+    line2 = parts.join('')
+  }
+
   return `${line1}\n${line2}`
 }

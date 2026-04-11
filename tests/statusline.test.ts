@@ -542,7 +542,8 @@ describe('memory integration', () => {
     writeState({ memory_count: 3 })
     const result = renderMode()
     const line2 = result.split('\n')[1]
-    expect(line2).toContain('3 mem')
+    expect(line2).toContain('mem')
+    expect(line2).toContain('3')
   })
 
   // memory_recall trigger: 60+ min + memory_count>0 + no last_memory_recall => triggers

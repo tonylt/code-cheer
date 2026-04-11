@@ -42,6 +42,7 @@ Then run a single Bash command that writes config.json preserving the city field
   - If city is absent:  python3 -c "import os; open(os.path.expanduser('~/.claude/code-cheer/config.json'),'w').write('{\"character\": \"NAME\", \"version\": \"3.1.0\"}')"
 Also reset state in the same command: open(os.path.expanduser('~/.claude/code-cheer/state.json'),'w').write('{\"message\":\"\",\"last_updated\":\"\",\"last_rate_tier\":\"normal\",\"last_slot\":null}')
 
+
 If the state.json read above contained "commits_today" with a value > 0, append a stats line after the character reply message.
 
 Stats line format (append on a new line after the reply):

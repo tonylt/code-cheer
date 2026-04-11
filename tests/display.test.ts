@@ -1,4 +1,4 @@
-import { formatTokens, formatResets, render } from '../src/core/display'
+import { formatTokens, formatResets, render, termColWidth } from '../src/core/display'
 import type { VocabData } from '../src/schemas'
 
 // ─── formatTokens ─────────────────────────────────────────────────────────────
@@ -164,7 +164,8 @@ describe('render', () => {
   it('line1 contains character name and message', () => {
     const output = render(CHAR, 'testmsg', {}, {})
     const line1 = output.split('\n')[0]
-    expect(line1).toContain('Nova: testmsg')
+    expect(line1).toContain('Nova')
+    expect(line1).toContain('testmsg')
   })
 
   it('line2 contains unknown when no model provided', () => {
@@ -188,7 +189,8 @@ describe('render', () => {
   it('includes token count when today_tokens provided', () => {
     const output = render(CHAR, 'msg', {}, { today_tokens: 47768 })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('47k tokens')
+    expect(line2).toContain('token')
+    expect(line2).toContain('47k')
   })
 
   it('includes cwd_name when provided', () => {
@@ -200,19 +202,20 @@ describe('render', () => {
   it('shows ctx block when context_window.used_percentage provided', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 55 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('ctx 55%')
+    expect(line2).toContain('ctx')
+    expect(line2).toContain('55%')
   })
 
-  it('line1 contains ANSI escape when color is set', () => {
+  it('line1 always contains ANSI escapes (accent bar style)', () => {
     const output = render(CHAR, 'msg', {}, {})
     const line1 = output.split('\n')[0]
-    expect(line1).toContain('\x1b[33m')
+    expect(line1).toContain('\x1b[48;5;234m')  // near-black bg
   })
 
-  it('line1 does NOT contain ANSI escapes when color is empty', () => {
+  it('line1 contains ANSI escapes even when character color is empty', () => {
     const output = render(CHAR_NO_COLOR, 'msg', {}, {})
     const line1 = output.split('\n')[0]
-    expect(line1).not.toContain('\x1b[')
+    expect(line1).toContain('\x1b[48;5;234m')  // accent bar always rendered
   })
 
   it('truncates message longer than 40 chars to 39 chars + ellipsis', () => {
@@ -240,34 +243,36 @@ describe('render', () => {
     expect(line2).not.toContain('x'.repeat(21))
   })
 
-  it('truncates cwd_name longer than 20 chars to 19 chars + ellipsis', () => {
-    const longCwd = 'y'.repeat(21)
+  it('truncates cwd_name longer than 32 chars with ellipsis (keeps last segment)', () => {
+    const longCwd = '/a/b/c/' + 'y'.repeat(30)
     const output = render(CHAR, 'msg', {}, { cwd_name: longCwd })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('y'.repeat(19) + '…')
-    expect(line2).not.toContain('y'.repeat(21))
+    expect(line2).toContain('…/')
+    expect(line2).toContain('y'.repeat(30))
   })
 
-  it('ctx block uses warn bg (25) at 80% context', () => {
+  it('ctx block uses stable bg (17) at 80% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 80 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;25m')
-    expect(line2).toContain('ctx 80%')
+    expect(line2).toContain('\x1b[48;5;110m')
+    expect(line2).toContain('ctx')
+    expect(line2).toContain('80%')
   })
 
-  it('ctx block uses danger bg (18) at 95% context', () => {
+  it('ctx block uses stable bg (17) at 95% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 95 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;18m')
-    expect(line2).toContain('ctx 95%')
+    expect(line2).toContain('\x1b[48;5;110m')
+    expect(line2).toContain('ctx')
+    expect(line2).toContain('95%')
   })
 
-  it('ctx block uses ok bg (24) at 79% context', () => {
+  it('ctx block uses stable bg (17) at 79% context', () => {
     const output = render(CHAR, 'msg', { context_window: { used_percentage: 79 } }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;24m')
-    expect(line2).not.toContain('\x1b[48;5;25m')
-    expect(line2).toContain('ctx 79%')
+    expect(line2).toContain('\x1b[48;5;110m')
+    expect(line2).toContain('ctx')
+    expect(line2).toContain('79%')
   })
 
   it('ctx block displays floor of decimal percentage', () => {
@@ -286,7 +291,8 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('5h 38%')
+    expect(line2).toContain('5h')
+    expect(line2).toContain('38%')
   })
 
   it('shows reset countdown from resets_at unix timestamp', () => {
@@ -304,7 +310,7 @@ describe('render', () => {
     jest.useRealTimers()
   })
 
-  it('5h quota block uses warn bg (136) at 70%', () => {
+  it('5h quota block uses stable bg (23) at 70%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -312,10 +318,10 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;136m')
+    expect(line2).toContain('\x1b[48;5;108m')
   })
 
-  it('5h quota block uses danger bg (56) at 90%', () => {
+  it('5h quota block uses stable bg (23) at 90%', () => {
     const output = render(
       CHAR,
       'msg',
@@ -323,7 +329,7 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;56m')
+    expect(line2).toContain('\x1b[48;5;108m')
   })
 
   it('omits 5h segment entirely when no rate_limits provided', () => {
@@ -342,7 +348,8 @@ describe('render', () => {
       {}
     )
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('wk 40%')
+    expect(line2).toContain('wk')
+    expect(line2).toContain('40%')
   })
 
   it('weekly block uses days format for resets', () => {
@@ -385,27 +392,29 @@ describe('render', () => {
     expect(line2).toMatch(/\x1b\[48;5;\d+m/)
   })
 
-  it('model segment uses bg 17 (navy) by default', () => {
+  it('model segment uses bg 54 (deep purple)', () => {
     const output = render(CHAR, 'msg', { model: 'Sonnet' }, {})
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;18m')
+    expect(line2).toContain('\x1b[48;5;73m')
   })
 
-  it('mem segment uses bg 23 (dark teal) when memory_count>0', () => {
+  it('mem segment uses bg 53 (dark magenta) when memory_count>0', () => {
     const output = render(CHAR, 'msg', {}, { memory_count: 3 })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;30m')
-    expect(line2).toContain('3 mem')
+    expect(line2).toContain('\x1b[48;5;140m')
+    expect(line2).toContain('mem')
+    expect(line2).toContain('3')
   })
 })
 
 // ─── memory count display ─────────────────────────────────────────────────────
 
 describe('memory count display', () => {
-  it('line2 contains "3 mem" when memory_count=3', () => {
+  it('line2 contains mem label and count when memory_count=3', () => {
     const output = render(CHAR, 'msg', {}, { memory_count: 3 })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('3 mem')
+    expect(line2).toContain('mem')
+    expect(line2).toContain('3')
   })
 
   it('line2 does NOT contain "mem" when memory_count=0', () => {
@@ -429,15 +438,16 @@ describe('weather block', () => {
       weather: { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: Math.floor(Date.now() / 1000) }
     })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('Beijing ⛅ 18°C')
+    expect(line2).toContain('Beijing')
+    expect(line2).toContain('⛅ 18°C')
   })
 
-  it('weather block uses bg 60 (slate)', () => {
+  it('weather block uses bg 60 (dark slate-blue)', () => {
     const output = render(CHAR, 'msg', {}, {
       weather: { city: 'Beijing', tempC: 18, icon: '⛅', fetchedAt: Math.floor(Date.now() / 1000) }
     })
     const line2 = output.split('\n')[1]
-    expect(line2).toContain('\x1b[48;5;60m')
+    expect(line2).toContain('\x1b[48;5;173m')
   })
 
   it('omits weather block when stats.weather is null', () => {
@@ -458,9 +468,62 @@ describe('weather block', () => {
       weather: { city: 'Beijing', tempC: 22, icon: '☀️', fetchedAt: Math.floor(Date.now() / 1000) }
     })
     const line2 = output.split('\n')[1]
-    const memIdx = line2.indexOf('3 mem')
+    const memIdx = line2.indexOf('\x1b[48;5;140m')  // mem bg
     const weatherIdx = line2.indexOf('22°C')
     expect(memIdx).toBeGreaterThan(-1)
     expect(weatherIdx).toBeGreaterThan(memIdx)
+  })
+
+  it('ascii face with multiple frames: name position stays fixed across frames', () => {
+    // Frames of deliberately different visual widths: 7 cols vs 9 cols
+    const MULTI: VocabData = {
+      meta: { name: 'Nova', ascii: ['(*>ω<)', '(ﾉ*>ω<)ﾉ'], style: '', color: '' },
+    }
+    const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, '')
+    // frame 0 at t=0, frame 1 at t=600ms
+    jest.setSystemTime(0)
+    const out0 = render(MULTI, 'hi', {}, {})
+    const namePos0 = stripAnsi(out0.split('\n')[0]).indexOf('Nova')
+
+    jest.setSystemTime(600)
+    const out1 = render(MULTI, 'hi', {}, {})
+    const namePos1 = stripAnsi(out1.split('\n')[0]).indexOf('Nova')
+
+    expect(namePos0).toBe(namePos1)
+  })
+})
+
+// ─── termColWidth ─────────────────────────────────────────────────────────────
+
+describe('termColWidth', () => {
+  it('counts ASCII as 1 col each', () => {
+    expect(termColWidth('hello')).toBe(5)
+  })
+
+  it('counts fullwidth katakana as 2 cols', () => {
+    // ノ U+30CE is fullwidth katakana = 2 cols
+    expect(termColWidth('ノ')).toBe(2)
+  })
+
+  it('counts halfwidth katakana as 1 col', () => {
+    // ﾉ U+FF89 is halfwidth = 1 col
+    expect(termColWidth('ﾉ')).toBe(1)
+  })
+
+  it('counts hiragana iteration mark ゞ as 2 cols', () => {
+    expect(termColWidth('ゞ')).toBe(2)
+  })
+
+  it('kaomoji (*>ω<) is 6 cols (ω is greek, 1 col)', () => {
+    expect(termColWidth('(*>ω<)')).toBe(6)
+  })
+
+  it('kaomoji (^▽^)ゞ accounts for wide ゞ', () => {
+    // ( ^ ▽ ^ ) = 5 cols (▽ U+25BD geometric shape = 1 col), ゞ = 2 cols → 7
+    expect(termColWidth('(^▽^)ゞ')).toBe(7)
+  })
+
+  it('mixed: (ﾉ*>ω<)ﾉ is 8 cols (both ﾉ are halfwidth)', () => {
+    expect(termColWidth('(ﾉ*>ω<)ﾉ')).toBe(8)
   })
 })

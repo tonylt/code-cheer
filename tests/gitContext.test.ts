@@ -148,6 +148,7 @@ describe('loadGitContext - error fallback', () => {
       diff_lines: 0,
       first_commit_time: null,
       repo_path: null,
+      branch: null,
     })
   })
 
@@ -161,6 +162,7 @@ describe('loadGitContext - error fallback', () => {
       diff_lines: 0,
       first_commit_time: null,
       repo_path: null,
+      branch: null,
     })
   })
 })
@@ -201,14 +203,14 @@ describe('loadGitContext - partial failure', () => {
 // ─── Concurrent execution ──────────────────────────────────────────────────────
 
 describe('loadGitContext - concurrent execution', () => {
-  it('calls all 4 git commands concurrently', async () => {
+  it('calls all 5 git commands concurrently', async () => {
     const called: string[] = []
     currentImpl = async (_file: string, args: string[]) => {
       called.push(args.join(' '))
       return { stdout: '', stderr: '' }
     }
     await loadGitContext('/tmp')
-    expect(called).toHaveLength(4)
+    expect(called).toHaveLength(5)
   })
 
   it('verifies all 4 command types are issued', async () => {

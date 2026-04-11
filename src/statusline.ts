@@ -452,7 +452,8 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
     stats['git_branch'] = state.git_branch
   }
 
-  return render(character, message, ccData, stats)
+  const cols = process.stdout.columns || Number(process.env['COLUMNS'] || 0) || undefined
+  return render(character, message, ccData, stats, cols)
 }
 
 export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
@@ -517,7 +518,7 @@ export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const isDebug = process.argv.includes('--debug-events')
+  const isDebug  = process.argv.includes('--debug-events')
   const isUpdate = process.argv.includes('--update') || isDebug
 
   const stdin = await readStdinString()
