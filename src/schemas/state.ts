@@ -11,6 +11,7 @@ export type StateType = {
   memory_count?: number
   memory_titles?: string[]
   last_memory_recall?: string
+  git_branch?: string
 }
 
 // D-07: default state for when file doesn't exist
@@ -50,5 +51,6 @@ export function parseState(raw: unknown): StateType {
       ? (obj.memory_titles as unknown[]).filter((x): x is string => typeof x === 'string')
       : undefined,
     last_memory_recall: typeof obj.last_memory_recall === 'string' ? obj.last_memory_recall : undefined,
+    git_branch:         typeof obj.git_branch         === 'string' ? obj.git_branch         : undefined,
   }
 }

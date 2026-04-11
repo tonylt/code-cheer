@@ -4,6 +4,7 @@ export type ConfigType = {
   character: typeof CHARACTER_NAMES[number]
   version?: string
   language?: 'zh' | 'en'
+  city?: string
 }
 
 export function parseConfig(raw: unknown, label: string): ConfigType {
@@ -25,9 +26,11 @@ export function parseConfig(raw: unknown, label: string): ConfigType {
     )
   }
   const language = obj.language === 'en' ? 'en' : obj.language === 'zh' ? 'zh' : undefined
+  const city = typeof obj.city === 'string' && obj.city.trim() !== '' ? obj.city.trim() : undefined
   return {
     character: obj.character as ConfigType['character'],
     ...(version !== undefined && { version }),
     ...(language !== undefined && { language }),
+    ...(city !== undefined && { city }),
   }
 }

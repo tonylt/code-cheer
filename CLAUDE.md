@@ -139,6 +139,10 @@ install.sh registers two entries in `~/.claude/settings.json`:
 - TypeScript strict: `if (x)` is false when x=0; use `!== undefined` for existence checks
 - install.sh uses `$(which node)` absolute path for nvm/fnm compatibility
 
+## Collaboration
+
+- When a dependency or tool needs to be installed (brew, npm, etc.), do NOT just show the command — ask the user if they want you to run it directly. Showing a command without running it can mislead them into thinking it's already done.
+
 ## Design System
 Always read DESIGN.md before making any visual or UI decisions.
 All font choices, colors, spacing, and aesthetic direction are defined there.

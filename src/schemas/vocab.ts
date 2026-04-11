@@ -16,7 +16,7 @@ export type GitEventKey = typeof GIT_EVENT_KEYS[number]
 export type VocabData = {
   meta: {
     name: string
-    ascii: string
+    ascii: string | string[]
     style: string
     color: string
   }
@@ -57,11 +57,15 @@ export function parseVocab(raw: unknown, label: string): VocabData {
     process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected object, received undefined\n  → at meta\n`)
     throw new Error(`Invalid ${label}: missing meta`)
   }
-  for (const key of ['name', 'ascii', 'style', 'color'] as const) {
+  for (const key of ['name', 'style', 'color'] as const) {
     if (typeof meta[key] !== 'string') {
       process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected string\n  → at meta.${key}\n`)
       throw new Error(`Invalid ${label}: meta.${key} must be string`)
     }
+  }
+  if (typeof meta['ascii'] !== 'string' && !Array.isArray(meta['ascii'])) {
+    process.stderr.write(`[code-cheer] ${label} schema validation failed:\n✖ Invalid input: expected string or string[]\n  → at meta.ascii\n`)
+    throw new Error(`Invalid ${label}: meta.ascii must be string or string[]`)
   }
 
   const tr = obj.triggers as Record<string, unknown> | undefined
@@ -96,7 +100,9 @@ export function parseVocab(raw: unknown, label: string): VocabData {
   return {
     meta: {
       name:  meta['name']  as string,
-      ascii: meta['ascii'] as string,
+      ascii: Array.isArray(meta['ascii'])
+        ? (meta['ascii'] as unknown[]).filter((x): x is string => typeof x === 'string')
+        : meta['ascii'] as string,
       style: meta['style'] as string,
       color: meta['color'] as string,
     },

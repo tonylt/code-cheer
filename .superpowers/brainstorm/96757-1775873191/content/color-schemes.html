@@ -1,0 +1,104 @@
+<style>
+  .terminal {
+    background: #121212;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .line1 { margin-bottom: 4px; color: #7ec8e3; }
+
+  /* two-tone block: dim label + white value, no bold, flush */
+  .seg { display: inline-block; }
+  .lbl { color: #808080; }
+  .val { color: #ffffff; }
+
+  /* ── Scheme A: Ocean — blue/teal family ── */
+  .a-model   { background: #00005f; }  /* 17 */
+  .a-cwd     { background: #303030; }  /* 236 */
+  .a-branch  { background: #262626; }  /* 235 */
+  .a-tokens  { background: #005f5f; }  /* 23 */
+  .a-ok      { background: #005f00; }  /* 22 */
+  .a-warn    { background: #5f5f00; }  /* 58 */
+  .a-danger  { background: #5f0000; }  /* 52 */
+  .a-ctx     { background: #005f87; }  /* 24 */
+  .a-weather { background: #00005f; }  /* 17 */
+
+  /* ── Scheme B: Smoke — all neutrals, status gets color ── */
+  .b-model   { background: #1c1c1c; }  /* 234 */
+  .b-cwd     { background: #262626; }  /* 235 */
+  .b-branch  { background: #303030; }  /* 236 */
+  .b-tokens  { background: #262626; }  /* 235 */
+  .b-ok      { background: #005f00; }  /* 22 */
+  .b-warn    { background: #875f00; }  /* 94 */
+  .b-danger  { background: #5f0000; }  /* 52 */
+  .b-ctx     { background: #262626; }  /* 235 */
+  .b-weather { background: #1c1c1c; }  /* 234 */
+
+  /* ── Scheme C: Indigo — purple-blue tones ── */
+  .c-model   { background: #1c0060; }  /* ~55 */
+  .c-cwd     { background: #2a2a3a; }  /* custom */
+  .c-branch  { background: #1e1e2e; }
+  .c-tokens  { background: #3a2a00; }
+  .c-ok      { background: #003a00; }
+  .c-warn    { background: #3a2a00; }
+  .c-danger  { background: #3a0020; }
+  .c-ctx     { background: #002050; }
+  .c-weather { background: #1c1c3a; }
+</style>
+
+<h2>配色方案</h2>
+<p class="subtitle">三种色调，无加粗，标签暗色 / 数值白色</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div>
+          <span class="seg a-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg a-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg a-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg a-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg a-ok"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg a-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg a-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>Ocean — 蓝绿家族</h3>
+      <p>model/weather 深海蓝，cwd/branch 中性灰，tokens/ctx 蓝绿，状态块红绿黄。冷色调统一，层次分明。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div>
+          <span class="seg b-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg b-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg b-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg b-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg b-ok"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg b-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg b-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>Smoke — 极简烟灰</h3>
+      <p>信息块全部深灰，只有状态类（quota/danger）才用颜色。克制、专注，不抢注意力。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div>
+          <span class="seg c-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg c-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg c-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg c-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg c-ok"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg c-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg c-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>Indigo — 深紫午夜</h3>
+      <p>偏紫蓝的暗色调，model/ctx 深靛蓝，branch/cwd 近黑偏紫，tokens 暗琥珀。整体高级感更强。</p>
+    </div>
+  </div>
+
+</div>

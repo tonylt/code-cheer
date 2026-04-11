@@ -7,6 +7,7 @@ import { loadGitContext } from './core/gitContext'
 import type { GitContextResult } from './core/gitContext'
 import { resolveMessage, detectGitEvents, getTimeSlot, cacheExpired, formatMemoryTitles } from './core/trigger'
 import { loadMemoryContext } from './core/memory'
+import { fetchAndCacheWeather, loadWeatherCache } from './core/weather'
 import { parseState, DEFAULT_STATE, parseConfig } from './schemas'
 import type { VocabData, StateType, ConfigType } from './schemas'
 
@@ -140,6 +141,7 @@ function saveState(
     memoryCount?: number
     memoryTitles?: string[]
     lastMemoryRecall?: string
+    gitBranch?: string
   }
 ): void {
   fs.mkdirSync(baseDir, { recursive: true })
@@ -156,6 +158,7 @@ function saveState(
   if (options?.memoryCount !== undefined) state.memory_count = options.memoryCount
   if (options?.memoryTitles !== undefined) state.memory_titles = options.memoryTitles
   if (options?.lastMemoryRecall !== undefined) state.last_memory_recall = options.lastMemoryRecall
+  if (options?.gitBranch !== undefined) state.git_branch = options.gitBranch
   fs.writeFileSync(statePath + '.tmp', JSON.stringify(state, undefined, 2), 'utf-8')
   try {
     fs.renameSync(statePath + '.tmp', statePath)
@@ -257,7 +260,9 @@ async function runUpdateCore(
   const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
+  const _cwd = process.cwd()
+  const _home = process.env['HOME'] ?? ''
+  stats['cwd_name'] = _home && _cwd.startsWith(_home) ? '~' + _cwd.slice(_home.length) : _cwd
 
   // Parse stdin as JSON (empty string -> {})
   let ccData: Record<string, unknown> = {}
@@ -271,7 +276,13 @@ async function runUpdateCore(
   // Token fallback: supplement from ccData when stats-cache has no today entry
   applyTokenFallback(stats, ccData)
 
-  const gitContext = await loadGitContext(process.cwd())
+  const [gitSettled] = await Promise.allSettled([
+    loadGitContext(process.cwd()),
+    fetchAndCacheWeather(baseDir, config.city),
+  ])
+  const gitContext = gitSettled.status === 'fulfilled'
+    ? gitSettled.value
+    : { repo_path: null, commits_today: 0, diff_lines: 0, last_git_events: [], branch: null, first_commit_time: null } as GitContextResult
 
   // Phase 16: load memory context (per D-04, only in --update mode)
   const memoryCtx = loadMemoryContext(gitContext.repo_path, os.homedir())
@@ -348,6 +359,7 @@ async function runUpdateCore(
   const newCommitsToday = gitContext.commits_today ?? 0
 
   // Persist state (atomic write)
+  const gitBranch = typeof gitContext.branch === 'string' ? gitContext.branch : undefined
   if (finalMessage !== state.message || tier !== state.last_rate_tier) {
     saveState(statePath, baseDir, finalMessage, tier, slot, {
       lastGitEvents: newLastGitEvents,
@@ -357,6 +369,7 @@ async function runUpdateCore(
       memoryCount: memoryCtx.memory_count,
       memoryTitles: memoryCtx.memory_titles,
       lastMemoryRecall: newLastMemoryRecall,
+      gitBranch,
     })
   } else {
     saveState(statePath, baseDir, state.message ?? '', state.last_rate_tier ?? 'normal', slot, {
@@ -367,6 +380,7 @@ async function runUpdateCore(
       memoryCount: memoryCtx.memory_count,
       memoryTitles: memoryCtx.memory_titles,
       lastMemoryRecall: newLastMemoryRecall,
+      gitBranch,
     })
   }
 
@@ -390,12 +404,16 @@ async function runUpdateCore(
 // ─── Exported mode functions ──────────────────────────────────────────────────
 
 export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string {
-  const { configPath, statePath, statsPath } = resolvePaths(env)
+  const { baseDir, configPath, statePath, statsPath } = resolvePaths(env)
 
   const config = loadConfig(configPath, env)
   const state = loadState(statePath)
   const stats = loadStats(statsPath)
-  stats['cwd_name'] = path.basename(process.cwd())
+  const _cwd = process.cwd()
+  const _home = process.env['HOME'] ?? ''
+  stats['cwd_name'] = _home && _cwd.startsWith(_home) ? '~' + _cwd.slice(_home.length) : _cwd
+  const weather = loadWeatherCache(baseDir, true)
+  stats['weather'] = weather ?? null
 
   // Parse stdin as ccData — mirrors Python: cc_data = read_stdin_json() in all modes
   let ccData: Record<string, unknown> = {}
@@ -430,8 +448,12 @@ export function renderMode(stdin: string = '', env?: NodeJS.ProcessEnv): string 
   if (state.memory_count !== undefined) {
     stats['memory_count'] = state.memory_count
   }
+  if (state.git_branch !== undefined) {
+    stats['git_branch'] = state.git_branch
+  }
 
-  return render(character, message, ccData, stats)
+  const cols = process.stdout.columns || Number(process.env['COLUMNS'] || 0) || undefined
+  return render(character, message, ccData, stats, cols)
 }
 
 export async function updateMode(stdin: string, env?: NodeJS.ProcessEnv): Promise<void> {
@@ -496,7 +518,7 @@ export async function debugMode(stdin: string, env?: NodeJS.ProcessEnv): Promise
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const isDebug = process.argv.includes('--debug-events')
+  const isDebug  = process.argv.includes('--debug-events')
   const isUpdate = process.argv.includes('--update') || isDebug
 
   const stdin = await readStdinString()

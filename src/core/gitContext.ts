@@ -8,6 +8,7 @@ export interface GitContextResult {
   diff_lines: number
   first_commit_time: string | null
   repo_path: string | null
+  branch: string | null
 }
 
 const COMMANDS: Record<string, string[]> = {
@@ -15,6 +16,7 @@ const COMMANDS: Record<string, string[]> = {
   diff_lines: ['git', 'diff', '--stat', 'HEAD'],
   first_commit_time: ['git', 'log', '--format=%ai', '--since=midnight'],
   repo_path: ['git', 'rev-parse', '--show-toplevel'],
+  branch: ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
 }
 
 export async function loadGitContext(cwd: string): Promise<GitContextResult> {
@@ -29,6 +31,7 @@ export async function loadGitContext(cwd: string): Promise<GitContextResult> {
     diff_lines: 0,
     first_commit_time: null,
     repo_path: null,
+    branch: null,
   }
 
   for (const result of settled) {
@@ -39,6 +42,7 @@ export async function loadGitContext(cwd: string): Promise<GitContextResult> {
         else if (key === 'diff_lines') results.diff_lines = _parseDiffLines(output)
         else if (key === 'first_commit_time') results.first_commit_time = _parseFirstCommitTime(output)
         else if (key === 'repo_path') results.repo_path = _parseRepoPath(output)
+        else if (key === 'branch') results.branch = output.trim() || null
       }
     }
     // result.status === 'rejected' → 静默跳过，使用默认值

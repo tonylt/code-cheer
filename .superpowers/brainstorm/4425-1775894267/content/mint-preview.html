@@ -1,0 +1,93 @@
+<style>
+  .terminal {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  .seg { display: inline-block; }
+  .lbl { color: #5f8787; }   /* 66 — muted teal */
+  .val { color: #005f00; }   /* 22 — deep green */
+  .vdn { color: #303030; }   /* 236 — dark gray (cwd/branch) */
+
+  /* Line 2 blocks */
+  .s-model   { background: #d7ffd7; }  /* 194 */
+  .s-cwd     { background: #e4e4e4; }  /* 254 */
+  .s-branch  { background: #dadada; }  /* 253 */
+  .s-tokens  { background: #d7ffaf; }  /* 193 */
+  .s-ok      { background: #d7ffd7; }  /* 194 */
+  .s-warn    { background: #ffffaf; }  /* 229 */
+  .s-danger  { background: #ffd7d7; }  /* 224 */
+  .s-ctx     { background: #d7ffff; }  /* 195 */
+  .s-ctxw    { background: #afd7ff; }  /* 153 */
+  .s-mem     { background: #afd7d7; }  /* 152 */
+  .s-weather { background: #d7ffd7; }  /* 194 */
+
+  .lbl-warn   { color: #af8700; }  /* 136 */
+  .val-warn   { color: #875f00; }  /* 94 */
+  .lbl-danger { color: #af5f5f; }  /* 131 */
+  .val-danger { color: #870000; }  /* 88 */
+  .lbl-ctx    { color: #5f8787; }  /* 66 */
+  .val-ctx    { color: #005f5f; }  /* 23 */
+  .lbl-ctxw   { color: #5f87af; }  /* 67 */
+  .val-ctxw   { color: #000087; }  /* 18 */
+
+  /* Line 1 accent bar */
+  .line1 {
+    background: #d7ffd7;   /* 194 */
+    padding: 2px 0 2px 0;
+    margin-bottom: 2px;
+  }
+  .l1-bar  { color: #005f5f; }  /* 23 */
+  .l1-asc  { color: #5f8787; }  /* 66 */
+  .l1-name { color: #005f00; font-weight: normal; }  /* 22 */
+  .l1-msg  { color: #444444; }  /* 238 */
+</style>
+
+<h2 style="margin-bottom:4px">Mint 冷绿方案</h2>
+<p class="subtitle">薄荷绿基底，深绿/暗青文字，状态异常保留暖色警示</p>
+
+<div class="cards" style="display:block">
+  <div class="card" style="max-width:860px">
+    <div class="card-image">
+
+      <!-- Normal state: 5h ok, ctx ok -->
+      <div style="margin-bottom:6px;font-size:11px;color:#aaa">正常状态</div>
+      <div class="terminal">
+        <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (￣ω￣) </span><span class="l1-name">Iris</span><span class="l1-msg">: 这一步做完，接下来更进，准备好吧。</span></div>
+        <div>
+          <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="vdn"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="vdn">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-ok"><span class="lbl"> 5h </span><span class="val">38% ↻2h15m </span></span><span class="seg s-ctx"><span class="lbl-ctx val-ctx"> ctx </span><span class="val-ctx">62% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span>
+        </div>
+      </div>
+
+      <!-- Warning state -->
+      <div style="margin-top:12px;margin-bottom:6px;font-size:11px;color:#aaa">用量预警</div>
+      <div class="terminal">
+        <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (￣ω￣) </span><span class="l1-name">Iris</span><span class="l1-msg">: 注意一下，快到上限了。</span></div>
+        <div>
+          <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="vdn"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⌂ </span><span class="vdn">main </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">47k </span></span><span class="seg s-warn"><span class="lbl-warn"> 5h </span><span class="val-warn">78% ↻0h42m </span></span><span class="seg s-danger"><span class="lbl-danger"> wk </span><span class="val-danger">91% ↻3d08h </span></span><span class="seg s-ctxw"><span class="lbl-ctxw"> ctx </span><span class="val-ctxw">86% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">🌧 18°C </span></span>
+        </div>
+      </div>
+
+      <!-- mem block -->
+      <div style="margin-top:12px;margin-bottom:6px;font-size:11px;color:#aaa">有记忆条目</div>
+      <div class="terminal">
+        <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (￣ω￣) </span><span class="l1-name">Iris</span><span class="l1-msg">: 记住了，不会再犯同样的错。</span></div>
+        <div>
+          <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="vdn"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="vdn">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">8.3k </span></span><span class="seg s-ok"><span class="lbl"> 5h </span><span class="val">45% ↻1h50m </span></span><span class="seg s-ctx"><span class="lbl-ctx"> ctx </span><span class="val-ctx">31% </span></span><span class="seg s-mem"><span class="lbl"> mem </span><span class="val">4 </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">⛅ 20°C </span></span>
+        </div>
+      </div>
+
+    </div>
+    <div class="card-body">
+      <h3>Mint — 冷绿</h3>
+      <p>主色块 <strong>#d7ffd7</strong> 薄荷绿，tokens 用 <strong>#d7ffaf</strong> 偏黄绿区分。ctx 用 <strong>#d7ffff</strong> 冷青。预警/危险保留暖色（黄/红），与冷绿形成对比，警示效果更明显。</p>
+    </div>
+  </div>
+</div>

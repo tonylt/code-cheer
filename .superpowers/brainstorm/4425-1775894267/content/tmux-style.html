@@ -1,0 +1,83 @@
+<style>
+  .terminal {
+    background: #111111;
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* ── Reference ── */
+  .ref-label { font-size: 11px; color: #888; margin: 4px 0 2px; }
+
+  /* Shared block: dark text on colored bg, flush */
+  .seg { display: inline-block; }
+  .lbl { color: #3a3a3a; }
+  .val { color: #1c1c1c; }
+
+  /* Block colors — mid-tone saturated */
+  .s-model   { background: #5fafaf; }  /* 73  teal       */
+  .s-cwd     { background: #5f87af; }  /* 67  steel blue */
+  .s-branch  { background: #5fd7d7; }  /* 80  bright teal*/
+  .s-tokens  { background: #d7af5f; }  /* 179 golden     */
+  .s-quota   { background: #87af87; }  /* 108 sage green */
+  .s-ctx     { background: #87afd7; }  /* 110 sky blue   */
+  .s-mem     { background: #af87d7; }  /* 140 lavender   */
+  .s-weather { background: #d7875f; }  /* 173 warm orange*/
+
+  /* Line 1 */
+  .line1 {
+    background: #1c1c1c;
+    padding: 2px 0;
+  }
+  .l1-bar  { color: #5fafaf; }
+  .l1-asc  { color: #5f87af; }
+  .l1-name { color: #5fd7d7; }
+  .l1-msg  { color: #d0d0d0; }
+</style>
+
+<h2 style="margin-bottom:4px">Tmux/Airline 风格 — 中等饱和度 · 深色文字</h2>
+<p class="subtitle">仿参考图配色：彩色色块背景 + 近黑文字</p>
+
+<div class="cards" style="display:block">
+
+  <!-- Reference -->
+  <div class="ref-label">参考图（原始风格）</div>
+  <div class="terminal">
+    <div>
+      <span class="seg" style="background:#5fafaf"><span class="val"> main </span><span class="lbl">? </span></span><span class="seg" style="background:#d7af5f"><span class="val"> 16:41:09 </span></span>
+    </div>
+  </div>
+
+  <!-- Full statusline -->
+  <div class="ref-label">完整状态栏 — 正常状态</div>
+  <div class="terminal">
+    <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (￣ω￣) </span><span class="l1-name">Iris</span><span class="l1-msg">: 进展如何，别让我失望。</span></div>
+    <div>
+      <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">38% ↻2h15m </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg s-mem"><span class="lbl"> mem </span><span class="val">4 </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span>
+    </div>
+  </div>
+
+  <!-- Main branch -->
+  <div class="ref-label">主干分支 + 宽屏</div>
+  <div class="terminal">
+    <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (*>ω<) </span><span class="l1-name">Nova</span><span class="l1-msg">: 冲冲冲！目标就在眼前！</span></div>
+    <div>
+      <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⌂ </span><span class="val">main </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">47k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">71% ↻0h42m </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">88% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">🌧 18°C </span></span>
+    </div>
+  </div>
+
+  <!-- Narrow window simulation -->
+  <div class="ref-label">窄窗口（weather/mem 已丢弃）</div>
+  <div class="terminal">
+    <div class="line1"><span class="l1-bar">▌</span><span class="l1-asc"> (￣ω￣) </span><span class="l1-name">Iris</span><span class="l1-msg">: 执行完毕。</span></div>
+    <div>
+      <span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">8.3k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">45% ↻1h50m </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">31% </span></span>
+    </div>
+  </div>
+
+</div>

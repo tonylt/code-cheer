@@ -1,0 +1,226 @@
+<style>
+  .terminal {
+    background: #111;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    margin: 8px 0;
+    white-space: nowrap;
+  }
+  .l1 { background: #1c1c1c; padding: 2px 0; display: block; margin-bottom: 2px; }
+  .bar  { color: #5fafaf; }
+  .asc  { color: #5f87af; }
+  .name { color: #5fd7d7; }
+  .msg  { color: #d0d0d0; }
+
+  /* animation cycling: 3 frames, 0.6s each → 1.8s loop */
+  .face { display: inline-block; width: 90px; }
+
+  /* Scheme A */
+  .a-f1, .a-f2, .a-f3 { display: none; }
+  @keyframes cycleA {
+    0%,30%   { content: ''; }
+    33%,63%  { content: ''; }
+    66%,96%  { content: ''; }
+  }
+  .anim-a .face::before { animation: none; }
+  .anim-a .face { animation: swapA 1.8s steps(1) infinite; }
+  @keyframes swapA {
+    0%   { content: attr(data-f1); }
+    33%  { content: attr(data-f2); }
+    66%  { content: attr(data-f3); }
+  }
+  /* Fallback: show all frames with opacity cycling */
+  .frame { display: inline-block; position: absolute; transition: opacity 0s; opacity: 0; }
+  .f1 { opacity: 1; }
+  .char-wrap { position: relative; display: inline-block; min-width: 80px; }
+
+  /* Pure CSS frame cycling using animation-delay */
+  .anim .char-wrap .f1 { animation: showFrame 1.8s steps(1) infinite 0s; }
+  .anim .char-wrap .f2 { animation: showFrame 1.8s steps(1) infinite -1.2s; }
+  .anim .char-wrap .f3 { animation: showFrame 1.8s steps(1) infinite -0.6s; }
+  @keyframes showFrame {
+    0%     { opacity: 1; }
+    33.3%  { opacity: 1; }
+    33.4%  { opacity: 0; }
+    100%   { opacity: 0; }
+  }
+
+  .char-name { color: #888; font-size: 11px; margin-top: 6px; }
+  .scheme-title { font-size: 12px; color: #aaa; margin: 12px 0 4px; border-bottom: 1px solid #333; padding-bottom: 4px; }
+
+  .chars-row { display: flex; gap: 24px; flex-wrap: wrap; margin: 10px 0; }
+  .char-col { text-align: center; }
+  .char-col .char-wrap { font-size: 16px; min-width: 100px; height: 24px; }
+  .char-col .char-wrap .frame { color: #5f87af; font-size: 14px; white-space: nowrap; }
+</style>
+
+<h2 style="margin-bottom:4px">颜文字动画方案</h2>
+<p class="subtitle">2-3帧循环，约 0.6s/帧。下方预览实时运行动画效果。</p>
+
+<div class="cards" style="display:block">
+
+<!-- ── Scheme A: 眨眼 (Blink) ── -->
+<div class="scheme-title">A — 眨眼：周期性闭眼一帧，自然呼吸感</div>
+<div class="chars-row anim">
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(*>ω&lt;)</span>
+      <span class="frame f2">(*-ω-)</span>
+      <span class="frame f3">(*>ω&lt;)</span>
+    </div>
+    <div class="char-name">Nova</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(´• ω •`)</span>
+      <span class="frame f2">(´- ω -`)</span>
+      <span class="frame f3">(´• ω •`)</span>
+    </div>
+    <div class="char-name">Luna</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(=^･ω･^=)</span>
+      <span class="frame f2">(=^-ω-^=)</span>
+      <span class="frame f3">(=^･ω･^=)</span>
+    </div>
+    <div class="char-name">Mochi</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(￣ω￣)</span>
+      <span class="frame f2">(¬ω¬)</span>
+      <span class="frame f3">(￣ω￣)</span>
+    </div>
+    <div class="char-name">Iris</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(^▽^)ゞ</span>
+      <span class="frame f2">(^-^)ゞ</span>
+      <span class="frame f3">(^▽^)ゞ</span>
+    </div>
+    <div class="char-name">Rex</div>
+  </div>
+</div>
+<div class="terminal">
+  <span class="l1"><span class="bar">▌</span><span class="asc"> </span><span id="a-iris" class="asc">(￣ω￣)</span><span class="asc"> </span><span class="name">Iris</span><span class="msg">: 注意一下，快到上限了。</span></span>
+</div>
+
+<!-- ── Scheme B: 动作 (Action) ── -->
+<div class="scheme-title">B — 动作：加手势/挥手动作帧，有角色感</div>
+<div class="chars-row anim">
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(*>ω&lt;)</span>
+      <span class="frame f2">(ﾉ*>ω&lt;)ﾉ</span>
+      <span class="frame f3">(*>ω&lt;*)</span>
+    </div>
+    <div class="char-name">Nova</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(´• ω •`)</span>
+      <span class="frame f2">(´• ω •`)ﾉ</span>
+      <span class="frame f3">(´• ω •`)</span>
+    </div>
+    <div class="char-name">Luna</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(=^･ω･^=)</span>
+      <span class="frame f2">(=^･ω･^=)ﾉ</span>
+      <span class="frame f3">ヾ(=^･ω･^=)</span>
+    </div>
+    <div class="char-name">Mochi</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(￣ω￣)</span>
+      <span class="frame f2">(￣ω￣)ノ</span>
+      <span class="frame f3">(￣ω￣)</span>
+    </div>
+    <div class="char-name">Iris</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(^▽^)ゞ</span>
+      <span class="frame f2">(^o^)ノ</span>
+      <span class="frame f3">(^▽^)ゞ</span>
+    </div>
+    <div class="char-name">Rex</div>
+  </div>
+</div>
+<div class="terminal">
+  <span class="l1"><span class="bar">▌</span><span class="asc"> </span><span id="b-nova" class="asc">(*>ω&lt;)</span><span class="asc"> </span><span class="name">Nova</span><span class="msg">: 冲冲冲！目标就在眼前！</span></span>
+</div>
+
+<!-- ── Scheme C: 表情变化 (Expression) ── -->
+<div class="scheme-title">C — 表情：3帧情绪变化，更有戏剧感</div>
+<div class="chars-row anim">
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(*>ω&lt;)</span>
+      <span class="frame f2">(ﾟoﾟ*)</span>
+      <span class="frame f3">(*≧ω≦)</span>
+    </div>
+    <div class="char-name">Nova</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(´• ω •`)</span>
+      <span class="frame f2">(´｡• ω •｡`)</span>
+      <span class="frame f3">(´ ▽ `)</span>
+    </div>
+    <div class="char-name">Luna</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(=^･ω･^=)</span>
+      <span class="frame f2">(=^OwO^=)</span>
+      <span class="frame f3">(=^･ｪ･^=)</span>
+    </div>
+    <div class="char-name">Mochi</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(￣ω￣)</span>
+      <span class="frame f2">( ˘ω˘ )</span>
+      <span class="frame f3">(￣︿￣)</span>
+    </div>
+    <div class="char-name">Iris</div>
+  </div>
+  <div class="char-col">
+    <div class="char-wrap">
+      <span class="frame f1">(^▽^)ゞ</span>
+      <span class="frame f2">(≧▽≦)ゞ</span>
+      <span class="frame f3">(^▽^)ゞ</span>
+    </div>
+    <div class="char-name">Rex</div>
+  </div>
+</div>
+<div class="terminal">
+  <span class="l1"><span class="bar">▌</span><span class="asc"> </span><span id="c-iris" class="asc">(￣ω￣)</span><span class="asc"> </span><span class="name">Iris</span><span class="msg">: 执行完毕。别以为顺了就轻松了。</span></span>
+</div>
+
+</div>
+
+<script>
+// Animate the preview status bars too
+const seqs = {
+  'a-iris': ['(￣ω￣)', '(¬ω¬)', '(￣ω￣)'],
+  'b-nova': ['(*>ω<)', '(ﾉ*>ω<)ﾉ', '(*>ω<*)'],
+  'c-iris': ['(￣ω￣)', '( ˘ω˘ )', '(￣︿￣)'],
+}
+let tick = 0
+setInterval(() => {
+  tick = (tick + 1) % 3
+  for (const [id, frames] of Object.entries(seqs)) {
+    const el = document.getElementById(id)
+    if (el) el.textContent = frames[tick]
+  }
+}, 600)
+</script>

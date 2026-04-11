@@ -1,0 +1,136 @@
+<style>
+  .terminal {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .line1 { margin-bottom: 4px; }
+  .note { font-family: sans-serif; font-size: 11px; color: #666; margin-top: 5px; padding-left: 2px; }
+
+  /* ── A: Current baseline — flat blocks, 1-char gap ── */
+  .style-a span {
+    display: inline-block;
+    padding: 0 7px;
+    color: #eee;
+    margin-right: 3px;
+  }
+
+  /* ── B: Bold text + slightly deeper bg ── */
+  .style-b span {
+    display: inline-block;
+    padding: 0 7px;
+    color: #fff;
+    font-weight: bold;
+    margin-right: 3px;
+    filter: brightness(0.85);
+  }
+
+  /* ── C: Two-tone — dim label / bright value ── */
+  .style-c span {
+    display: inline-block;
+    padding: 0 7px;
+    margin-right: 3px;
+  }
+  .style-c .lbl { color: rgba(255,255,255,0.55); font-size: 11px; }
+  .style-c .val { color: #fff; font-weight: 600; }
+
+  /* ── D: Thin separator line between blocks ── */
+  .style-d span {
+    display: inline-block;
+    padding: 0 7px;
+    color: #eee;
+  }
+  .style-d .sep { color: #555; padding: 0 1px; background: none !important; }
+
+  /* colors */
+  .c-model   { background: #000087; }
+  .c-cwd     { background: #303030; }
+  .c-branch  { background: #3a3a3a; }
+  .c-tokens  { background: #875f00; }
+  .c-quota   { background: #5f8700; }
+  .c-ctx     { background: #005f87; }
+  .c-weather { background: #5f5f87; }
+</style>
+
+<h2>色块样式方案</h2>
+<p class="subtitle">基于 SF Mono 默认字体，四种不同质感</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1" style="color:#7ec8e3">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="style-a">
+          <span class="c-model">claude-sonnet-4-6</span><span class="c-cwd">…/code-cheer</span><span class="c-branch">⎇ alex-new-feature</span><span class="c-tokens">1.2k tokens</span><span class="c-quota">5h 38%</span><span class="c-ctx">ctx 62%</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 当前样式</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>现状 — 平铺色块</h3>
+      <p>直角方块，块间 1 字符间距。简洁，无视觉噪声。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1" style="color:#7ec8e3">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="style-b">
+          <span class="c-model">claude-sonnet-4-6</span><span class="c-cwd">…/code-cheer</span><span class="c-branch">⎇ alex-new-feature</span><span class="c-tokens">1.2k tokens</span><span class="c-quota">5h 38%</span><span class="c-ctx">ctx 62%</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 加粗文字 + 加深背景</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>加粗 + 加深</h3>
+      <p>文字加粗，背景色加深约 15%。视觉更有分量，SF Mono 粗体显示效果好。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1" style="color:#7ec8e3">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="style-c">
+          <span class="c-model"><span class="val">claude-sonnet-4-6</span></span>
+          <span class="c-cwd" style="margin-right:3px"><span class="val">…/code-cheer</span></span>
+          <span class="c-branch" style="margin-right:3px"><span class="lbl">⎇</span> <span class="val">alex-new-feature</span></span>
+          <span class="c-tokens" style="margin-right:3px"><span class="lbl">tok</span> <span class="val">1.2k</span></span>
+          <span class="c-quota" style="margin-right:3px"><span class="lbl">5h</span> <span class="val">38%</span></span>
+          <span class="c-ctx" style="margin-right:3px"><span class="lbl">ctx</span> <span class="val">62%</span></span>
+          <span class="c-weather" style="margin-right:3px"><span class="lbl">Beijing</span> <span class="val">☀️ 22°C</span></span>
+        </div>
+      </div>
+      <p class="note">▲ 标签暗色，数值亮白</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>双色调 — 标签/数值分层</h3>
+      <p>标签（5h、ctx、tok）用半透明暗色，数值用亮白加粗。信息层次清晰，重要数据一眼抓到。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="line1" style="color:#7ec8e3">(￣ω￣) Iris: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="style-d">
+          <span class="c-model">claude-sonnet-4-6</span><span class="sep">│</span><span class="c-cwd">…/code-cheer</span><span class="sep">│</span><span class="c-branch">⎇ alex-new-feature</span><span class="sep">│</span><span class="c-tokens">1.2k tokens</span><span class="sep">│</span><span class="c-quota">5h 38%</span><span class="sep">│</span><span class="c-ctx">ctx 62%</span><span class="sep">│</span><span class="c-weather">Beijing ☀️ 22°C</span>
+        </div>
+      </div>
+      <p class="note">▲ 细竖线 │ 分隔，色块连续</p>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">D</span>细线分隔 — 连续背景</h3>
+      <p>色块之间用暗色 │ 分隔，背景连续无断层。整体感更强，像一条完整的状态栏。</p>
+    </div>
+  </div>
+
+</div>

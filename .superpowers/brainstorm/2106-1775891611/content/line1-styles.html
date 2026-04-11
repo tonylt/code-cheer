@@ -1,0 +1,129 @@
+<style>
+  .terminal {
+    background: #121212;
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* ── Status bar (same across all options) ── */
+  .statusbar { margin-top: 5px; }
+  .seg { display: inline-block; }
+  .lbl { color: #808080; }
+  .val { color: #ffffff; }
+  .s-model   { background: #5f0087; }
+  .s-cwd     { background: #3a3a3a; }
+  .s-branch  { background: #262626; }
+  .s-tokens  { background: #5f5f00; }
+  .s-quota   { background: #005f00; }
+  .s-ctx     { background: #00005f; }
+  .s-weather { background: #00005f; }
+
+  /* ── A: Name block + plain message ── */
+  .a-name {
+    display: inline-block;
+    background: #5f0087;
+    color: #fff;
+    padding: 0 8px;
+    margin-right: 6px;
+  }
+  .a-msg { color: #e0e0e0; }
+
+  /* ── B: Full-width accent bar ── */
+  .b-line {
+    display: block;
+    background: #1a0035;
+    padding: 2px 0;
+    border-left: 3px solid #8a3fcf;
+    padding-left: 10px;
+    color: #e0e0e0;
+  }
+  .b-name { color: #c084fc; font-weight: normal; }
+  .b-ascii { color: #7c5c9c; margin-right: 6px; }
+
+  /* ── C: Two-line card ── */
+  .c-header {
+    color: #9066c8;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-bottom: 1px;
+  }
+  .c-msg { color: #f0f0f0; }
+
+  /* ── D: Inline tag ── */
+  .d-ascii { color: #666; }
+  .d-tag {
+    display: inline-block;
+    border: 1px solid #5f0087;
+    color: #c084fc;
+    padding: 0 5px;
+    margin: 0 6px;
+    font-size: 11px;
+  }
+  .d-msg { color: #e8e8e8; }
+</style>
+
+<h2>台词栏样式方案</h2>
+<p class="subtitle">与下方 Indigo 状态栏搭配，增强第一行存在感</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div><span class="a-name"> Iris </span><span class="a-msg">(￣ω￣) 这一步做完，接下来更进，准备好吧。</span></div>
+        <div class="statusbar"><span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">A</span>角色名色块 + 台词</h3>
+      <p>角色名放进紫色色块，风格与状态栏统一。台词用浅灰色，视觉重心在名字上。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="b-line"><span class="b-ascii">(￣ω￣)</span><span class="b-name">Iris</span>: 这一步做完，接下来更进，准备好吧。</div>
+        <div class="statusbar"><span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">B</span>左侧紫色边框条</h3>
+      <p>整行带深紫背景 + 左侧亮紫竖线。角色名用紫色，台词白色。沉浸感强，像对话框。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div class="c-header">IRIS  (￣ω￣)</div>
+        <div class="c-msg">这一步做完，接下来更进，准备好吧。</div>
+        <div class="statusbar"><span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">C</span>三行：角色名 / 台词 / 状态栏</h3>
+      <p>角色名单独一行（小字紫色），台词独占一行（白色大字），状态栏第三行。层次最清晰，但多占一行。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="terminal">
+        <div><span class="d-ascii">(￣ω￣)</span><span class="d-tag">IRIS</span><span class="d-msg">这一步做完，接下来更进，准备好吧。</span></div>
+        <div class="statusbar"><span class="seg s-model"><span class="val"> claude-sonnet-4-6 </span></span><span class="seg s-cwd"><span class="val"> ~/code-cheer </span></span><span class="seg s-branch"><span class="lbl"> ⎇ </span><span class="val">alex-new-feature </span></span><span class="seg s-tokens"><span class="lbl"> tok </span><span class="val">1.2k </span></span><span class="seg s-quota"><span class="lbl"> 5h </span><span class="val">38% </span></span><span class="seg s-ctx"><span class="lbl"> ctx </span><span class="val">62% </span></span><span class="seg s-weather"><span class="lbl"> Beijing </span><span class="val">☀️ 22°C </span></span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3><span class="letter" style="display:inline-block;margin-right:8px">D</span>内联边框标签</h3>
+      <p>ASCII 颜文字淡灰，角色名用细线紫色边框标签，台词白色。轻量精致，不增加高度。</p>
+    </div>
+  </div>
+
+</div>
